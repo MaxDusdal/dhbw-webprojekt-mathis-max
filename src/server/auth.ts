@@ -1,14 +1,19 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import {
   getServerSession,
+  RequestInternal,
   type DefaultSession,
   type NextAuthOptions,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import DiscordProvider from "next-auth/providers/discord";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
+import { credentialsSchema } from "~/app/utils/zod";
+import { createUser, getUserFromDB } from "~/app/utils/authAdapter";
+import { comparePassword, saltAndHashPassword } from "~/app/utils/passwordHelper";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -38,19 +43,66 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
-  },
+		jwt: async ({ token, user }) => {
+			if (user) {
+				token.id = user.id;
+			}
+			return token;
+		},
+		session: async ({ session, token }) => {
+			if (session?.user) {
+				session.user.id = token.id as string;
+			}
+			return session;
+		},
+	},
+	pages: {
+		signIn: "/login",
+		error: "/login?error=true",
+	},
+	session: {
+		strategy: "jwt",
+	},
   adapter: PrismaAdapter(db) as Adapter,
   providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
+    CredentialsProvider({
+      credentials: {
+        username: { label: "Username", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      authorize: async (credentials: Record<"username" | "password", string> | undefined, req: Pick<RequestInternal, "body" | "query" | "headers" | "method">) => {
+        const { email, password } = credentialsSchema.parse(credentials);
+
+        const user = await getUserFromDB(email.toLowerCase());
+
+        if (user) {
+          // User exists, verify password
+          const isPasswordValid = await comparePassword(password, user.hash);
+          if (!isPasswordValid) {
+            throw new Error("Invalid email or password");
+          }
+          // Password is valid, return user
+          return {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+          };
+        } else {
+          // Throw Error if user doesn't exist
+          const { salt, hash } = await saltAndHashPassword(password);
+
+          const newUser = await createUser({
+            email,
+            hash,
+            salt,
+            avatar: "",
+            firstName: "",
+            lastName: "",
+          });
+
+        }
+        return null;
+      },
     }),
     /**
      * ...add more providers here.
