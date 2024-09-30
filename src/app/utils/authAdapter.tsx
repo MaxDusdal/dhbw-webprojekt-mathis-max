@@ -1,18 +1,23 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, User } from "@prisma/client";
+import { UserWithAuthRelevantInfo } from "./types";
 const prisma = new PrismaClient();
-
-export async function getUserFromDB(email: string) {
-  const user = await prisma.user.findUnique({
+export async function getUserFromDB(email: string): Promise<User | null> {
+  try {
+    const user = await prisma.user.findUnique({
     where: {
       email: email,
-    },
-  });
-  return user;
+    }
+    });
+    return user;
+  } catch (error) {
+    console.error("Error getting user from DB:", error);
+    return null;
+  }
 }
 
-export async function createUser(user: any) {
+export async function createUser(user: any): Promise<UserWithAuthRelevantInfo> {
   try {
-    const newUser = await prisma.user.create({
+    const createdUser = await prisma.user.create({
       data: {
         email: user.email,
         hash: user.hash,
@@ -21,9 +26,14 @@ export async function createUser(user: any) {
         firstName: user.firstName,
         lastName: user.lastName,
       },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+      },
     });
 
-    return newUser;
+    return createdUser;
   } catch (error) {
     console.error("Error creating user:", error);
     throw new Error("Failed to create user");
