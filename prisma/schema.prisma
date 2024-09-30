@@ -14,61 +14,79 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
-
-    @@index([name])
-}
-
-// Necessary for Next auth
-model Account {
-    id                       String  @id @default(cuid())
-    userId                   String
-    type                     String
-    provider                 String
-    providerAccountId        String
-    refresh_token            String? // @db.Text
-    access_token             String? // @db.Text
-    expires_at               Int?
-    token_type               String?
-    scope                    String?
-    id_token                 String? // @db.Text
-    session_state            String?
-    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-    refresh_token_expires_in Int?
-
-    @@unique([provider, providerAccountId])
-}
-
-model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+enum Role {
+    USER
+    HOST
+    ADMIN
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
+    id                String         @id @default(uuid()) @db.Uuid
+    email             String         @unique
+    role              Role           @default(USER)
+    hash              String
+    salt              String
+    avatar            String?
+    firstName         String
+    lastName          String
+    phoneNumber       String?
+    nationality       String?
+    preferredLanguage String?
+    ownedHomes        VacationHome[] @relation("Owner")
+    bookings          Booking[]
+    createdAt         DateTime       @default(now())
+    updatedAt         DateTime       @updatedAt @default(now())
 }
 
-model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+model VacationHome {
+    id                 Int       @id @default(autoincrement())
+    title              String
+    location           String
+    guestCount         Int
+    bedroomCount       Int
+    bedCount           Int
+    bathroomCount      Int
+    pricePerNight      Float
+    description        String
+    owner              User      @relation("Owner", fields: [ownerId], references: [id], )
+    ownerId            String    @db.Uuid
+    amenities          Amenity[]
+    bookings           Booking[]
+    isAvailable        Boolean   @default(true)
+    latitude           Float?
+    longitude          Float?
+    houseRules         String?
+    cancellationPolicy String?
+    createdAt          DateTime  @default(now())
+    updatedAt          DateTime  @updatedAt
+}
 
-    @@unique([identifier, token])
+model Amenity {
+    id            Int            @id @default(autoincrement())
+    icon          String
+    description   String
+    category      String
+    vacationHomes VacationHome[]
+}
+
+model Booking {
+    id             Int           @id @default(autoincrement())
+    user           User          @relation(fields: [userId], references: [id])
+    userId         String        @db.Uuid
+    vacationHome   VacationHome  @relation(fields: [vacationHomeId], references: [id])
+    vacationHomeId Int
+    checkInDate    DateTime
+    checkOutDate   DateTime
+    price          Float
+    guestCount     Int
+    status         BookingStatus @default(PENDING)
+    createdAt      DateTime      @default(now())
+    updatedAt      DateTime      @updatedAt
+}
+
+enum BookingStatus {
+    PENDING
+    CONFIRMED
+    CANCELLED
+    COMPLETED
 }
