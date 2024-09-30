@@ -3,8 +3,11 @@ import { UserCircleIcon } from "@heroicons/react/20/solid";
 import { EllipsisVerticalIcon, UserIcon } from "@heroicons/react/24/outline";
 import { BeatLoader } from "react-spinners";
 import { User } from "@prisma/client";
+import { api } from "~/trpc/react";
+import { notify } from "~/app/utils/notification";
 
 export default function UsersTable({ users, isLoading }: { users: User[]; isLoading: boolean }) {
+	const utils = api.useUtils();
 
     if (isLoading) {
         return (
@@ -13,6 +16,22 @@ export default function UsersTable({ users, isLoading }: { users: User[]; isLoad
             </div>
         );
     }
+
+	const mutation = api.user.delete.useMutation({
+		onSuccess: () => {
+			utils.user.invalidate();
+		},
+	});
+
+	const handleDelete = async (id: string) => {
+		const promise = mutation.mutateAsync({ id });
+		notify.promise(promise, {
+			pending: "User wird gelöscht...",
+			success: "User erfolgreich gelöscht",
+			error: "Fehler beim Löschen des Users",
+		});
+		await promise;
+	};
 
 	return (
 		<ul role="list" className="divide-y divide-gray-100">
@@ -65,9 +84,9 @@ export default function UsersTable({ users, isLoading }: { users: User[]; isLoad
 									</a>
 								</MenuItem>
 								<MenuItem>
-									<a href="#" className="block px-3 py-1 text-sm leading-6 text-gray-900 data-[focus]:bg-gray-50">
-										Message<span className="sr-only">, {user.email}</span>
-									</a>
+									<button onClick={() => handleDelete(user.id)} className="block px-3 py-1 text-sm leading-6 text-gray-900 data-[focus]:bg-gray-50">
+										Löschen
+									</button>
 								</MenuItem>
 							</MenuItems>
 						</Menu>

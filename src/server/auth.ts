@@ -44,6 +44,7 @@ declare module "next-auth" {
  *
  * @see https://next-auth.js.org/configuration/options
  */
+// TODO: When user gets deleted, the session still holds the user id and therefore the session is not invalidated
 export const authOptions: NextAuthOptions = {
   callbacks: {
     jwt: async ({ token, user }) => {

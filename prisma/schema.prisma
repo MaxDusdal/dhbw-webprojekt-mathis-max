@@ -35,7 +35,7 @@ model User {
     ownedHomes        VacationHome[] @relation("Owner")
     bookings          Booking[]
     createdAt         DateTime       @default(now())
-    updatedAt         DateTime       @updatedAt
+    updatedAt         DateTime       @updatedAt @default(now())
 }
 
 model VacationHome {
@@ -48,7 +48,7 @@ model VacationHome {
     bathroomCount      Int
     pricePerNight      Float
     description        String
-    owner              User      @relation("Owner", fields: [ownerId], references: [id])
+    owner              User      @relation("Owner", fields: [ownerId], references: [id], )
     ownerId            String    @db.Uuid
     amenities          Amenity[]
     bookings           Booking[]

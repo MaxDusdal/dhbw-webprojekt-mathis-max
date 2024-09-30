@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import InputField from "@/components/Inputs/InputField";
 import InputFieldWrapper from "../Inputs/InputFieldWrapper";
 import { api } from "~/trpc/react";
+import { notify } from "~/app/utils/notification";
 
 type FormValues = z.infer<typeof userCreateSchema>;
 
@@ -20,11 +21,13 @@ export default function CreateUserDialog({
   onClose: () => void;
 }) {
   const schema = userCreateSchema;
+  const utils = api.useUtils();
 
   const {
     register,
     handleSubmit,
     reset,
+    trigger,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -44,17 +47,31 @@ export default function CreateUserDialog({
   const mutation = api.user.create.useMutation({
     onSuccess: () => {
       onClose();
+      utils.user.invalidate();
     },
   });
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     console.log(data);
     try {
-      mutation.mutate(data);
+      const promise = mutation.mutateAsync(data);
+      notify.promise(promise, {
+        pending: "User wird erstellt...",
+        success: "User erfolgreich erstellt",
+        error: "Fehler beim Erstellen des Users",
+      });
+      await promise;
     } catch (error) {
       console.error("Error creating user:", error);
     }
   };
+
+  async function isValid() {
+    const isValid = await trigger();
+    console.log("isValid", isValid);
+    console.log("errors", errors);
+    return isValid;
+  }
 
   return (
     <>
@@ -68,7 +85,7 @@ export default function CreateUserDialog({
         description="Mit Hilfe dieser Funktion können Sie einen neuen User erstellen."
         actions={
           <div className="flex justify-end space-x-4">
-            <CustomButton onClick={onClose} type="button" variant="secondary">
+            <CustomButton onClick={isValid} type="button" variant="secondary">
               Abbrechen
             </CustomButton>
             <CustomButton type="submit" variant="primary">
@@ -77,6 +94,37 @@ export default function CreateUserDialog({
           </div>
         }
       >
+        <InputFieldWrapper label="Vorname" id="firstName">
+          <InputField
+            id="firstName"
+            name="firstName"
+            register={register}
+            placeholder="Vorname"
+            required
+            error={errors.firstName}
+          />
+        </InputFieldWrapper>
+
+        <InputFieldWrapper label="Nachname" id="lastName">
+          <InputField
+            id="lastName"
+            name="lastName"
+            register={register}
+            placeholder="Nachname"
+            required
+            error={errors.lastName}
+          />
+        </InputFieldWrapper>
+        <InputFieldWrapper label="E-Mail" id="email">
+          <InputField
+            id="email"
+            name="email"
+            register={register}
+            placeholder="E-Mail"
+            required
+            error={errors.email}
+          />
+        </InputFieldWrapper>
         <InputFieldWrapper label="Passwort" id="password">
           <InputField
             id="password"
@@ -89,24 +137,11 @@ export default function CreateUserDialog({
           />
         </InputFieldWrapper>
 
-        <InputFieldWrapper label="E-Mail" id="email">
-          <InputField
-            id="email"
-            name="email"
-            register={register}
-            placeholder="E-Mail"
-            required
-            error={errors.email}
-          />
-        </InputFieldWrapper>
-
         <InputFieldWrapper label="Rolle" id="role">
           <select
-            name="role"
+            {...register("role")}
             id="role"
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            defaultValue="USER"
-            required
           >
             <option value="USER">User</option>
             <option value="ADMIN">Admin</option>

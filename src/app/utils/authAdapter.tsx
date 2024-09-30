@@ -4,9 +4,9 @@ const prisma = new PrismaClient();
 export async function getUserFromDB(email: string): Promise<User | null> {
   try {
     const user = await prisma.user.findUnique({
-    where: {
-      email: email,
-    }
+      where: {
+        email: email,
+      },
     });
     return user;
   } catch (error) {
@@ -22,9 +22,10 @@ export async function createUser(user: any): Promise<UserWithAuthRelevantInfo> {
         email: user.email,
         hash: user.hash,
         salt: user.salt,
-        avatar: user.avatar,
         firstName: user.firstName,
         lastName: user.lastName,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       select: {
         id: true,
