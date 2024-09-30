@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Role } from "@prisma/client";
 
-import type { VacationHome} from "@prisma/client";
+import type { VacationHome, Amenity} from "@prisma/client";
 
 export const credentialsSchema = z.object({
   email: z.string().email(), 
@@ -23,6 +23,7 @@ export const userCreateSchema = z.object({
 export const vacationhomeCreateSchema = z.object({
   title: z.string().min(3).max(255),
   location: z.string().min(3).max(255),
+  images: z.array(z.string().url()).optional(),
   guestCount: z.number().min(1),
   bedroomCount: z.number().min(1),
   bedCount: z.number().min(1),
@@ -37,3 +38,9 @@ export const vacationhomeCreateSchema = z.object({
   isAvailable: z.boolean().optional(),
 });
 
+export const amenityCreateSchema = z.object({
+  icon: z.string(),
+  name: z.string().min(2).max(255),
+  description: z.string().min(3).max(1000),
+  category: z.string().min(3).max(255),
+});

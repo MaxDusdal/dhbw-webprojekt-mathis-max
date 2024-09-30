@@ -26,6 +26,9 @@ export const vacationhomeRouter = createTRPCRouter({
               id: ctx.session.user.id,
             },
           },
+          images: {
+            create: input.images?.map((image) => ({ url: image })),
+          },
         },
       });
 

@@ -35,7 +35,7 @@ model User {
     ownedHomes        VacationHome[] @relation("Owner")
     bookings          Booking[]
     createdAt         DateTime       @default(now())
-    updatedAt         DateTime       @updatedAt @default(now())
+    updatedAt         DateTime       @default(now()) @updatedAt
 }
 
 model VacationHome {
@@ -48,7 +48,7 @@ model VacationHome {
     bathroomCount      Int
     pricePerNight      Float
     description        String
-    owner              User      @relation("Owner", fields: [ownerId], references: [id], )
+    owner              User      @relation("Owner", fields: [ownerId], references: [id])
     ownerId            String    @db.Uuid
     amenities          Amenity[]
     bookings           Booking[]
@@ -57,6 +57,7 @@ model VacationHome {
     longitude          Float?
     houseRules         String?
     cancellationPolicy String?
+    images             Image[]
     createdAt          DateTime  @default(now())
     updatedAt          DateTime  @updatedAt
 }
@@ -64,6 +65,7 @@ model VacationHome {
 model Amenity {
     id            Int            @id @default(autoincrement())
     icon          String
+    name          String
     description   String
     category      String
     vacationHomes VacationHome[]
@@ -89,4 +91,13 @@ enum BookingStatus {
     CONFIRMED
     CANCELLED
     COMPLETED
+}
+
+model Image {
+    id             Int          @id @default(autoincrement())
+    url            String
+    vacationHome   VacationHome @relation(fields: [vacationHomeId], references: [id])
+    vacationHomeId Int
+    createdAt      DateTime     @default(now())
+    updatedAt      DateTime     @updatedAt
 }
