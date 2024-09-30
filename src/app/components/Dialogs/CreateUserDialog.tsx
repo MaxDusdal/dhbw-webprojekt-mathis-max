@@ -35,6 +35,8 @@ export default function CreateUserDialog({
       password: "",
       email: "",
       role: "USER",
+      firstName: "",
+      lastName: "",
     },
   });
 
