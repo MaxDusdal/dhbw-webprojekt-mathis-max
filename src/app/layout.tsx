@@ -5,10 +5,10 @@ import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { ToastContainer } from "react-toastify";
-import Header from "./components/Layout/Header";
-import Footer from "./components/Layout/Footer";
+import Header from "../components/Layout/Header";
+import Footer from "../components/Layout/Footer";
 import { SessionProvider } from "next-auth/react";
-import MainContainer from "./components/Utility/MainContainer";
+import MainContainer from "../components/Utility/MainContainer";
 
 export const metadata: Metadata = {
   title: "Create T3 App",

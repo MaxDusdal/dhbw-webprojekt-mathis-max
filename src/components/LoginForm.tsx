@@ -9,9 +9,9 @@ import { credentialsSchema } from "@/utils/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import InputField from "@/components/Inputs/InputField";
-import InputFieldWrapper from "@/components/Inputs/InputFieldWrapper"
-import CustomButton from "@/components/Buttons/CustomButton";
+import InputField from "~/components/Inputs/InputField";
+import InputFieldWrapper from "~/components/Inputs/InputFieldWrapper"
+import CustomButton from "~/components/Buttons/CustomButton";
 import AlertBanner from "./Alerts/AlertBanner";
 
 type FormValues = z.infer<typeof credentialsSchema>;

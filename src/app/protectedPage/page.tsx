@@ -2,11 +2,11 @@
 import { useState, useEffect, use } from "react";
 
 import { SessionProvider } from "next-auth/react";
-import UsersTable from "@/components/Tables/AccountTable";
-import CustomButton from "@/components/Buttons/CustomButton";
-import NarrowContainer from "@/components/Utility/NarrowContainer";
-import TableHeader from "@/components/Utility/TableHeader";
-import CreateUserDialog from "@/components/Dialogs/CreateUserDialog";
+import UsersTable from "~/components/Tables/AccountTable";
+import CustomButton from "~/components/Buttons/CustomButton";
+import NarrowContainer from "~/components/Utility/NarrowContainer";
+import TableHeader from "~/components/Utility/TableHeader";
+import CreateUserDialog from "~/components/Dialogs/CreateUserDialog";
 import { api, TRPCReactProvider } from "~/trpc/react";
 
 function BlockingPeriodConfigurationPage() {

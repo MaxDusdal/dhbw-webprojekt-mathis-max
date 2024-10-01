@@ -1,6 +1,6 @@
 "use client";
 import { api, TRPCReactProvider } from "~/trpc/react";
-import NarrowContainer from "@/components/Utility/NarrowContainer";
+import NarrowContainer from "~/components/Utility/NarrowContainer";
 import Image from "next/image";
 
 function AmenitiesPage() {

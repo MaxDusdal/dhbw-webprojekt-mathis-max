@@ -1,12 +1,12 @@
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import CustomButton from "../Buttons/CustomButton";
-import InputDialog from "@/components/Dialogs/InputDialog";
+import InputDialog from "~/components/Dialogs/InputDialog";
 import { userCreateSchema } from "@/utils/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { useEffect } from "react";
-import InputField from "@/components/Inputs/InputField";
+import InputField from "~/components/Inputs/InputField";
 import InputFieldWrapper from "../Inputs/InputFieldWrapper";
 import { api } from "~/trpc/react";
 import { notify } from "~/app/utils/notification";
