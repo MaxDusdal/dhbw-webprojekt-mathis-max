@@ -17,7 +17,6 @@ function BlockingPeriodConfigurationPage() {
 
   if (!usersQuery.data) return null;
   return (
-    <TRPCReactProvider>
       <SessionProvider>
         <div>
           <div className="overflow-x-clip py-4 lg:pl-20">
@@ -42,7 +41,6 @@ function BlockingPeriodConfigurationPage() {
           </div>
         </div>
       </SessionProvider>
-    </TRPCReactProvider>
   );
 }
 

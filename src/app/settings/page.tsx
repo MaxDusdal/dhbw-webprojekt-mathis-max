@@ -17,7 +17,6 @@ export default function SettingsPage() {
   if (!usersQuery.data) return null;
   return (
     <TRPCReactProvider>
-      <Header />
       <SectionHeading
         header="Settings"
         tabs={[
@@ -38,25 +37,24 @@ export default function SettingsPage() {
       />
       <MainContainer>
         <NarrowContainer>
-          <div className="overflow-x-clip py-4 mt-6 lg:pl-20">
+          <div className="mt-6 overflow-x-clip py-4 lg:pl-20">
             <TableHeader
-            header="Accounts"
-            description="Hier können Sie User hinzufügen, bearbeiten und löschen."
-            onClick={() => setIsDialogOpen(true)}
-            buttonText="Neuer User"
-          />
-          <UsersTable
-            users={usersQuery.data}
-            isLoading={usersQuery.isLoading}
-          />
-          <CreateUserDialog
-            isOpen={isDialogOpen}
-            onClose={() => setIsDialogOpen(false)}
+              header="Accounts"
+              description="Hier können Sie User hinzufügen, bearbeiten und löschen."
+              onClick={() => setIsDialogOpen(true)}
+              buttonText="Neuer User"
+            />
+            <UsersTable
+              users={usersQuery.data}
+              isLoading={usersQuery.isLoading}
+            />
+            <CreateUserDialog
+              isOpen={isDialogOpen}
+              onClose={() => setIsDialogOpen(false)}
             />
           </div>
         </NarrowContainer>
       </MainContainer>
-      <Footer />
     </TRPCReactProvider>
   );
 }
