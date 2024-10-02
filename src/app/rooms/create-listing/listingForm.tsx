@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -9,14 +10,15 @@ import { Checkbox } from "~/components/ui/checkbox";
 import QuantitySelector from "./QuantitySelector";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "~/components/ui/context-menu";
 import { UploadButton, UploadDropzone } from "~/app/utils/uploadthing";
 import "@uploadthing/react/styles.css";
+import { api } from "~/trpc/react";
+import Image from "next/image";
+import {
+  FileUploaderRegular,
+  FileUploaderMinimal,
+} from "@uploadcare/react-uploader/next";
+import "@uploadcare/react-uploader/core.css";
 
 // Define the Zod schema for form validation
 const vacationHomeSchema = z.object({
@@ -60,6 +62,18 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
       isAvailable: true,
     },
   });
+
+  const [selectedAmenities, setSelectedAmenities] = useState<number[]>([]);
+
+  const toggleAmenity = (amenityId: number) => {
+    setSelectedAmenities((prev) =>
+      prev.includes(amenityId)
+        ? prev.filter((id) => id !== amenityId)
+        : [...prev, amenityId],
+    );
+  };
+
+  const amenitiesQuery = api.amenities.getAll.useQuery();
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -128,7 +142,6 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
           </p>
         )}
       </div>
-
       <div>
         <label>Allgemein</label>
         <Card>
@@ -210,7 +223,101 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
         </Card>
       </div>
 
-      <UploadDropzone
+      <Separator></Separator>
+      {amenitiesQuery.data ? (
+        <div>
+          <label>Ausstattungsmerkmale</label>
+          <div className="mt-3 grid w-full grid-cols-3 gap-5">
+            {amenitiesQuery.data.map((amenity) => (
+              <div
+                key={amenity.id}
+                //className="flex cursor-default flex-col items-start gap-2 rounded-md p-4 ring-1 ring-gray-300 hover:bg-gray-50 hover:ring-gray-400"
+                className={`flex cursor-pointer flex-col items-start gap-2 rounded-md p-4 ring-1 ${
+                  selectedAmenities.includes(amenity.id)
+                    ? "bg-gray-100 ring-2 ring-black"
+                    : "ring-gray-300 hover:ring-2 hover:ring-black"
+                }`}
+                onClick={() => toggleAmenity(amenity.id)}
+              >
+                <Image
+                  src={"/images/" + amenity.icon}
+                  alt={amenity.name}
+                  width={32}
+                  height={32}
+                />
+                <div>
+                  <div>{amenity.name}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <></>
+      )}
+      <Separator></Separator>
+
+      {true ? (
+        <div>
+          <label>Bilder</label>
+          <div className="mt-3 grid w-full grid-cols-2 gap-5">
+            <Image
+              alt="Product image"
+              className="aspect-square w-full rounded-md object-cover"
+              height="300"
+              src="https://ui.shadcn.com/placeholder.svg"
+              width="300"
+            />
+            <div className="flex flex-col space-y-5">
+              <div className="grid w-full grid-cols-2 gap-5">
+                <Image
+                  alt="Product image"
+                  className="aspect-square w-full rounded-md object-cover"
+                  height="300"
+                  src="https://ui.shadcn.com/placeholder.svg"
+                  width="300"
+                />
+                <Image
+                  alt="Product image"
+                  className="aspect-square w-full rounded-md object-cover"
+                  height="300"
+                  src="https://ui.shadcn.com/placeholder.svg"
+                  width="300"
+                />
+              </div>
+              <div className="flex h-full w-full flex-grow items-center justify-center rounded-md border border-dashed text-sm">
+                <FileUploaderRegular
+                  localeName="Bilder hochladen"
+                  sourceList="local, camera, dropbox, gdrive"
+                  classNameUploader="uc-light uc-gray"
+                  pubkey="413109ae6155eb8e885e"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <FileUploaderMinimal
+            classNameUploader="uc-light uc-gray"
+            pubkey="413109ae6155eb8e885e"
+          />
+        </div>
+      )}
+
+      <Separator></Separator>
+      <div className="flex w-full justify-end">
+        <Button className="mt-3 w-full" type="submit">
+          Erstellen
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+export default VacationHomeForm;
+
+/*<UploadDropzone
         className="p-6"
         endpoint="imageUploader"
         onClientUploadComplete={(res) => {
@@ -222,19 +329,7 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
           // Do something with the error.
           alert(`ERROR! ${error.message}`);
         }}
-      />
-
-      <div className="flex w-full justify-end">
-        <Button className="mt-3" type="submit">
-          Erstellen
-        </Button>
-      </div>
-    </form>
-  );
-};
-
-export default VacationHomeForm;
-
+    />*/
 /*
       <div>
         <label

@@ -1,6 +1,4 @@
 "use client";
-import { useState } from "react";
-import QuantitySelector from "./QuantitySelector";
 import { Separator } from "~/components/ui/separator";
 import VacationHomeForm from "./listingForm";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -15,7 +13,8 @@ export default function CreateListing() {
     <div className="flex w-full justify-center">
       <Card className="w-[630px]">
         <CardHeader>
-          <CardTitle>Erstelle ein neues Inserat</CardTitle>
+          <CardTitle>Unterkunf erstellen</CardTitle>
+          <Separator></Separator>
         </CardHeader>
         <CardContent>
           <VacationHomeForm onSubmit={handleSubmit} />

@@ -29,7 +29,7 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-between py-4">
+    <div className="flex cursor-default items-center justify-between py-4">
       <span>{label}</span>
       <div className="flex items-center">
         <button

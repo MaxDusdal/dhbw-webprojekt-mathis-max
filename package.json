@@ -30,6 +30,7 @@
     "@trpc/client": "^11.0.0-rc.446",
     "@trpc/react-query": "^11.0.0-rc.446",
     "@trpc/server": "^11.0.0-rc.446",
+    "@uploadcare/react-uploader": "^1.1.0",
     "@uploadthing/react": "^7.0.2",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.0",
