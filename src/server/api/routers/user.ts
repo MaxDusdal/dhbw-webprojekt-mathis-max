@@ -1,11 +1,15 @@
-import { createTRPCRouter, publicProcedure, protectedProcedure, sessionPassProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  publicProcedure,
+  protectedProcedure,
+  sessionPassProcedure,
+} from "../trpc";
 import { userCreateSchema } from "@/utils/zod";
 import { saltAndHashPassword } from "@/utils/passwordHelper";
 import { TRPCError } from "@trpc/server";
 import { User } from "@prisma/client";
 import { z } from "zod";
-import { omit } from 'lodash';
-
+import { omit } from "lodash";
 
 async function getUser(id: string, ctx: any) {
   const user = await ctx.db.user.findUnique({
@@ -35,7 +39,6 @@ export const usersRouter = createTRPCRouter({
       }
         */
 
-
       const { salt, hash } = await saltAndHashPassword(input.password, 10);
 
       // remove password key from input
@@ -53,7 +56,7 @@ export const usersRouter = createTRPCRouter({
     }),
 
   delete: protectedProcedure
-  // TODO: CASCADE DELETION
+    // TODO: CASCADE DELETION
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
       await ctx.db.user.delete({
@@ -66,4 +69,14 @@ export const usersRouter = createTRPCRouter({
 
     return users;
   }),
+
+  getByEmail: protectedProcedure
+    .input(z.object({ email: z.string().optional() }))
+    .query(async ({ input, ctx }) => {
+      if (!input?.email) return null;
+      const user = await ctx.db.user.findUnique({
+        where: { email: input.email },
+      });
+      return user;
+    }),
 });
