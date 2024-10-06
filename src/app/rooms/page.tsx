@@ -1,47 +1,37 @@
+"use client";
+
 import ListingCover from "~/components/listing-cover";
+import { api } from "~/trpc/react";
 
 export default function Rooms() {
-  const mockListings = [
+  const listings = api.vacationhome.findMany.useInfiniteQuery(
+    { limit: 20 },
     {
-      listing_id: "001",
-      image_url:
-        "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8a29lbG58ZW58MHx8MHx8fDA%3D",
-      location: "Köln, Deutschland",
-      price: 85,
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
-    {
-      listing_id: "002",
-      image_url:
-        "https://images.unsplash.com/photo-1524738258074-f8125c6a7588?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8a29lbG58ZW58MHx8MHx8fDA%3D",
-      location: "München, Deutschland",
-      price: 110,
-    },
-    {
-      listing_id: "003",
-      image_url:
-        "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8YmVybGlufGVufDB8fDB8fHww",
-      location: "Berlin, Deutschland",
-      price: 95,
-    },
-    {
-      listing_id: "004",
-      image_url:
-        "https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aGFtYnVyZ3xlbnwwfHwwfHx8MA%3D%3D",
-      location: "Hamburg, Deutschland",
-      price: 100,
-    },
-    {
-      listing_id: "005",
-      image_url:
-        "https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aGFtYnVyZ3xlbnwwfHwwfHx8MA%3D%3D",
-      location: "Frankfurt, Deutschland",
-      price: 120,
-    },
-  ];
+  );
 
+  const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } = listings;
+
+  if (isFetching) {
+    return <div>Loading...</div>;
+  }
   return (
     <div className="grid grid-cols-4 gap-x-6 gap-y-10">
-      {mockListings.map((data) => {
+      {data?.pages.map((page) => {
+        return page.vacationHomes.map((vacationHome) => {
+          return (
+            <ListingCover
+              key={vacationHome.id}
+              price={vacationHome.pricePerNight}
+              image_url={vacationHome.images[0]?.url ?? ""}
+              location={vacationHome.location}
+              listing_id={vacationHome.id.toString()}
+            ></ListingCover>
+          );
+        });
+      })}
+      {/*mockListings.map((data) => {
         return (
           <ListingCover
             key={data.listing_id}
@@ -51,7 +41,9 @@ export default function Rooms() {
             listing_id={data.listing_id}
           ></ListingCover>
         );
-      })}
+      }) */}
+
+      <button onClick={() => fetchNextPage()}>Load More</button>
     </div>
   );
 }

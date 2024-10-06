@@ -14,6 +14,7 @@ import {
 } from "~/components/ui/popover";
 import { round } from "lodash";
 import QuantitySelector from "../create-listing/QuantitySelector";
+import { useParams } from "next/navigation";
 
 type Guests = {
   adults: number;
@@ -22,6 +23,12 @@ type Guests = {
 };
 
 export default function RoomDetail() {
+  const { id } = useParams<{ id: string }>();
+  if (!id || isNaN(Number(id))) {
+    return "Du HS"
+  }
+  const listing = api.vacationhome.getById.useQuery({ id: Number(id) });
+  
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
     from: new Date(),
     to: addDays(new Date(), 5),
@@ -60,12 +67,10 @@ export default function RoomDetail() {
       : ""
   }`;
 
-  const amenitiesQuery = api.amenities.getAll.useQuery();
-
   return (
     <div className="flex w-full justify-center">
       <div className="flex max-w-7xl flex-grow flex-col p-10">
-        <h1 className="text-2xl font-medium">Hier steht der Titel</h1>
+        <h1 className="text-2xl font-medium">{listing.data?.title}</h1>
         <div className="mt-6 grid h-[516px] w-full grid-cols-2 gap-2 overflow-hidden rounded-2xl">
           <div className="h-full w-full bg-gray-200"></div>
           <div className="h-fullw-full grid grid-cols-2 gap-2">
@@ -100,9 +105,9 @@ export default function RoomDetail() {
               <h1 className="text-2xl font-medium">
                 Das Bietet diese Unterkunft
               </h1>
-              {amenitiesQuery.data ? (
+              {listing.data?.amenities ? (
                 <div className="mt-3 grid w-full grid-cols-4 gap-5">
-                  {amenitiesQuery.data.map((amenity) => (
+                  {listing.data.amenities.map((amenity) => (
                     <div
                       key={amenity.id}
                       className={
@@ -140,7 +145,6 @@ export default function RoomDetail() {
                   : "Chek-In Datum wählen"}
               </h1>
               <CalendarLarge
-                initialFocus
                 mode="range"
                 defaultMonth={dateRange?.from}
                 selected={dateRange}

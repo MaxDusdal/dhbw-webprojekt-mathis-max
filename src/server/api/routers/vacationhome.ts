@@ -1,5 +1,5 @@
 import { vacationhomeCreateSchema } from "~/app/utils/zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 
@@ -62,5 +62,37 @@ export const vacationhomeRouter = createTRPCRouter({
           id: input.id,
         },
       });
+    }),
+
+  findMany: publicProcedure
+    .input(z.object({ 
+      limit: z.number(), 
+      cursor: z.number().optional() 
+    }))
+    .query(async ({ input, ctx }) => {
+      const vacationHomes = await ctx.db.vacationHome.findMany({
+        take: input.limit,
+        skip: input.cursor ? 1 : 0,
+        cursor: input.cursor ? { id: input.cursor } : undefined,
+        include: {
+          images: true,
+        },
+      });
+
+      const lastVacationHome = vacationHomes[vacationHomes.length - 1];
+      return {
+        vacationHomes,
+        nextCursor: lastVacationHome ? lastVacationHome.id : undefined,
+      };
+    }),
+
+  getById: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ input, ctx }) => {
+      const vacationHome = await ctx.db.vacationHome.findUnique({
+        where: { id: input.id },
+        include: { images: true, amenities: true },
+      });
+      return vacationHome;
     }),
 });
