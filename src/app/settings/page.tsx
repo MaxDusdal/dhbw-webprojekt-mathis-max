@@ -17,27 +17,9 @@ export default function SettingsPage() {
   if (!usersQuery.data) return null;
   return (
     <TRPCReactProvider>
-      <SectionHeading
-        header="Settings"
-        tabs={[
-          {
-            name: "General",
-            href: "/settings",
-          },
-          {
-            name: "API",
-            href: "#",
-          },
-          {
-            name: "Users",
-            href: "#",
-          },
-        ]}
-        actions={[]}
-      />
+      
       <MainContainer>
-        <NarrowContainer>
-          <div className="mt-6 overflow-x-clip py-4 lg:pl-20">
+          <div className="mt-6 overflow-x-clip py-4 ">
             <TableHeader
               header="Accounts"
               description="Hier können Sie User hinzufügen, bearbeiten und löschen."
@@ -53,7 +35,6 @@ export default function SettingsPage() {
               onClose={() => setIsDialogOpen(false)}
             />
           </div>
-        </NarrowContainer>
       </MainContainer>
     </TRPCReactProvider>
   );

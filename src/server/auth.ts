@@ -55,6 +55,16 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
+    session: ({ session, token }) => {
+      if (token) {
+        session.user = {
+          id: token.id as string,
+          email: token.email as string,
+          role: token.role as Role,
+        };
+      }
+      return session;
+    },
   },
   pages: {
     signIn: "/login",

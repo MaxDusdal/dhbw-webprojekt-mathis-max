@@ -1,14 +1,14 @@
 import { z } from "zod";
 import { Role } from "@prisma/client";
 
-import type { VacationHome, Amenity} from "@prisma/client";
+import type { VacationHome, Amenity } from "@prisma/client";
 
 export const credentialsSchema = z.object({
-  email: z.string().email(), 
+  email: z.string().email(),
   password: z.string().min(1),
 });
 
-export const userCreateSchema = z.object({ 
+export const userCreateSchema = z.object({
   email: z.string().email(),
   role: z.nativeEnum(Role),
   avatar: z.string().url().optional(),
@@ -17,7 +17,14 @@ export const userCreateSchema = z.object({
   phoneNumber: z.string().optional(),
   nationality: z.string().optional(),
   preferredLanguage: z.string().optional(),
-  password: z.string().min(8).max(32).regex(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,32}$/, "Password must contain at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character"),
+  password: z
+    .string()
+    .min(8)
+    .max(32)
+    .regex(
+      /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,32}$/,
+      "Password must contain at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character",
+    ),
 });
 
 export const vacationhomeCreateSchema = z.object({
@@ -44,3 +51,31 @@ export const amenityCreateSchema = z.object({
   description: z.string().min(3).max(1000),
   category: z.string().min(3).max(255),
 });
+
+export const userProfileSchema = z.object({
+  avatar: z.string().url().optional(),
+  firstName: z.string().min(3),
+  lastName: z.string().min(3),
+  phoneNumber: z.string().optional(),
+  nationality: z.string().optional(),
+  preferredLanguage: z.string().optional(),
+  email: z.string().email(),
+});
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Aktuelles Passwort ist erforderlich"),
+    newPassword: z
+      .string()
+      .min(8, "Neues Passwort muss aus mindestens 8 Zeichen bestehen")
+      .max(32, "Neues Passwort muss aus weniger als 32 Zeichen bestehen")
+      .regex(
+        /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,32}$/,
+        "Passwort muss aus mindestens 8 Zeichen, 1 Großbuchstaben, 1 Kleinbuchstaben, 1 Zahl und 1 Sonderzeichen bestehen",
+      ),
+    confirmPassword: z.string().min(1, "Passwort bestätigen ist erforderlich"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwörter müssen übereinstimmen",
+    path: ["confirmPassword"],
+  });

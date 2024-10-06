@@ -4,19 +4,19 @@ import {
   protectedProcedure,
   sessionPassProcedure,
 } from "../trpc";
-import { userCreateSchema } from "@/utils/zod";
-import { saltAndHashPassword } from "@/utils/passwordHelper";
+import { changePasswordSchema, userCreateSchema } from "@/utils/zod";
+import { comparePassword, saltAndHashPassword } from "@/utils/passwordHelper";
 import { TRPCError } from "@trpc/server";
 import { User } from "@prisma/client";
 import { z } from "zod";
 import { omit } from "lodash";
+import { UserWithoutSensitiveInfo } from "~/app/utils/types";
 
 async function getUser(id: string, ctx: any) {
   const user = await ctx.db.user.findUnique({
     where: { id },
     select: {
       id: true,
-      username: true,
       email: true,
       role: true,
     },
@@ -78,5 +78,65 @@ export const usersRouter = createTRPCRouter({
         where: { email: input.email },
       });
       return user;
+    }),
+
+  getCallerUser: protectedProcedure.query(async ({ ctx }) => {
+    const user = await ctx.db.user.findUnique({
+      where: { id: ctx.session.user.id },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        avatar: true,
+        firstName: true,
+        lastName: true,
+        nationality: true,
+        phoneNumber: true,
+        preferredLanguage: true,
+        hash: false,
+        salt: false,
+      },
+    });
+    return user as UserWithoutSensitiveInfo;
+  }),
+
+  changePassword: protectedProcedure
+    .input(changePasswordSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { currentPassword, newPassword } = input;
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "User not found",
+        });
+      }
+
+      const validPassword = await comparePassword(currentPassword, user.hash);
+
+      if (!validPassword) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Aktuelles Passwort ist falsch",
+        });
+      }
+
+      const { salt, hash } = await saltAndHashPassword(newPassword, 10);
+      try {
+        await ctx.db.user.update({
+          where: { id: ctx.session.user.id },
+          data: { hash, salt },
+        });
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Passwort konnte nicht geändert werden",
+        });
+      }
+
+      return true;
     }),
 });
