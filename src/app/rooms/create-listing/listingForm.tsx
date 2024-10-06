@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -19,8 +19,8 @@ import {
   FileUploaderMinimal,
 } from "@uploadcare/react-uploader/next";
 import "@uploadcare/react-uploader/core.css";
+import { useLoadScript, Autocomplete } from "@react-google-maps/api";
 
-// Define the Zod schema for form validation
 const vacationHomeSchema = z.object({
   title: z.string().min(1, "Title is required"),
   location: z.string().min(1, "Location is required"),
@@ -35,6 +35,8 @@ const vacationHomeSchema = z.object({
   longitude: z.number().optional(),
   houseRules: z.string().optional(),
   cancellationPolicy: z.string().optional(),
+  images: z.array(z.string()).optional(),
+  amenities: z.array(z.number()).min(1, "At least one amenity is required"),
 });
 
 type VacationHomeFormData = z.infer<typeof vacationHomeSchema>;
@@ -48,10 +50,17 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
   onSubmit,
   initialData,
 }) => {
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
+    libraries: ["places"],
+  });
+
   const {
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm<VacationHomeFormData>({
     resolver: zodResolver(vacationHomeSchema),
     defaultValues: initialData || {
@@ -60,20 +69,32 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
       bedCount: 1,
       bathroomCount: 1,
       isAvailable: true,
+      amenities: [],
     },
   });
 
-  const [selectedAmenities, setSelectedAmenities] = useState<number[]>([]);
+  const selectedAmenities = watch("amenities");
 
-  const toggleAmenity = (amenityId: number) => {
-    setSelectedAmenities((prev) =>
-      prev.includes(amenityId)
-        ? prev.filter((id) => id !== amenityId)
-        : [...prev, amenityId],
-    );
-  };
+  const toggleAmenity = useCallback(
+    (amenityId: number) => {
+      setValue(
+        "amenities",
+        selectedAmenities.includes(amenityId)
+          ? selectedAmenities.filter((id) => id !== amenityId)
+          : [...selectedAmenities, amenityId],
+        { shouldValidate: true },
+      );
+    },
+    [selectedAmenities, setValue],
+  );
 
   const amenitiesQuery = api.amenities.getAll.useQuery();
+
+  const handlePlaceSelect = (place: google.maps.places.PlaceResult) => {
+    setValue("location", place.formatted_address || "");
+    setValue("latitude", place.geometry?.location?.lat() || undefined);
+    setValue("longitude", place.geometry?.location?.lng() || undefined);
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -126,9 +147,11 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
         <Controller
           name="pricePerNight"
           control={control}
-          render={({ field }) => (
+          render={({ field: { onChange, value, ...rest } }) => (
             <Input
-              {...field}
+              {...rest}
+              onChange={(e) => onChange(parseFloat(e.target.value))}
+              value={value === undefined ? "" : value}
               id="pricePerNight"
               type="number"
               step="0.01"
@@ -139,6 +162,38 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
         {errors.pricePerNight && (
           <p className="mt-1 text-sm text-red-600">
             {errors.pricePerNight.message}
+          </p>
+        )}
+      </div>
+      <div>
+        {isLoaded ? (
+          <Controller
+            name="location"
+            control={control}
+            render={({ field }) => (
+              <Autocomplete
+                onLoad={(autocomplete) => {
+                  autocomplete.addListener("place_changed", () => {
+                    const place = autocomplete.getPlace();
+                    handlePlaceSelect(place);
+                  });
+                }}
+              >
+                <Input {...field} id="location" className="mt-1" />
+              </Autocomplete>
+            )}
+          />
+        ) : (
+          <Input
+            id="location"
+            className="mt-1"
+            placeholder="Loading..."
+            disabled
+          />
+        )}
+        {errors.description && (
+          <p className="mt-1 text-sm text-red-600">
+            {errors.description.message}
           </p>
         )}
       </div>
@@ -231,7 +286,6 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
             {amenitiesQuery.data.map((amenity) => (
               <div
                 key={amenity.id}
-                //className="flex cursor-default flex-col items-start gap-2 rounded-md p-4 ring-1 ring-gray-300 hover:bg-gray-50 hover:ring-gray-400"
                 className={`flex cursor-pointer flex-col items-start gap-2 rounded-md p-4 ring-1 ${
                   selectedAmenities.includes(amenity.id)
                     ? "bg-gray-100 ring-2 ring-black"
@@ -251,6 +305,11 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
               </div>
             ))}
           </div>
+          {errors.amenities && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.amenities.message}
+            </p>
+          )}
         </div>
       ) : (
         <></>
@@ -287,7 +346,6 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
               </div>
               <div className="flex h-full w-full flex-grow items-center justify-center rounded-md border border-dashed text-sm">
                 <FileUploaderRegular
-                  localeName="Bilder hochladen"
                   sourceList="local, camera, dropbox, gdrive"
                   classNameUploader="uc-light uc-gray"
                   pubkey="413109ae6155eb8e885e"
@@ -316,134 +374,3 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
 };
 
 export default VacationHomeForm;
-
-/*<UploadDropzone
-        className="p-6"
-        endpoint="imageUploader"
-        onClientUploadComplete={(res) => {
-          // Do something with the response
-          console.log("Files: ", res);
-          alert("Upload Completed");
-        }}
-        onUploadError={(error: Error) => {
-          // Do something with the error.
-          alert(`ERROR! ${error.message}`);
-        }}
-    />*/
-/*
-      <div>
-        <label
-          htmlFor="location"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Location
-        </label>
-        <Controller
-          name="location"
-          control={control}
-          render={({ field }) => (
-            <Input {...field} id="location" className="mt-1" />
-          )}
-        />
-        {errors.location && (
-          <p className="mt-1 text-sm text-red-600">{errors.location.message}</p>
-        )}
-      </div>
-
-      <div className="flex items-center">
-        <Controller
-          name="isAvailable"
-          control={control}
-          render={({ field }) => (
-            <Checkbox
-              id="isAvailable"
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
-          )}
-        />
-        <label
-          htmlFor="isAvailable"
-          className="ml-2 block text-sm text-gray-900"
-        >
-          Available for booking
-        </label>
-      </div>
-
-      <div>
-        <label
-          htmlFor="latitude"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Latitude (optional)
-        </label>
-        <Controller
-          name="latitude"
-          control={control}
-          render={({ field }) => (
-            <Input
-              {...field}
-              id="latitude"
-              type="number"
-              step="any"
-              className="mt-1"
-            />
-          )}
-        />
-      </div>
-
-      <div>
-        <label
-          htmlFor="longitude"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Longitude (optional)
-        </label>
-        <Controller
-          name="longitude"
-          control={control}
-          render={({ field }) => (
-            <Input
-              {...field}
-              id="longitude"
-              type="number"
-              step="any"
-              className="mt-1"
-            />
-          )}
-        />
-      </div>
-
-      <div>
-        <label
-          htmlFor="houseRules"
-          className="block text-sm font-medium text-gray-700"
-        >
-          House Rules (optional)
-        </label>
-        <Controller
-          name="houseRules"
-          control={control}
-          render={({ field }) => (
-            <Textarea {...field} id="houseRules" className="mt-1" />
-          )}
-        />
-      </div>
-
-      <div>
-        <label
-          htmlFor="cancellationPolicy"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Cancellation Policy (optional)
-        </label>
-        <Controller
-          name="cancellationPolicy"
-          control={control}
-          render={({ field }) => (
-            <Textarea {...field} id="cancellationPolicy" className="mt-1" />
-          )}
-        />
-      </div>
-
-*/
