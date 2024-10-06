@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { ReactElement, useState } from "react";
 import { Minus, Plus } from "lucide-react";
 
 interface QuantitySelectorProps {
-  label: string;
+  label: ReactElement;
   value: number;
   onChange: (value: number) => void;
   min?: number;
@@ -30,7 +30,7 @@ const QuantitySelector: React.FC<QuantitySelectorProps> = ({
 
   return (
     <div className="flex cursor-default items-center justify-between py-4">
-      <span>{label}</span>
+      {label}
       <div className="flex items-center">
         <button
           type="button"

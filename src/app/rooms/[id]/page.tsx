@@ -12,14 +12,24 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "~/lib/utils";
 import { round } from "lodash";
+import QuantitySelector from "../create-listing/QuantitySelector";
+
+type Guests = {
+  adults: number;
+  children: number;
+  pets: number;
+};
 
 export default function RoomDetail() {
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
     from: new Date(),
     to: addDays(new Date(), 5),
+  });
+  const [guests, setGuests] = React.useState<Guests>({
+    adults: 1,
+    children: 0,
+    pets: 0,
   });
 
   const handleSelectCheckIn = (date: Date | undefined) => {
@@ -36,13 +46,35 @@ export default function RoomDetail() {
     }));
   };
 
+  const handleChange = (type: keyof Guests) => (value: number) => {
+    setGuests((prev) => ({ ...prev, [type]: value }));
+  };
+
+  const guestSummary = `${guests.adults} ${guests.adults > 1 ? "Gäste" : "Gast"}${
+    guests.children > 0
+      ? `, ${guests.children} ${guests.children > 1 ? "Kinder" : "Kind"}`
+      : ""
+  }${
+    guests.pets > 0
+      ? `, ${guests.pets} ${guests.pets > 1 ? "Haustiere" : "Haustier"}`
+      : ""
+  }`;
+
   const amenitiesQuery = api.amenities.getAll.useQuery();
 
   return (
     <div className="flex w-full justify-center">
       <div className="flex max-w-7xl flex-grow flex-col p-10">
         <h1 className="text-2xl font-medium">Hier steht der Titel</h1>
-        <div className="mt-6 h-96 w-full rounded-2xl bg-gray-200"></div>
+        <div className="mt-6 grid h-[516px] w-full grid-cols-2 gap-2 overflow-hidden rounded-2xl">
+          <div className="h-full w-full bg-gray-200"></div>
+          <div className="h-fullw-full grid grid-cols-2 gap-2">
+            <div className="h-full w-full bg-gray-200"></div>
+            <div className="h-full w-full bg-gray-200"></div>
+            <div className="h-full w-full bg-gray-200"></div>
+            <div className="h-full w-full bg-gray-200"></div>
+          </div>
+        </div>
         <div className="flex w-full flex-row">
           <div className="flex w-2/3 flex-col space-y-10 py-8 pr-8">
             <div className="mb-4">
@@ -99,7 +131,11 @@ export default function RoomDetail() {
                 {dateRange?.from
                   ? dateRange.to
                     ? differenceInCalendarDays(dateRange.to, dateRange.from) +
-                      " Tage Stadt xy"
+                      (differenceInCalendarDays(dateRange.to, dateRange.from) >
+                      1
+                        ? " Nächte"
+                        : " Nacht") +
+                      "  in Stadt xy"
                     : "Check-Out Datum wählen"
                   : "Chek-In Datum wählen"}
               </h1>
@@ -176,7 +212,61 @@ export default function RoomDetail() {
                     </Popover>
                   </div>
                 </div>
-                <div className="h-12 w-full"></div>
+                <div className="h-full w-full">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <div className="flex w-full cursor-pointer flex-col justify-start space-y-1 rounded-b-md p-2 hover:bg-gray-100">
+                        <p className="text-[10px] font-semibold">GÄSTE</p>
+                        <p className="text-sm">{guestSummary}</p>
+                      </div>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[296px] px-3">
+                      <QuantitySelector
+                        onChange={handleChange("adults")}
+                        value={guests.adults}
+                        min={1}
+                        max={5}
+                        label={
+                          <div className="flex flex-col">
+                            <span className="text-base font-medium">
+                              Erwachsene
+                            </span>
+                            <span className="text-sm font-light">
+                              Ab 13 Jahren
+                            </span>
+                          </div>
+                        }
+                      />
+                      <QuantitySelector
+                        onChange={handleChange("children")}
+                        value={guests.children}
+                        max={5}
+                        label={
+                          <div className="flex flex-col">
+                            <span className="text-base font-medium">
+                              Kinder
+                            </span>
+                            <span className="text-sm font-light">
+                              Bis 12 Jahren
+                            </span>
+                          </div>
+                        }
+                      />
+                      <QuantitySelector
+                        onChange={handleChange("pets")}
+                        value={guests.pets}
+                        max={5}
+                        label={
+                          <div className="flex flex-col">
+                            <span className="text-base font-medium">
+                              Haustiere
+                            </span>
+                          </div>
+                        }
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
               <Button className="mt-5 h-12 w-full bg-[#FF385C] bg-[linear-gradient(to_right,#E61E4D_0%,#E31C5F_50%,#D70466_100%)] text-base text-white">
                 Reservieren
