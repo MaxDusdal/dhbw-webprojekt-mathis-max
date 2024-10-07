@@ -9,6 +9,7 @@ import Header from "../components/Layout/Header";
 import Footer from "../components/Layout/Footer";
 import { SessionProvider } from "next-auth/react";
 import MainContainer from "../components/Utility/MainContainer";
+import DialogProvider from "~/components/Provider/DialogProvider";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -25,7 +26,7 @@ export default function RootLayout({
         <TRPCReactProvider>
           <MainContainer>
             <Header />
-            {children}
+            <DialogProvider>{children}</DialogProvider>
             <Footer />
           </MainContainer>
         </TRPCReactProvider>

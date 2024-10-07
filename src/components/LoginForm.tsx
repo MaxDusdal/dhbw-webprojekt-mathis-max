@@ -19,7 +19,7 @@ type FormValues = z.infer<typeof credentialsSchema>;
 const LoginForm = () => {
 	const [error, setError] = useState("");
 	const params = useSearchParams();
-	const callbackUrl = params.get("callbackUrl") || "/dashboard";
+	const callbackUrl = params.get("callbackUrl") || "/rooms";
 
 	const schema = credentialsSchema;
 

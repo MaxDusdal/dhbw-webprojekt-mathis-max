@@ -37,3 +37,5 @@ export type SectionHeadingActions = {
   buttonVariant: ButtonVariants;
   onClick: () => void;
 };
+
+export type DialogTypes = "create" | "destructive" | "default" | "cancel";

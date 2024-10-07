@@ -14,6 +14,14 @@ import {
 } from "~/app/utils/passwordHelper";
 import { Role, User } from "@prisma/client";
 import { UserWithAuthRelevantInfo } from "~/app/utils/types";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import prisma from "~/app/utils/prisma";
+import { Adapter } from "next-auth/adapters";
+import { v4 as uuid } from "uuid";
+import {
+  encode as defaultEncode,
+  decode as defaultDecode,
+} from "next-auth/jwt";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -46,34 +54,47 @@ declare module "next-auth" {
  */
 // TODO: When user gets deleted, the session still holds the user id and therefore the session is not invalidated
 export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma) as Adapter,
   callbacks: {
-    jwt: async ({ token, user }) => {
-      if (user) {
-        token.email = user.email;
-        token.id = user.id;
-        token.role = user.role;
+    async jwt({ token, user, account }) {
+      if (account?.provider === "credentials") {
+        token.credentials = true;
       }
       return token;
     },
-    session: ({ session, token }) => {
-      if (token) {
-        session.user = {
-          id: token.id as string,
-          email: token.email as string,
-          role: token.role as Role,
-        };
+  },
+  jwt: {
+    encode: async function (params) {
+      if (params.token?.credentials) {
+        const sessionToken = uuid();
+
+        if (!params.token?.sub) {
+          throw new Error("User id is required");
+        }
+
+        const session = await prisma?.session.create({
+          data: {
+            sessionToken,
+            userId: params.token.sub as string,
+            expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+          },
+        });
+
+        if (!session) {
+          throw new Error("Session could not be created");
+        }
+
+        return sessionToken;
       }
-      return session;
+      return defaultEncode(params);
     },
   },
   pages: {
     signIn: "/login",
     error: "/login?error=true",
+    signOut: "/rooms",
   },
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
       credentials: {

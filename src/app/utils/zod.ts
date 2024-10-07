@@ -8,6 +8,17 @@ export const credentialsSchema = z.object({
   password: z.string().min(1),
 });
 
+export const passwordSchema = z.object({
+  password: z
+    .string()
+    .min(8)
+    .max(32)
+    .regex(
+      /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,32}$/,
+      "Password must contain at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character",
+    ),
+});
+
 export const userCreateSchema = z.object({
   email: z.string().email(),
   role: z.nativeEnum(Role),

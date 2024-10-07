@@ -4,7 +4,11 @@ import {
   protectedProcedure,
   sessionPassProcedure,
 } from "../trpc";
-import { changePasswordSchema, userCreateSchema } from "@/utils/zod";
+import {
+  changePasswordSchema,
+  passwordSchema,
+  userCreateSchema,
+} from "@/utils/zod";
 import { comparePassword, saltAndHashPassword } from "@/utils/passwordHelper";
 import { TRPCError } from "@trpc/server";
 import { User } from "@prisma/client";
@@ -82,7 +86,7 @@ export const usersRouter = createTRPCRouter({
 
   getCallerUser: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.db.user.findUnique({
-      where: { id: ctx.session.user.id },
+      where: { id: ctx.session.user.id, email: ctx.session.user.email },
       select: {
         id: true,
         email: true,
@@ -137,6 +141,50 @@ export const usersRouter = createTRPCRouter({
         });
       }
 
+      return true;
+    }),
+
+  deleteUser: sessionPassProcedure.mutation(async ({ ctx }) => {
+    // TODO: Check if deletion is cascading to VacationHomes also, invalidate all tokens
+    await ctx.db.user.delete({
+      where: { id: ctx.session.user.id },
+    });
+    return true;
+  }),
+
+  deleteAllSessions: sessionPassProcedure
+    .input(passwordSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { password } = input;
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "User not found",
+        });
+      }
+
+      const validPassword = await comparePassword(password, user.hash);
+
+      if (!validPassword) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Aktuelles Passwort ist falsch",
+        });
+      }
+      // Delete all sessions except the current one, to invalidate all tokens
+      // May is a bit of a hack, by using the session.expires field, which is a datetime.
+      // But realistically, the user won't have 2 sessions open at the same time, so this is a good enough solution
+      const currentSession = ctx.session.expires;
+      await ctx.db.session.deleteMany({
+        where: {
+          userId: ctx.session.user.id,
+          expires: { not: currentSession },
+        },
+      });
       return true;
     }),
 });
