@@ -104,11 +104,13 @@ model Image {
 }
 
 model Session {
-    sessionToken String   @unique
+    id           String   @id
     userId       String   @db.Uuid
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    expiresAt    DateTime
+    user         User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+    device       String?
+    location     String?
+    ipAddress    String?
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
 }

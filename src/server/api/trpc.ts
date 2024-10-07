@@ -11,9 +11,10 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
-import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
-
+import { lucia } from "~/auth";
+import { headers } from "next/headers";
+import type { Session, User } from "lucia";
 /**
  * 1. CONTEXT
  *
@@ -27,10 +28,19 @@ import { db } from "~/server/db";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const session = await getServerAuthSession();
+  var session;
+  const authSessionCookie = opts.headers
+    .get("cookie")
+    ?.split("; ")
+    .find((row) => row.startsWith("auth_session="))
+    ?.split("=")[1];
+  if (authSessionCookie) {
+    session = await lucia.validateSession(authSessionCookie);
+  }
 
   return {
     db,
+    lucia,
     session,
     ...opts,
   };

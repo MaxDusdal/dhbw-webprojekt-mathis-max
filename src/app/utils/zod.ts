@@ -38,6 +38,20 @@ export const userCreateSchema = z.object({
     ),
 });
 
+export const signUpSchema = z.object({
+  firstName: z.string().min(3),
+  lastName: z.string().min(3),
+  email: z.string().email(),
+  password: z
+    .string()
+    .min(8)
+    .max(32)
+    .regex(
+      /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,32}$/,
+      "Password must contain at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character",
+    ),
+});
+
 export const vacationhomeCreateSchema = z.object({
   title: z.string().min(3).max(255),
   location: z.string().min(3).max(255),

@@ -1,5 +1,3 @@
-import { useSession } from "next-auth/react";
-import { SessionProvider } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import { api } from "~/trpc/react";
@@ -7,10 +5,9 @@ import CustomButton from "../Buttons/CustomButton";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
 
 export default function HeaderUserComponent() {
-  const { data: session } = useSession();
-
-  const user = api.user.getByEmail.useQuery({
-    email: session?.user.email ?? "",
+  const user = api.user.getCallerUser.useQuery(undefined, {
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   if (user.isLoading) {
@@ -18,7 +15,7 @@ export default function HeaderUserComponent() {
     return (
       <div className="hidden lg:flex lg:flex-1 lg:justify-end">
         <div className="flex items-center gap-3 rounded-md p-2 px-2 transition-all duration-200 hover:cursor-pointer hover:bg-gray-200">
-          <div className="flex items-center gap-2 animate-pulse">
+          <div className="flex animate-pulse items-center gap-2">
             <div className="h-4 w-24 rounded bg-gray-200"></div>
             <div className="h-8 w-8 rounded-full bg-gray-200"></div>
           </div>
@@ -27,7 +24,7 @@ export default function HeaderUserComponent() {
     );
   }
 
-  if (!session) {
+  if (!user.data && !user.isLoading) {
     return (
       <div className="hidden lg:flex lg:flex-1 lg:justify-end">
         <CustomButton
@@ -42,7 +39,7 @@ export default function HeaderUserComponent() {
       </div>
     );
   }
-  if (session && session.user.email && user) {
+  if (user) {
     console.log(user.data);
     return (
       <div className="hidden lg:flex lg:flex-1 lg:justify-end">
@@ -66,13 +63,12 @@ export default function HeaderUserComponent() {
 }
 
 export function MobileHeaderUserComponent() {
-  const { data: session } = useSession();
-
-  const user = api.user.getByEmail.useQuery({
-    email: session?.user.email ?? "",
+  const user = api.user.getCallerUser.useQuery(undefined, {
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
-  if (!session) {
+  if (!user) {
     return (
       <div className="py-6">
         <Link
@@ -84,7 +80,7 @@ export function MobileHeaderUserComponent() {
       </div>
     );
   }
-  if (session && session.user.email && user) {
+  if (user.data) {
     return (
       <div className="py-6">
         <div className="flex items-center gap-3 rounded-md p-2 px-2 transition-all duration-200 hover:cursor-pointer hover:bg-gray-200">

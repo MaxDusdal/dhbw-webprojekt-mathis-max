@@ -7,6 +7,7 @@ import {
 import {
   changePasswordSchema,
   passwordSchema,
+  signUpSchema,
   userCreateSchema,
 } from "@/utils/zod";
 import { comparePassword, saltAndHashPassword } from "@/utils/passwordHelper";
@@ -57,6 +58,35 @@ export const usersRouter = createTRPCRouter({
       });
 
       return newUser;
+    }),
+
+  signUp: publicProcedure
+    .input(signUpSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { salt, hash } = await saltAndHashPassword(input.password, 10);
+
+      const newUser = await ctx.db.user.create({
+        data: {
+          firstName: input.firstName,
+          lastName: input.lastName,
+          email: input.email,
+          role: "USER",
+          hash,
+          salt,
+          avatar: "",
+        },
+      });
+
+      if (!newUser) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "User not created",
+        });
+      }
+
+      const session = await ctx.lucia.createSession(newUser.id, {});
+      const sessionCookie = ctx.lucia.createSessionCookie(session.id);
+      return { newUser, sessionCookie };
     }),
 
   delete: protectedProcedure
