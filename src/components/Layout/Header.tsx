@@ -29,6 +29,7 @@ import {
 import HeaderUserComponent, {
   MobileHeaderUserComponent,
 } from "../UserComponents/HeaderUserComponent";
+import Image from "next/image";
 
 const products = [
   {
@@ -79,10 +80,11 @@ export default function Header() {
         <div className="flex lg:flex-1">
           <a href="#" className="-m-1.5 p-1.5">
             <span className="sr-only">Your Company</span>
-            <img
-              alt=""
-              src="https://tailwindui.com/img/logos/mark.svg?color=blue&shade=600"
-              className="h-8 w-auto"
+            <Image
+              alt="Product image"
+              height="100"
+              width={100}
+              src="/images/luftnbn.svg"
             />
           </a>
         </div>

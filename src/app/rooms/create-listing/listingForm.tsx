@@ -206,7 +206,7 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
               control={control}
               render={({ field }) => (
                 <QuantitySelector
-                  label={<span>"Gäste"</span>}
+                  label={<span>Gäste</span>}
                   value={field.value}
                   onChange={field.onChange}
                   min={1}
@@ -225,7 +225,7 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
               control={control}
               render={({ field }) => (
                 <QuantitySelector
-                  label={<span>"Schlafzimmer"</span>}
+                  label={<span>Schlafzimmer</span>}
                   value={field.value}
                   onChange={field.onChange}
                   min={1}
@@ -243,7 +243,7 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
               control={control}
               render={({ field }) => (
                 <QuantitySelector
-                  label={<span>"Betten"</span>}
+                  label={<span>Betten</span>}
                   value={field.value}
                   onChange={field.onChange}
                   min={1}
@@ -262,7 +262,7 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
               control={control}
               render={({ field }) => (
                 <QuantitySelector
-                  label={<span>"Badezimmer/WCs"</span>}
+                  label={<span>Badezimmer/WCs</span>}
                   value={field.value}
                   onChange={field.onChange}
                   min={1}
