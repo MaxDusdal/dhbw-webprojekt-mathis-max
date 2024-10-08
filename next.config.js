@@ -10,6 +10,7 @@ const config = {
     ignoreDuringBuilds: true,
   },
   images: {
+
     remotePatterns: [
       {
         protocol: "https",
@@ -20,6 +21,12 @@ const config = {
       {
         protocol: "https",
         hostname: "picsum.photos",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "luftnbn.server.dusdal.dev",
         port: "",
         pathname: "/**",
       },
