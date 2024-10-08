@@ -2,6 +2,7 @@ import { z } from "zod";
 import { Role } from "@prisma/client";
 
 import type { VacationHome, Amenity } from "@prisma/client";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 export const credentialsSchema = z.object({
   email: z.string().email(),
@@ -25,7 +26,27 @@ export const userCreateSchema = z.object({
   avatar: z.string().url().optional(),
   firstName: z.string().min(3),
   lastName: z.string().min(3),
-  phoneNumber: z.string().optional(),
+  phoneNumber: z
+    .string()
+    .optional()
+    .transform((arg, ctx) => {
+      if (!arg) return undefined;
+
+      const phone = parsePhoneNumberFromString(arg, {
+        defaultCountry: "DE",
+        extract: false,
+      });
+
+      if (phone && phone.isValid()) {
+        return phone.number;
+      }
+
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid phone number",
+      });
+      return undefined;
+    }),
   nationality: z.string().optional(),
   preferredLanguage: z.string().optional(),
   password: z
@@ -81,9 +102,27 @@ export const userProfileSchema = z.object({
   avatar: z.string().url().optional(),
   firstName: z.string().min(3),
   lastName: z.string().min(3),
-  phoneNumber: z.string().optional(),
-  nationality: z.string().optional(),
-  preferredLanguage: z.string().optional(),
+  phoneNumber: z
+    .string()
+    .optional()
+    .transform((arg, ctx) => {
+      if (!arg) return undefined;
+
+      const phone = parsePhoneNumberFromString(arg, {
+        defaultCountry: "DE",
+        extract: false,
+      });
+
+      if (phone && phone.isValid()) {
+        return phone.number;
+      }
+
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid phone number",
+      });
+      return undefined;
+    }),
   email: z.string().email(),
 });
 

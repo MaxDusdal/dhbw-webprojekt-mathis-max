@@ -3,13 +3,16 @@
 import { userProfileSchema } from "~/app/utils/zod";
 import CustomButton from "../Buttons/CustomButton";
 import InputFieldWrapper from "../Inputs/InputFieldWrapper";
-import { type SubmitHandler, useForm } from "react-hook-form";
+import { FieldError, type SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type z } from "zod";
 import { api } from "~/trpc/react";
 import InputField from "../Inputs/InputField";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { notify } from "~/app/utils/notification";
+import { TRPCError } from "@trpc/server";
+import { errorToJSON } from "next/dist/server/render";
 
 type UserProfileFormValues = z.infer<typeof userProfileSchema>;
 
@@ -17,21 +20,51 @@ export default function UserProfileForm() {
   const schema = userProfileSchema;
   const utils = api.useUtils();
   const userData = api.user.getCallerUser.useQuery();
+  const [isFormDirty, setIsFormDirty] = useState(false);
 
-  const { register, handleSubmit, setValue } = useForm<UserProfileFormValues>({
+  const updateUser = api.user.updateUser.useMutation({
+    onSuccess: () => {
+      notify.success("Benutzer erfolgreich aktualisiert");
+      utils.user.getCallerUser.invalidate();
+      setIsFormDirty(false);
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<UserProfileFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       firstName: "",
       lastName: "",
       email: "",
       phoneNumber: "",
-      nationality: "",
     },
   });
+
+  const watchAllFields = watch();
 
   useEffect(() => {
     prefillForm();
   }, [userData.data, setValue]);
+
+  useEffect(() => {
+    if (userData.data) {
+      const isDirty =
+        watchAllFields.firstName !== userData.data.firstName ||
+        watchAllFields.lastName !== userData.data.lastName ||
+        watchAllFields.email !== userData.data.email ||
+        watchAllFields.phoneNumber !== userData.data.phoneNumber;
+      setIsFormDirty(isDirty);
+    }
+  }, [watchAllFields, userData.data]);
 
   function prefillForm() {
     if (userData.data) {
@@ -39,14 +72,17 @@ export default function UserProfileForm() {
       setValue("lastName", userData.data.lastName || "");
       setValue("email", userData.data.email || "");
       setValue("phoneNumber", userData.data.phoneNumber || "");
-      setValue("nationality", userData.data.nationality || "");
     }
   }
 
   if (userData.isLoading) return <div>Loading...</div>;
 
   const onSubmit: SubmitHandler<UserProfileFormValues> = async (data) => {
-    console.log(data);
+    try {
+      await updateUser.mutateAsync(data);
+    } catch (error) {
+      notify.error((error as TRPCError).message);
+    }
   };
 
   return (
@@ -60,7 +96,7 @@ export default function UserProfileForm() {
         </p>
       </div>
 
-      <form className="md:col-span-2">
+      <form className="md:col-span-2" onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
           <div className="col-span-full flex items-center gap-x-8">
             {userData.data?.avatar ? (
@@ -88,6 +124,7 @@ export default function UserProfileForm() {
                 name="firstName"
                 register={register}
                 placeholder="Max"
+                error={errors.firstName as FieldError}
               />
             </InputFieldWrapper>
           </div>
@@ -99,6 +136,7 @@ export default function UserProfileForm() {
                 name="lastName"
                 register={register}
                 placeholder="Mustermann"
+                error={errors.lastName as FieldError}
               />
             </InputFieldWrapper>
           </div>
@@ -110,6 +148,7 @@ export default function UserProfileForm() {
                 name="email"
                 register={register}
                 type="email"
+                error={errors.email as FieldError}
               />
             </InputFieldWrapper>
           </div>
@@ -120,16 +159,7 @@ export default function UserProfileForm() {
                 id="phoneNumber"
                 name="phoneNumber"
                 register={register}
-              />
-            </InputFieldWrapper>
-          </div>
-
-          <div className="col-span-full">
-            <InputFieldWrapper id="nationality" label="Nationalität">
-              <InputField
-                id="nationality"
-                name="nationality"
-                register={register}
+                error={errors.phoneNumber as FieldError}
               />
             </InputFieldWrapper>
           </div>
@@ -139,9 +169,18 @@ export default function UserProfileForm() {
           <CustomButton type="submit" fullWidth={false}>
             Speichern
           </CustomButton>
-          <CustomButton variant="tertiary" fullWidth={false}>
-            Abbrechen
-          </CustomButton>
+          {isFormDirty && (
+            <CustomButton
+              variant="tertiary"
+              fullWidth={false}
+              onClick={() => {
+                prefillForm();
+                setIsFormDirty(false);
+              }}
+            >
+              Abbrechen
+            </CustomButton>
+          )}
         </div>
       </form>
     </div>

@@ -6,9 +6,8 @@ import {
 } from "../trpc";
 import {
   changePasswordSchema,
-  passwordSchema,
-  signUpSchema,
   userCreateSchema,
+  userProfileSchema,
 } from "@/utils/zod";
 import { comparePassword, saltAndHashPassword } from "@/utils/passwordHelper";
 import { TRPCError } from "@trpc/server";
@@ -44,35 +43,6 @@ export const usersRouter = createTRPCRouter({
       });
 
       return newUser;
-    }),
-
-  signUp: publicProcedure
-    .input(signUpSchema)
-    .mutation(async ({ input, ctx }) => {
-      const { salt, hash } = await saltAndHashPassword(input.password, 10);
-
-      const newUser = await ctx.db.user.create({
-        data: {
-          firstName: input.firstName,
-          lastName: input.lastName,
-          email: input.email,
-          role: "USER",
-          hash,
-          salt,
-          avatar: "",
-        },
-      });
-
-      if (!newUser) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "User not created",
-        });
-      }
-
-      const session = await ctx.lucia.createSession(newUser.id, {});
-      const sessionCookie = ctx.lucia.createSessionCookie(session.id);
-      return { newUser, sessionCookie };
     }),
 
   delete: protectedProcedure
@@ -169,39 +139,37 @@ export const usersRouter = createTRPCRouter({
     return true;
   }),
 
-  deleteAllSessions: sessionPassProcedure
-    .input(passwordSchema)
+  updateUser: protectedProcedure
+    .input(userProfileSchema)
     .mutation(async ({ input, ctx }) => {
-      const { password } = input;
-      const user = await ctx.db.user.findUnique({
+      const currentUser = await ctx.db.user.findUnique({
         where: { id: ctx.session.user.id },
       });
 
-      if (!user) {
+      if (!currentUser) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "User not found",
         });
       }
 
-      const validPassword = await comparePassword(password, user.hash);
-
-      if (!validPassword) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Aktuelles Passwort ist falsch",
-        });
-      }
-      // Delete all sessions except the current one, to invalidate all tokens
-      // May is a bit of a hack, by using the session.expires field, which is a datetime.
-      // But realistically, the user won't have 2 sessions open at the same time, so this is a good enough solution
-      const currentSession = ctx.session.session.expiresAt;
-      await ctx.db.session.deleteMany({
+      const emailUniqueConstraint = await ctx.db.user.findFirst({
         where: {
-          userId: ctx.session.user.id,
-          expiresAt: { not: currentSession },
+          email: input.email,
+          id: { not: currentUser.id },
         },
       });
-      return true;
+
+      if (emailUniqueConstraint) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Die Mail ist bereits vergeben",
+        });
+      }
+
+      await ctx.db.user.update({
+        where: { id: ctx.session.user.id },
+        data: input,
+      });
     }),
 });

@@ -1,11 +1,14 @@
 // src/app/api/auth/signup/route.ts
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse, userAgent } from "next/server";
 import { saltAndHashPassword } from "~/app/utils/passwordHelper";
+import { getDeviceString, getLocation } from "~/app/utils/sessionHelper";
 import { signUpSchema } from "~/app/utils/zod";
 import { lucia } from "~/auth";
 import { db } from "~/server/db";
 
 export async function POST(req: NextRequest, res: NextResponse) {
+  const ip = req.headers.get("x-forwarded-for") || req.ip || "Unknown";
+  const ua = userAgent(req);
   const input = await req.json();
   const parsedInput = signUpSchema.parse(input);
 
@@ -31,7 +34,11 @@ export async function POST(req: NextRequest, res: NextResponse) {
     },
   });
 
-  const session = await lucia.createSession(newUser.id, {});
+  const session = await lucia.createSession(newUser.id, {
+    ipAddress: ip,
+    device: getDeviceString(ua),
+    location: await getLocation(ip),
+  });
   const sessionCookie = lucia.createSessionCookie(session.id);
 
   const response = NextResponse.json(

@@ -39,3 +39,20 @@ export type SectionHeadingActions = {
 };
 
 export type DialogTypes = "create" | "destructive" | "default" | "cancel";
+
+export interface GeoIPResponse {
+  status: string;
+  message: string;
+  country: string;
+  region: string;
+  regionName: string;
+  city: string;
+  zip: string;
+}
+
+export interface UserAgentInfo {
+  ua: string;
+  browser?: { name?: string; version?: string };
+  os?: { name?: string; version?: string };
+  device?: { vendor?: string; model?: string; type?: string };
+}

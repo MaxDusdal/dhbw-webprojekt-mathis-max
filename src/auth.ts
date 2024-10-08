@@ -33,6 +33,7 @@ declare module "lucia" {
   interface Register {
     Lucia: typeof lucia;
     DatabaseUserAttributes: DatabaseUserAttributes;
+    DatabaseSessionAttributes: DatabaseSessionAttributes;
   }
 }
 
@@ -42,4 +43,10 @@ interface DatabaseUserAttributes {
   lastName: string;
   email: string;
   role: Role;
+}
+
+interface DatabaseSessionAttributes {
+  ipAddress: string;
+  device: string;
+  location: string;
 }
