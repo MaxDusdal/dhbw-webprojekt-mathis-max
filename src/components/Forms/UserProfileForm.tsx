@@ -3,9 +3,9 @@
 import { userProfileSchema } from "~/app/utils/zod";
 import CustomButton from "../Buttons/CustomButton";
 import InputFieldWrapper from "../Inputs/InputFieldWrapper";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { type z } from "zod";
 import { api } from "~/trpc/react";
 import InputField from "../Inputs/InputField";
 import { useEffect } from "react";

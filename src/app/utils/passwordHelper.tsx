@@ -6,7 +6,7 @@ import * as bcrypt from 'bcryptjs';
  * @param saltRounds The number of salt rounds to use (default: 10)
  * @returns A promise that resolves to the hashed password
  */
-export async function saltAndHashPassword(password: any, saltRounds: number = 10): Promise<{ salt: string, hash: string }> {
+export async function saltAndHashPassword(password: any, saltRounds = 10): Promise<{ salt: string, hash: string }> {
   try {
     // Generate a salt
     const salt = await bcrypt.genSalt(saltRounds);

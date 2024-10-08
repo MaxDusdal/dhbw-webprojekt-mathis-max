@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 import { clx } from "~/app/utils/clx";
-import { SectionHeadingActions, Tab } from "~/app/utils/types";
+import { type SectionHeadingActions, type Tab } from "~/app/utils/types";
 import CustomButton from "../Buttons/CustomButton";
 
 const tabs = [

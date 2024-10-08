@@ -31,7 +31,7 @@ const AlertBanner = ({
 
   // Select the correct classes and icon based on the type prop
   const { container, icon, IconComponent } =
-    typeClasses[type as AlertType] || typeClasses.error;
+    typeClasses[type] || typeClasses.error;
 
   return (
     <div className={`${baseClass} ${container}`}>

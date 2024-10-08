@@ -13,8 +13,6 @@ import { ZodError } from "zod";
 
 import { db } from "~/server/db";
 import { lucia } from "~/auth";
-import { headers } from "next/headers";
-import type { Session, User } from "lucia";
 /**
  * 1. CONTEXT
  *
@@ -28,7 +26,7 @@ import type { Session, User } from "lucia";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  var session;
+  let session;
   const authSessionCookie = opts.headers
     .get("cookie")
     ?.split("; ")
@@ -94,6 +92,7 @@ export const createTRPCRouter = t.router;
  * You can remove this if you don't like it, but it can help catch unwanted waterfalls by simulating
  * network latency that would occur in production but not in local development.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const timingMiddleware = t.middleware(async ({ next, path }) => {
   const start = Date.now();
 
@@ -129,18 +128,21 @@ export const publicProcedure = t.procedure;
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
-  if (!ctx.session || !ctx.session.user) {
+  // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+  if (ctx.session && ctx.session.user) {
+    return next({
+      ctx: {
+        // infers the `session` as non-nullable
+        session: { ...ctx.session, user: ctx.session.user },
+      },
+    });
+  } else {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
-  return next({
-    ctx: {
-      // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
-    },
-  });
 });
 
 export const sessionPassProcedure = t.procedure.use(({ ctx, next }) => {
+  // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
   if (ctx.session && ctx.session.user) {
     return next({
       ctx: {

@@ -2,7 +2,7 @@
 import { Lucia } from "lucia";
 import { PrismaAdapter } from "@lucia-auth/adapter-prisma";
 import { db } from "~/server/db";
-import { Role } from "@prisma/client";
+import { type Role } from "@prisma/client";
 
 const adapter = new PrismaAdapter(db.session, db.user);
 

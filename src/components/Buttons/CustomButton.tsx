@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { ButtonVariants } from "@/utils/types"
+import { type ButtonVariants } from "@/utils/types"
 
 const buttonBaseClass =
   "inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold ";

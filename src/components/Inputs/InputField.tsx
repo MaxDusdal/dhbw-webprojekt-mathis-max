@@ -4,7 +4,7 @@ import {
   EyeIcon,
   EyeSlashIcon,
 } from "@heroicons/react/20/solid";
-import { UseFormRegister, FieldError, RegisterOptions } from "react-hook-form";
+import { type UseFormRegister, type FieldError, type RegisterOptions } from "react-hook-form";
 
 type InputFieldProps = {
   id: string;

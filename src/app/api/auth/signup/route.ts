@@ -1,5 +1,5 @@
 // src/app/api/auth/signup/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { saltAndHashPassword } from "~/app/utils/passwordHelper";
 import { signUpSchema } from "~/app/utils/zod";
 import { lucia } from "~/auth";

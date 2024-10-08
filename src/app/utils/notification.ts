@@ -1,5 +1,5 @@
 // utils/notification.js
-import { toast, ToastOptions } from "react-toastify";
+import { toast, type ToastOptions } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastPosition } from 'react-toastify';
 

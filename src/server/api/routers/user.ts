@@ -12,23 +12,10 @@ import {
 } from "@/utils/zod";
 import { comparePassword, saltAndHashPassword } from "@/utils/passwordHelper";
 import { TRPCError } from "@trpc/server";
-import { User } from "@prisma/client";
+import type { User } from "@prisma/client";
 import { z } from "zod";
 import { omit } from "lodash";
-import { UserWithoutSensitiveInfo } from "~/app/utils/types";
-
-async function getUser(id: string, ctx: any) {
-  const user = await ctx.db.user.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      email: true,
-      role: true,
-    },
-  });
-
-  return user;
-}
+import type { UserWithoutSensitiveInfo } from "~/app/utils/types";
 
 export const usersRouter = createTRPCRouter({
   create: protectedProcedure
@@ -165,6 +152,7 @@ export const usersRouter = createTRPCRouter({
           data: { hash, salt },
         });
       } catch (error) {
+        console.error(error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Passwort konnte nicht geändert werden",
@@ -208,11 +196,11 @@ export const usersRouter = createTRPCRouter({
       // Delete all sessions except the current one, to invalidate all tokens
       // May is a bit of a hack, by using the session.expires field, which is a datetime.
       // But realistically, the user won't have 2 sessions open at the same time, so this is a good enough solution
-      const currentSession = ctx.session.expires;
+      const currentSession = ctx.session.session.expiresAt;
       await ctx.db.session.deleteMany({
         where: {
           userId: ctx.session.user.id,
-          expires: { not: currentSession },
+          expiresAt: { not: currentSession },
         },
       });
       return true;

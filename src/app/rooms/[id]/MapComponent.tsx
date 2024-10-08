@@ -29,7 +29,7 @@ const MapComponent = ({ latitude, longitude }: Props) => {
   return (
     <div className="mt-5 overflow-hidden rounded-xl">
       <LoadScript
-        googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string}
+        googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
       >
         <GoogleMap
           mapContainerStyle={mapStyles}

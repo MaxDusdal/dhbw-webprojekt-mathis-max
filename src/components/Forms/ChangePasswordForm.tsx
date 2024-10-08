@@ -1,8 +1,8 @@
 "use client";
 import { changePasswordSchema } from "~/app/utils/zod";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { type z } from "zod";
 import InputFieldWrapper from "../Inputs/InputFieldWrapper";
 import InputField from "../Inputs/InputField";
 import CustomButton from "../Buttons/CustomButton";

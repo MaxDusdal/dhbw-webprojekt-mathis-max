@@ -5,7 +5,7 @@ import { api } from "~/trpc/react";
 import { CalendarLarge } from "~/components/ui/calendar";
 import { addDays, format, differenceInCalendarDays } from "date-fns";
 import React from "react";
-import { DateRange } from "react-day-picker";
+import { type DateRange } from "react-day-picker";
 import { useParams } from "next/navigation";
 import ReservationDataCard from "./ReservationDataForm";
 import MapComponent from "./MapComponent";

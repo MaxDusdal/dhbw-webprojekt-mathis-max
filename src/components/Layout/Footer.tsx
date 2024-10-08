@@ -1,4 +1,4 @@
-import { JSX, SVGProps } from "react";
+import { type JSX, type SVGProps } from "react";
 
 const navigation = {
   main: [

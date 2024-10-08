@@ -2,7 +2,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { UserCircleIcon } from "@heroicons/react/20/solid";
 import { EllipsisVerticalIcon, UserIcon } from "@heroicons/react/24/outline";
 import { BeatLoader } from "react-spinners";
-import { User } from "@prisma/client";
+import { type User } from "@prisma/client";
 import { api } from "~/trpc/react";
 import { notify } from "~/app/utils/notification";
 

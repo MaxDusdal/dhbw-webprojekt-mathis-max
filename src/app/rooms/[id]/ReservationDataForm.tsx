@@ -8,7 +8,7 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { Separator } from "~/components/ui/separator";
-import { DateRange } from "react-day-picker";
+import { type DateRange } from "react-day-picker";
 import QuantitySelector from "../create-listing/QuantitySelector";
 import { number } from "zod";
 

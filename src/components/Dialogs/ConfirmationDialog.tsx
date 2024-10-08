@@ -13,7 +13,7 @@ import {
 } from "@heroicons/react/24/outline";
 import CustomButton from "../Buttons/CustomButton";
 
-import { DialogTypes } from "@/utils/types";
+import { type DialogTypes } from "@/utils/types";
 
 /**
  * Reusable confirmation dialog component, used to confirm actions before executing them.

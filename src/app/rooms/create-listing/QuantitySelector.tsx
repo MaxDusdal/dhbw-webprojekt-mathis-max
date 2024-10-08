@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from "react";
+import React, { type ReactElement, useState } from "react";
 import { Minus, Plus } from "lucide-react";
 
 interface QuantitySelectorProps {

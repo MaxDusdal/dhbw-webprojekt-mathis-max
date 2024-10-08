@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { comparePassword } from "~/app/utils/passwordHelper";
 import { credentialsSchema } from "~/app/utils/zod";
 import { lucia } from "~/auth";

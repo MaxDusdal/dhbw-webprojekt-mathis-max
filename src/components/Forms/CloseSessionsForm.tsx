@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { type z } from "zod";
 import { passwordSchema } from "~/app/utils/zod";
 import InputField from "../Inputs/InputField";
 import InputFieldWrapper from "../Inputs/InputFieldWrapper";

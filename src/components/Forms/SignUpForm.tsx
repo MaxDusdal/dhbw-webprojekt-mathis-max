@@ -1,12 +1,12 @@
 "use client";
 import InputFieldWrapper from "../Inputs/InputFieldWrapper";
 
-import { FieldError, useForm } from "react-hook-form";
+import { type FieldError, useForm } from "react-hook-form";
 import InputField from "../Inputs/InputField";
 import CustomButton from "../Buttons/CustomButton";
 import AlertBanner from "../Alerts/AlertBanner";
 import { BeatLoader } from "react-spinners";
-import { z } from "zod";
+import { type z } from "zod";
 import { signUpSchema } from "~/app/utils/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "~/trpc/react";
@@ -81,7 +81,7 @@ export default function SignUpForm() {
             register={register}
             placeholder="Email"
             required
-            error={formState.errors.email as FieldError | undefined}
+            error={formState.errors.email}
           />
         </InputFieldWrapper>
         <InputFieldWrapper id="password" label="Passwort">
@@ -92,7 +92,7 @@ export default function SignUpForm() {
             register={register}
             placeholder="Passwort"
             required
-            error={formState.errors.password as FieldError | undefined}
+            error={formState.errors.password}
           />
         </InputFieldWrapper>
 
@@ -112,7 +112,7 @@ export default function SignUpForm() {
           <AlertBanner
             type="error"
             header="Login Fehlgeschlagen"
-            message={formState.errors.email?.message as string}
+            message={formState.errors.email?.message!}
           />
         </div>
       )}

@@ -57,10 +57,12 @@ export default function ImageDisplay({ image_urls }: Props) {
   return (
     <>
       <div className="mt-6 grid h-[516px] w-full grid-cols-2 gap-2 overflow-hidden rounded-2xl">
-        <ImageTile
-          image={displayImages[0]}
-          onClick={() => handleImageClick(0)}
-        />
+        {displayImages[0] && (
+          <ImageTile
+            image={displayImages[0]}
+            onClick={() => handleImageClick(0)}
+          />
+        )}
         <div className="grid h-full w-full grid-cols-2 gap-2">
           {displayImages.slice(1).map((image, index) => (
             <ImageTile
