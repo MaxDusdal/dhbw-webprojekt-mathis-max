@@ -22,7 +22,6 @@ export const usersRouter = createTRPCRouter({
     .input(userCreateSchema)
     .mutation(async ({ input, ctx }) => {
       /*
-      TODO: Du schwanzlappen
       if ((await getUser(ctx.session.user.id, ctx)).role !== "ADMIN") {
         throw new TRPCError({
           code: "UNAUTHORIZED",
