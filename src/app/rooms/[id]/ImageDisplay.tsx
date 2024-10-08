@@ -1,6 +1,5 @@
 import Image from "next/image";
-import { useState } from "react";
-import { X } from "lucide-react";
+import { useState, useMemo } from "react";
 import { Skeleton } from "~/components/ui/skeleton";
 import {
   Carousel,
@@ -10,6 +9,7 @@ import {
   CarouselPrevious,
 } from "~/components/ui/carousel";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
+import { useEffect } from "react";
 
 type ImageData = {
   id: number;
@@ -27,15 +27,23 @@ export default function ImageDisplay({ image_urls }: Props) {
   const [isCarouselOpen, setIsCarouselOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
+  const displayImages = useMemo(
+    () => image_urls?.slice(0, 5) || [],
+    [image_urls],
+  );
+  const remainingSkeletons = useMemo(
+    () => 5 - displayImages.length,
+    [displayImages],
+  );
+
   if (!image_urls || image_urls.length === 0) {
     return (
       <div className="mt-6 grid h-[516px] w-full grid-cols-2 gap-2 overflow-hidden rounded-2xl">
         <Skeleton className="h-full w-full" />
         <div className="grid h-full w-full grid-cols-2 gap-2">
-          <Skeleton className="h-full w-full" />
-          <Skeleton className="h-full w-full" />
-          <Skeleton className="h-full w-full" />
-          <Skeleton className="h-full w-full" />
+          {[...Array(4)].map((_, index) => (
+            <Skeleton key={`skeleton-${index}`} className="h-full w-full" />
+          ))}
         </div>
       </div>
     );
@@ -49,68 +57,130 @@ export default function ImageDisplay({ image_urls }: Props) {
   return (
     <>
       <div className="mt-6 grid h-[516px] w-full grid-cols-2 gap-2 overflow-hidden rounded-2xl">
-        <div
-          className="relative h-full w-full cursor-pointer"
+        <ImageTile
+          image={displayImages[0]}
           onClick={() => handleImageClick(0)}
-        >
-          <Image
-            src={image_urls[0].url}
-            alt={`Vacation home image ${image_urls[0].id}`}
-            layout="fill"
-            objectFit="cover"
-          />
-        </div>
+        />
         <div className="grid h-full w-full grid-cols-2 gap-2">
-          {image_urls.slice(1, 5).map((image, index) => (
-            <div
+          {displayImages.slice(1).map((image, index) => (
+            <ImageTile
               key={image.id}
-              className="relative h-full w-full cursor-pointer"
+              image={image}
               onClick={() => handleImageClick(index + 1)}
+            />
+          ))}
+          {[...Array(remainingSkeletons)].map((_, index) => (
+            <Skeleton key={`skeleton-${index}`} className="h-full w-full" />
+          ))}
+        </div>
+      </div>
+      <ImageCarousel
+        images={image_urls}
+        isOpen={isCarouselOpen}
+        onOpenChange={setIsCarouselOpen}
+        selectedIndex={selectedImageIndex}
+        onSelectImage={setSelectedImageIndex}
+      />
+    </>
+  );
+}
+
+type ImageTileProps = {
+  image: ImageData;
+  onClick: () => void;
+};
+
+function ImageTile({ image, onClick }: ImageTileProps) {
+  return (
+    <div className="relative h-full w-full cursor-pointer" onClick={onClick}>
+      <Image
+        src={image.url}
+        alt={`Vacation home image ${image.id}`}
+        layout="fill"
+        objectFit="cover"
+      />
+    </div>
+  );
+}
+
+type ImageCarouselProps = {
+  images: ImageData[];
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  selectedIndex: number;
+  onSelectImage: (index: number) => void;
+};
+
+function ImageCarousel({
+  images,
+  isOpen,
+  onOpenChange,
+  selectedIndex,
+  onSelectImage,
+}: ImageCarouselProps) {
+  const [api, setApi] = useState<any>();
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    setCurrent(api.selectedScrollSnap());
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+  }, [api]);
+
+  useEffect(() => {
+    api?.scrollTo(selectedIndex);
+  }, [api, selectedIndex]);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-full max-w-[90vw] border-none border-opacity-0 bg-transparent bg-opacity-0 px-0 py-10">
+        <Carousel
+          setApi={setApi}
+          className="h-full w-full"
+          opts={{ loop: true }}
+        >
+          <CarouselContent>
+            {images.map((image) => (
+              <CarouselItem key={image.id}>
+                <div className="felx relative h-[calc(90vh-88px)] w-full flex-grow">
+                  <Image
+                    src={image.url}
+                    alt={`Vacation home image ${image.id}`}
+                    layout="fill"
+                    objectFit="contain"
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
+        <div className="mt-4 flex justify-center space-x-2 overflow-x-auto p-2">
+          {images.map((image, index) => (
+            <button
+              key={image.id}
+              onClick={() => onSelectImage(index)}
+              className={`relative h-16 w-16 overflow-hidden rounded-md transition-all ${
+                index === current ? "ring-2 ring-white" : ""
+              }`}
             >
               <Image
                 src={image.url}
-                alt={`Vacation home image ${image.id}`}
+                alt={`Thumbnail ${index + 1}`}
                 layout="fill"
                 objectFit="cover"
               />
-            </div>
+            </button>
           ))}
-          {[...Array(4 - Math.min(image_urls.length - 1, 4))].map(
-            (_, index) => (
-              <Skeleton key={`skeleton-${index}`} className="h-full w-full" />
-            ),
-          )}
         </div>
-      </div>
-
-      <Dialog open={isCarouselOpen} onOpenChange={setIsCarouselOpen}>
-        <DialogContent className="max-h-[90vh] max-w-[90vw]">
-          <Carousel className="w-full">
-            <CarouselContent>
-              {image_urls.map((image, index) => (
-                <CarouselItem key={image.id}>
-                  <div className="relative aspect-video w-full">
-                    <Image
-                      src={image.url}
-                      alt={`Vacation home image ${image.id}`}
-                      layout="fill"
-                      objectFit="contain"
-                    />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
-          <button
-            className="absolute right-4 top-4 rounded-full bg-black bg-opacity-50 p-2 text-white"
-            onClick={() => setIsCarouselOpen(false)}
-          >
-            <X size={24} />
-          </button>
-        </DialogContent>
-      </Dialog>
-    </>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -37,7 +37,7 @@ const MapComponent = ({ latitude, longitude }: Props) => {
           center={defaultCenter}
           options={mapOptions}
         >
-          <Marker position={defaultCenter} />
+          <Marker position={defaultCenter}></Marker>
         </GoogleMap>
       </LoadScript>
     </div>
