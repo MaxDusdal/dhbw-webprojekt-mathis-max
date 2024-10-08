@@ -166,6 +166,7 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
         )}
       </div>
       <div>
+        <label>Location</label>
         {isLoaded ? (
           <Controller
             name="location"
