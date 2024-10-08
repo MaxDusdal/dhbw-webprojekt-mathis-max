@@ -2,9 +2,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  const origin = request.nextUrl.origin;
 
   try {
+    const origin = process.env.APPLICATION_URL
+      ? // eslint-disable-next-line no-restricted-properties
+        `https://${process.env.APPLICATION_URL}`
+      : request.nextUrl.origin;
     // Verify session using an internal API endpoint
     const verifyRequest = await fetch(`${origin}/api/auth/verify-session`, {
       headers: { Cookie: request.headers.get("Cookie") || "" },
@@ -12,7 +15,9 @@ export async function middleware(request: NextRequest) {
 
     if (!verifyRequest.ok) {
       // Handle non-200 responses
-      console.error(`Verify session failed: ${verifyRequest.status} ${verifyRequest.statusText}`);
+      console.error(
+        `Verify session failed: ${verifyRequest.status} ${verifyRequest.statusText}`,
+      );
       return NextResponse.redirect(new URL("/login", request.nextUrl));
     }
 
@@ -33,5 +38,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [ "/protectedPage", "/settings/:path*"],
+  matcher: ["/protectedPage", "/settings/:path*"],
 };

@@ -58,6 +58,7 @@
     "react-spinners": "^0.14.1",
     "react-toastify": "^10.0.5",
     "server-only": "^0.0.1",
+    "sharp": "^0.33.5",
     "superjson": "^2.2.1",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
