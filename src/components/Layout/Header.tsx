@@ -84,7 +84,7 @@ export default function Header() {
               alt="Product image"
               height="100"
               width={100}
-              src="/images/luftnbn.svg"
+              src="/images/logo.svg"
               />
           </a>
         </div>
@@ -181,7 +181,7 @@ export default function Header() {
                 alt="Product image"
                 height="100"
                 width={100}
-                src="/images/luftnbn.svg"
+                src="/images/logo.svg"
               />
             </a>
             <button
