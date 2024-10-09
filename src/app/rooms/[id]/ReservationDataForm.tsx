@@ -52,7 +52,7 @@ export default function ReservationDataCard({
     return params;
   };
   return (
-    <div className="sticky top-20 h-fit w-96 rounded-xl p-6 shadow-lg ring-1 ring-gray-300">
+    <div className="stick top-20 h-fit w-96 rounded-xl p-6 shadow-lg ring-1 ring-gray-300">
       <p className="text-base font-light">
         <span className="text-2xl font-medium">85€</span> Nacht
       </p>

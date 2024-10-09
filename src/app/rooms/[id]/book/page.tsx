@@ -1,8 +1,6 @@
 "use client";
-import Image from "next/image";
 import { useParams, useSearchParams } from "next/navigation";
 import React from "react";
-import { DateRange } from "react-day-picker";
 import { Separator } from "~/components/ui/separator";
 import ReservationBookingOverview from "./ReservationOverview";
 import {
@@ -11,6 +9,10 @@ import {
   verifyDateParamWithDefault,
 } from "~/hooks/useReservation";
 import { api } from "~/trpc/react";
+import { PaymentMethod } from "./paymentMethod";
+import { format } from "date-fns";
+import { de } from "date-fns/locale";
+import { Button } from "~/components/ui/button";
 
 type CoverData = {
   image_url: string;
@@ -47,21 +49,65 @@ export default function BookingOverview() {
   return (
     <div className="flex w-full justify-center">
       <div className="flex max-w-7xl flex-grow flex-col p-10">
-        <h1 className="text-2xl font-medium">Bestätigen und Bezahlen</h1>
         <div className="flex w-full flex-row">
-          <div className="flex w-2/3 flex-col space-y-10 py-8 pr-8">
+          <div className="flex w-2/3 flex-col items-center space-y-10 py-8 pr-8">
             <div className="flex flex-col space-y-8">
-              <h1 className="text-2xl font-medium">Ihre Reise</h1>
-              <p>
-                Ein wunderbares seltenes Haus, das von der Künstlerin Gernod
-                Minke in der Nähe der Innenstadt von Kassel gebaut wurde. Es ist
-                ein schöner gemütlicher Ort. Wir empfehlen es auch für Familien
-                zum Entspannen und Beruhigen in dieser schönen Stadt und der
-                Weltsage-Parks. Hunde sind herzlich willkommen und der Wald ist
-                in der Nähe. Im schönen Garten hast du einen Schwimmteich und
-                eine Terrasse, um zum Beispiel zu sitzen und zu frühstücken. Wir
-                freuen uns, dich zu sehen...
-              </p>
+              <div className="flex flex-col space-y-8">
+                <h1 className="text-2xl font-medium">Bestellübersicht</h1>
+                <p>
+                  Prüfe bitte ob die Check-In und Check-Out Daten, sowie die
+                  angegebenen Gäste richtig sind. Ansonsten kannst du die rechts
+                  korrigieren.
+                </p>
+
+                <div className="grid grid-cols-2">
+                  <p className="font-medium">Check-In:</p>
+                  <p>
+                    {dateRange?.from
+                      ? format(dateRange.from, "dd.MM.yyyy", { locale: de })
+                      : "error"}
+                  </p>
+                  <p className="font-medium">Check-Out:</p>
+                  <p>
+                    {dateRange?.to
+                      ? format(dateRange.to, "dd.MM.yyyy", { locale: de })
+                      : "error"}
+                  </p>
+                </div>
+              </div>
+              <Separator></Separator>
+              <div className="flex w-full justify-center">
+                <PaymentMethod></PaymentMethod>
+              </div>
+              <Separator></Separator>
+              <div className="flex flex-col space-y-8">
+                <h1 className="text-2xl font-medium">
+                  Stornierungsbedingungen
+                </h1>
+                <p>
+                  Kostenlose Stornierung bis zu 7 Tage vor Check-In. Danach ist
+                  die Buchung nicht mehr erstattungsfähig.
+                </p>
+              </div>
+              <Separator></Separator>
+              <div className="flex flex-col space-y-8">
+                <h1 className="text-2xl font-medium">Grundregeln</h1>
+                <p>
+                  Wir bitten alle Gäste, ein paar einfache Dinge zu beachten,
+                  die großartige Gäste ausmachen. Befolge die Hausregeln.
+                  Behandle deine gebuchte Unterkunft, als ob sie dein eigenes
+                  Zuhause wäre.
+                </p>
+              </div>
+              <Separator></Separator>
+              <div>
+                <Button
+                  className="h-14 w-[300px] cursor-pointer bg-blue-600 text-lg hover:bg-blue-500 disabled:bg-gray-400"
+                  disabled={true}
+                >
+                  Bestätigen und Bezahlen
+                </Button>
+              </div>
             </div>
           </div>
           <div className="relative flex w-1/3 justify-end py-8 pl-10">
