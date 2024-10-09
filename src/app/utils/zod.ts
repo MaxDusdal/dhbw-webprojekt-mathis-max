@@ -71,6 +71,9 @@ export const signUpSchema = z.object({
       /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,32}$/,
       "Password must contain at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number and 1 special character",
     ),
+  privacyPolicy: z.boolean().refine((data) => data === true, {
+    message: "Datenschutzbestimmungen müssen akzeptiert werden",
+  }),
 });
 
 export const vacationhomeCreateSchema = z.object({

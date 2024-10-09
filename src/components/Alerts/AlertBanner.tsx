@@ -18,13 +18,13 @@ const AlertBanner = ({
   const baseClass = "rounded-md p-4 flex text-white";
   const typeClasses = {
     error: {
-      container: "bg-red-50 dark:bg-red-800",
-      icon: "text-red-400 dark:text-red-200",
+      container: "bg-red-600",
+      icon: "text-red-100",
       IconComponent: XCircleIcon,
     },
     success: {
-      container: "bg-green-50 dark:bg-green-600",
-      icon: "text-green-400 dark:text-green-200",
+      container: "bg-green-600",
+      icon: "text-green-100",
       IconComponent: CheckCircleIcon,
     },
   };

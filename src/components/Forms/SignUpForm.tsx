@@ -1,7 +1,7 @@
 "use client";
 import InputFieldWrapper from "../Inputs/InputFieldWrapper";
 
-import { type FieldError, useForm } from "react-hook-form";
+import { Controller, type FieldError, useForm } from "react-hook-form";
 import InputField from "../Inputs/InputField";
 import CustomButton from "../Buttons/CustomButton";
 import AlertBanner from "../Alerts/AlertBanner";
@@ -11,11 +11,13 @@ import { signUpSchema } from "~/app/utils/zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
+import CheckboxFieldset from "../Inputs/CheckboxFieldset";
+import Link from "next/link";
 
 type FormValues = z.infer<typeof signUpSchema>;
 
 export default function SignUpForm() {
-  const { register, handleSubmit, formState } = useForm<FormValues>({
+  const { register, handleSubmit, formState, watch, setValue } = useForm<FormValues>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
       email: "",
@@ -96,6 +98,24 @@ export default function SignUpForm() {
           />
         </InputFieldWrapper>
 
+					<CheckboxFieldset
+						legend="Benachrichtigungen senden"
+						items={[
+							{
+								id: "privacyPolicy",
+								label: "Datenschutzbestimmungen akzeptieren",
+								description: "Durch Ihre Registrierung erklären Sie sich mit den Datenschutzbestimmungen einverstanden.",
+							},
+						]}
+						values={{ privacyPolicy: watch("privacyPolicy") }}
+						onChange={(id) => setValue("privacyPolicy", !watch("privacyPolicy"))}
+					/>
+          {formState.errors.privacyPolicy && (
+            <p className="text-red-500 text-sm">
+              {formState.errors.privacyPolicy.message}
+            </p>
+          )}
+
         <div>
           <CustomButton type="submit">
             {formState.isSubmitting ? (
@@ -106,6 +126,15 @@ export default function SignUpForm() {
           </CustomButton>
         </div>
       </form>
+
+      <div className="flex justify-center">
+          <Link
+            className="text-sm text-gray-500 mt-6"
+          href="/login"
+        >
+            Bereits registriert? <span className="text-blue-500">Jetzt anmelden</span>
+          </Link>
+        </div>
 
       {formState.errors.email && (
         <div className="-mb-4 pt-5">

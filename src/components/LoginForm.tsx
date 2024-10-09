@@ -12,6 +12,7 @@ import InputField from "~/components/Inputs/InputField";
 import InputFieldWrapper from "~/components/Inputs/InputFieldWrapper";
 import CustomButton from "~/components/Buttons/CustomButton";
 import AlertBanner from "./Alerts/AlertBanner";
+import Link from "next/link";
 
 type FormValues = z.infer<typeof credentialsSchema>;
 
@@ -53,6 +54,7 @@ const LoginForm = () => {
       } else {
         const errorData = await response.json();
         console.error("Signup error:", errorData.error);
+        setError(errorData.error);
       }
     } catch (error) {
       setError("An unexpected error occurred. Please try again.");
@@ -95,6 +97,15 @@ const LoginForm = () => {
           </CustomButton>
         </div>
       </form>
+
+      <div className="flex justify-center">
+          <Link
+            className="text-sm text-gray-500 mt-6"
+          href="/signup"
+        >
+            Noch kein Account? <span className="text-blue-500">Jetzt registrieren</span>
+          </Link>
+        </div>
 
       {error && (
         <div className="-mb-4 pt-5">

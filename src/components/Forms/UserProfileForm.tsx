@@ -13,6 +13,7 @@ import Image from "next/image";
 import { notify } from "~/app/utils/notification";
 import { TRPCError } from "@trpc/server";
 import { errorToJSON } from "next/dist/server/render";
+import { E164Number } from "libphonenumber-js";
 
 type UserProfileFormValues = z.infer<typeof userProfileSchema>;
 
@@ -71,7 +72,7 @@ export default function UserProfileForm() {
       setValue("firstName", userData.data.firstName || "");
       setValue("lastName", userData.data.lastName || "");
       setValue("email", userData.data.email || "");
-      setValue("phoneNumber", userData.data.phoneNumber || "");
+      setValue("phoneNumber", userData.data.phoneNumber ? (userData.data.phoneNumber as E164Number) : undefined);
     }
   }
 
