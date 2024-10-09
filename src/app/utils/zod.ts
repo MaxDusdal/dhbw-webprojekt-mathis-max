@@ -77,19 +77,48 @@ export const signUpSchema = z.object({
 });
 
 export const vacationhomeCreateSchema = z.object({
-  title: z.string().min(3).max(255),
+  title: z
+    .string()
+    .min(3, "Titel muss aus mindestens 3 Zeichen bestehen")
+    .max(255, "Titel muss aus weniger als 255 Zeichen bestehen"),
   images: z.array(z.string().url()).optional(),
-  guestCount: z.number().min(1),
-  bedroomCount: z.number().min(1),
-  bedCount: z.number().min(1),
-  bathroomCount: z.number().min(1),
-  pricePerNight: z.number().min(0),
-  description: z.string().min(3).max(1000),
-  houseRules: z.string().min(3).max(1000).optional(),
-  cancellationPolicy: z.string().min(3).max(1000).optional(),
-  amenities: z.array(z.number()).optional(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
+  guestCount: z
+    .number()
+    .min(1, "Anzahl der Gäste muss aus mindestens 1 bestehen"),
+  bedroomCount: z
+    .number()
+    .min(1, "Anzahl der Schlafzimmer muss aus mindestens 1 bestehen"),
+  bedCount: z
+    .number()
+    .min(1, "Anzahl der Betten muss aus mindestens 1 bestehen"),
+  bathroomCount: z
+    .number()
+    .min(1, "Anzahl der Bäder muss aus mindestens 1 bestehen"),
+  pricePerNight: z.number().min(0, "Preis pro Nacht muss positiv sein"),
+  description: z
+    .string()
+    .min(10, "Beschreibung muss aus mindestens 10 Zeichen bestehen")
+    .max(1000, "Beschreibung muss aus weniger als 1000 Zeichen bestehen"),
+  houseRules: z
+    .string()
+    .min(3, "Hausregeln müssen aus mindestens 3 Zeichen bestehen")
+    .max(1000, "Hausregeln müssen aus weniger als 1000 Zeichen bestehen")
+    .optional(),
+  cancellationPolicy: z
+    .string()
+    .min(3, "Stornierungsbedingungen müssen aus mindestens 3 Zeichen bestehen")
+    .max(
+      1000,
+      "Stornierungsbedingungen müssen aus weniger als 1000 Zeichen bestehen",
+    )
+    .optional(),
+  amenities: z
+    .array(z.number())
+    .min(1, "Mindestens eine Einrichtung ist erforderlich")
+    .optional(),
+  latitude: z.number(),
+  longitude: z.number(),
+  locationDescription: z.string(),
   isAvailable: z.boolean().optional(),
 });
 

@@ -1,16 +1,12 @@
 "use client";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useForm, Controller, FieldError } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
-import { Checkbox } from "~/components/ui/checkbox";
 import QuantitySelector from "../../../components/listings/QuantitySelector";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
-import { UploadButton, UploadDropzone } from "~/app/utils/uploadthing";
 import "@uploadthing/react/styles.css";
 import { api } from "~/trpc/react";
 import Image from "next/image";
@@ -19,34 +15,24 @@ import {
   FileUploaderMinimal,
 } from "@uploadcare/react-uploader/next";
 import "@uploadcare/react-uploader/core.css";
-import { useLoadScript, Autocomplete } from "@react-google-maps/api";
+import { useLoadScript } from "@react-google-maps/api";
 import InputFieldWrapper from "~/components/Inputs/InputFieldWrapper";
 import InputField from "~/components/Inputs/InputField";
+import { vacationhomeCreateSchema } from "~/app/utils/zod";
+import AdressAutoComplete from "~/components/Inputs/AdressAutoComplete";
+import { notify } from "~/app/utils/notification";
+interface AdressAutoCompleteReturn {
+  latitude: number;
+  longitude: number;
+  locationDescription: string;
+}
 
-const vacationHomeSchema = z.object({
-  title: z.string().min(1, "Sie müssen einen Titel eingeben"),
-  guestCount: z.number().int().min(1, "At least 1 guest is required"),
-  bedroomCount: z.number().int().min(1, "At least 1 bedroom is required"),
-  bedCount: z.number().int().min(1, "At least 1 bed is required"),
-  bathroomCount: z.number().int().min(1, "At least 1 bathroom is required"),
-  pricePerNight: z.number().positive("Price must be positive"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  isAvailable: z.boolean(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
-  houseRules: z.string().optional(),
-  cancellationPolicy: z.string().optional(),
-  images: z.array(z.string()).optional(),
-  amenities: z.array(z.number()).min(1, "At least one amenity is required"),
-});
-
-type VacationHomeFormData = z.infer<typeof vacationHomeSchema>;
+type VacationHomeFormData = z.infer<typeof vacationhomeCreateSchema>;
 
 const VacationHomeForm = () => {
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
-    libraries: ["places"],
-  });
+  const [search, setSearch] = React.useState("");
+  const [adressAutoCompleteReturn, setAdressAutoCompleteReturn] =
+    React.useState<AdressAutoCompleteReturn>();
 
   const {
     control,
@@ -56,7 +42,7 @@ const VacationHomeForm = () => {
     register,
     watch,
   } = useForm<VacationHomeFormData>({
-    resolver: zodResolver(vacationHomeSchema),
+    resolver: zodResolver(vacationhomeCreateSchema),
     defaultValues: {
       guestCount: 1,
       bedroomCount: 1,
@@ -67,8 +53,18 @@ const VacationHomeForm = () => {
     },
   });
 
+  const mutation = api.vacationhome.create.useMutation({
+    onSuccess: () => {
+      notify.success("Inserat erfolgreich erstellt");
+    },
+    onError: (error) => {
+      notify.error("Fehler beim Erstellen des Inserats");
+      console.error(error);
+    },
+  });
+
   function onSubmit(data: VacationHomeFormData) {
-    console.log(data);
+    mutation.mutate(data);
   }
 
   const selectedAmenities = watch("amenities");
@@ -77,9 +73,9 @@ const VacationHomeForm = () => {
     (amenityId: number) => {
       setValue(
         "amenities",
-        selectedAmenities.includes(amenityId)
-          ? selectedAmenities.filter((id) => id !== amenityId)
-          : [...selectedAmenities, amenityId],
+        selectedAmenities?.includes(amenityId)
+          ? selectedAmenities?.filter((id) => id !== amenityId)
+          : [...(selectedAmenities || []), amenityId],
         { shouldValidate: true },
       );
     },
@@ -88,9 +84,16 @@ const VacationHomeForm = () => {
 
   const amenitiesQuery = api.amenities.getAll.useQuery();
 
-  const handlePlaceSelect = (place: google.maps.places.PlaceResult) => {
-    setValue("latitude", place.geometry?.location?.lat() || undefined);
-    setValue("longitude", place.geometry?.location?.lng() || undefined);
+  useEffect(() => {
+    if (adressAutoCompleteReturn) {
+      handlePlaceSelect(adressAutoCompleteReturn);
+    }
+  }, [adressAutoCompleteReturn]);
+
+  const handlePlaceSelect = (place: AdressAutoCompleteReturn) => {
+    setValue("latitude", place.latitude);
+    setValue("longitude", place.longitude);
+    setValue("locationDescription", place.locationDescription);
   };
 
   return (
@@ -114,6 +117,10 @@ const VacationHomeForm = () => {
         ></InputField>
       </InputFieldWrapper>
       {/* TODO: Add currency selector */}
+      <AdressAutoComplete
+        description="Adresse"
+        setAdressAutoCompleteReturn={setAdressAutoCompleteReturn}
+      />
       <InputFieldWrapper id="pricePerNight" label="Preis pro Nacht">
         <InputField
           name="pricePerNight"
@@ -212,7 +219,7 @@ const VacationHomeForm = () => {
               <div
                 key={amenity.id}
                 className={`flex cursor-pointer flex-col items-start gap-2 rounded-md p-4 ring-1 ${
-                  selectedAmenities.includes(amenity.id)
+                  selectedAmenities?.includes(amenity.id)
                     ? "bg-gray-100 ring-2 ring-black"
                     : "ring-gray-300 hover:ring-2 hover:ring-black"
                 }`}

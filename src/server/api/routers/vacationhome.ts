@@ -125,7 +125,16 @@ export const vacationhomeRouter = createTRPCRouter({
         take: input.limit,
         skip: input.cursor ? 1 : 0,
         cursor: input.cursor ? { id: input.cursor } : undefined,
-        include: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          isAvailable: true,
+          pricePerNight: true,
+          guestCount: true,
+          bedroomCount: true,
+          bedCount: true,
+          bathroomCount: true,
           images: true,
         },
       });
