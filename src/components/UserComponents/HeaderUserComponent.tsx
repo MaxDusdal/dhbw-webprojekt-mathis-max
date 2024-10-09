@@ -7,8 +7,6 @@ import { useState } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 
 export default function HeaderUserComponent() {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
   const user = api.user.getCallerUser.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
@@ -78,32 +76,32 @@ export default function HeaderUserComponent() {
           </div>
           <div className="py-1">
             <MenuItem>
-              <a
-                href="#"
+              <Link
+                href="/account/profile"
                 className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
               >
                 Account Einstellungen
-              </a>
+              </Link>
             </MenuItem>
             <MenuItem>
-              <a
-                href="#"
+              <Link
+                href="/account/bookings"
                 className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
               >
-                Support
-              </a>
+                Ihre Buchungen
+              </Link>
             </MenuItem>
             <MenuItem>
-              <a
-                href="#"
+              <Link
+                href="/account/rooms"
                 className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
               >
-                Lizenz
-              </a>
+                Ihre Inserate
+              </Link>
             </MenuItem>
           </div>
           <div className="py-1">
-            <form action="#" method="POST">
+            <form action="/api/auth/signout" method="POST">
               <MenuItem>
                 <button
                   type="submit"

@@ -35,6 +35,55 @@ export const vacationhomeRouter = createTRPCRouter({
       return vacationhome;
     }),
 
+  searchByLocation: publicProcedure
+    .input(
+      z.object({
+        latitude: z.number(),
+        longitude: z.number(),
+        radiusInKm: z.number().positive(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { latitude, longitude, radiusInKm } = input;
+
+      const vacationHomes: any[] = await ctx.db.$queryRaw`
+        SELECT 
+          id,
+          title,
+          "guestCount",
+          "bedroomCount",
+          "bedCount",
+          "bathroomCount",
+          "pricePerNight",
+          description,
+          "ownerId",
+          "isAvailable",
+          ST_X(location::geometry) as longitude,
+          ST_Y(location::geometry) as latitude,
+          ST_AsText(location) as location,
+          ST_Distance(
+            location::geography,
+            ST_SetSRID(ST_MakePoint(${longitude}, ${latitude})::geometry, 4326)::geography
+          ) as distance
+        FROM "VacationHome"
+        WHERE ST_DWithin(
+          location::geography,
+          ST_SetSRID(ST_MakePoint(${longitude}, ${latitude})::geometry, 4326)::geography,
+          ${radiusInKm * 1000}
+        )
+        ORDER BY distance
+      `;
+
+      return vacationHomes.map((home: any) => ({
+        ...home,
+        geoLocation: {
+          longitude: parseFloat(home.longitude),
+          latitude: parseFloat(home.latitude),
+        },
+        distance: parseFloat(home.distance),
+      }));
+    }),
+
   delete: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
@@ -65,10 +114,12 @@ export const vacationhomeRouter = createTRPCRouter({
     }),
 
   findMany: publicProcedure
-    .input(z.object({ 
-      limit: z.number(), 
-      cursor: z.number().optional() 
-    }))
+    .input(
+      z.object({
+        limit: z.number(),
+        cursor: z.number().optional(),
+      }),
+    )
     .query(async ({ input, ctx }) => {
       const vacationHomes = await ctx.db.vacationHome.findMany({
         take: input.limit,

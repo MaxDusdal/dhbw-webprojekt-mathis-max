@@ -3,6 +3,7 @@ import {
   publicProcedure,
   protectedProcedure,
   sessionPassProcedure,
+  adminProcedure,
 } from "../trpc";
 import {
   changePasswordSchema,
@@ -11,10 +12,10 @@ import {
 } from "@/utils/zod";
 import { comparePassword, saltAndHashPassword } from "@/utils/passwordHelper";
 import { TRPCError } from "@trpc/server";
-import type { User } from "@prisma/client";
+import { Role, type User } from "@prisma/client";
 import { z } from "zod";
 import { omit } from "lodash";
-import type { UserWithoutSensitiveInfo } from "~/app/utils/types";
+import type { UserWithoutSensitiveInfo, UserWithSessions } from "~/app/utils/types";
 
 export const usersRouter = createTRPCRouter({
   create: protectedProcedure
@@ -54,10 +55,18 @@ export const usersRouter = createTRPCRouter({
       });
     }),
 
-  getUsers: protectedProcedure.query(async ({ ctx }) => {
-    const users: User[] = await ctx.db.user.findMany({});
+  getUsers: adminProcedure.query(async ({ ctx }) => {
+    const users: User[] = await ctx.db.user.findMany({
+      include: {
+        sessions: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+      },
+    });
 
-    return users;
+    return users as UserWithSessions[];
   }),
 
   getByEmail: protectedProcedure
@@ -171,5 +180,15 @@ export const usersRouter = createTRPCRouter({
         where: { id: ctx.session.user.id },
         data: input,
       });
+    }),
+
+  changeRole: adminProcedure
+    .input(z.object({ id: z.string(), role: z.nativeEnum(Role) }))
+    .mutation(async ({ input, ctx }) => {
+      await ctx.db.user.update({
+        where: { id: input.id },
+        data: { role: input.role },
+      });
+      return true;
     }),
 });

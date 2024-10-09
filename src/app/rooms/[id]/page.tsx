@@ -106,7 +106,7 @@ export default function RoomDetail() {
                       1
                         ? " Nächte "
                         : " Nacht ") +
-                      listing.data?.location
+                      listing.data?.city
                     : "Check-Out Datum wählen"
                   : "Chek-In Datum wählen"}
               </h1>

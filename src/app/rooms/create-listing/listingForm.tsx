@@ -23,7 +23,6 @@ import { useLoadScript, Autocomplete } from "@react-google-maps/api";
 
 const vacationHomeSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  location: z.string().min(1, "Location is required"),
   guestCount: z.number().int().min(1, "At least 1 guest is required"),
   bedroomCount: z.number().int().min(1, "At least 1 bedroom is required"),
   bedCount: z.number().int().min(1, "At least 1 bed is required"),
@@ -91,7 +90,6 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
   const amenitiesQuery = api.amenities.getAll.useQuery();
 
   const handlePlaceSelect = (place: google.maps.places.PlaceResult) => {
-    setValue("location", place.formatted_address || "");
     setValue("latitude", place.geometry?.location?.lat() || undefined);
     setValue("longitude", place.geometry?.location?.lng() || undefined);
   };
@@ -162,39 +160,6 @@ const VacationHomeForm: React.FC<VacationHomeFormProps> = ({
         {errors.pricePerNight && (
           <p className="mt-1 text-sm text-red-600">
             {errors.pricePerNight.message}
-          </p>
-        )}
-      </div>
-      <div>
-        <label>Location</label>
-        {isLoaded ? (
-          <Controller
-            name="location"
-            control={control}
-            render={({ field }) => (
-              <Autocomplete
-                onLoad={(autocomplete) => {
-                  autocomplete.addListener("place_changed", () => {
-                    const place = autocomplete.getPlace();
-                    handlePlaceSelect(place);
-                  });
-                }}
-              >
-                <Input {...field} id="location" className="mt-1" />
-              </Autocomplete>
-            )}
-          />
-        ) : (
-          <Input
-            id="location"
-            className="mt-1"
-            placeholder="Loading..."
-            disabled
-          />
-        )}
-        {errors.description && (
-          <p className="mt-1 text-sm text-red-600">
-            {errors.description.message}
           </p>
         )}
       </div>

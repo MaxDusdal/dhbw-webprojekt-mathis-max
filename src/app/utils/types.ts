@@ -1,4 +1,4 @@
-import { type User } from "@prisma/client";
+import { Session, type User } from "@prisma/client";
 
 export type ButtonVariants =
   | "primary"
@@ -26,6 +26,10 @@ export type UserWithAuthRelevantInfo = Omit<
   | "phoneNumber"
   | "nationality"
 >;
+
+export type UserWithSessions = User & {
+  sessions: Session[];
+};
 
 export type Tab = {
   name: string;

@@ -40,27 +40,29 @@ model User {
 }
 
 model VacationHome {
-    id                 Int       @id @default(autoincrement())
+    id                 Int                                   @id @default(autoincrement())
     title              String
-    location           String
     guestCount         Int
     bedroomCount       Int
     bedCount           Int
     bathroomCount      Int
     pricePerNight      Float
     description        String
-    owner              User      @relation("Owner", fields: [ownerId], references: [id])
-    ownerId            String    @db.Uuid
+    owner              User                                  @relation("Owner", fields: [ownerId], references: [id])
+    ownerId            String                                @db.Uuid
     amenities          Amenity[]
     bookings           Booking[]
-    isAvailable        Boolean   @default(true)
+    isAvailable        Boolean                               @default(true)
     latitude           Float?
     longitude          Float?
     houseRules         String?
     cancellationPolicy String?
     images             Image[]
-    createdAt          DateTime  @default(now())
-    updatedAt          DateTime  @updatedAt
+    location           Unsupported("geometry(Point, 4326)")?
+    country            String?
+    city               String?
+    createdAt          DateTime                              @default(now())
+    updatedAt          DateTime                              @updatedAt
 }
 
 model Amenity {
@@ -104,13 +106,13 @@ model Image {
 }
 
 model Session {
-    id           String   @id
-    userId       String   @db.Uuid
-    expiresAt    DateTime
-    user         User     @relation(references: [id], fields: [userId], onDelete: Cascade)
-    device       String?
-    location     String?
-    ipAddress    String?
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+    id        String   @id
+    userId    String   @db.Uuid
+    expiresAt DateTime
+    user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+    device    String?
+    location  String?
+    ipAddress String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }

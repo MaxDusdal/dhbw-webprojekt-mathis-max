@@ -207,18 +207,28 @@ function GuestSelector({ guests, handleChange }: GuestSelectorProps) {
   );
 }
 
-type LocationSearchProps = {
+interface LocationSearchProps {
   description: string;
   search: string;
-  setSearch: (search: string) => void;
-};
+  setSearch: (value: string) => void;
+}
+
+interface PlaceSuggestion {
+  place_id: string;
+  description: string;
+}
+
 function LocationSearch({
   description,
   search,
   setSearch,
 }: LocationSearchProps) {
   const [isSearchMode, setIsSearchMode] = React.useState(false);
+  const [suggestions, setSuggestions] = React.useState<PlaceSuggestion[]>([]);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [showDropdown, setShowDropdown] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isSearchMode && inputRef.current) {
@@ -226,37 +236,114 @@ function LocationSearch({
     }
   }, [isSearchMode]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (search.length > 2) {
+        setIsLoading(true);
+        try {
+          const response = await fetch(
+            `/api/places?input=${encodeURIComponent(search)}`,
+          );
+          if (!response.ok) throw new Error("Failed to fetch suggestions");
+          const data = await response.json();
+          console.log("data", data);
+          setSuggestions(data.predictions);
+          setShowDropdown(true);
+        } catch (error) {
+          console.error("Error fetching suggestions:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setSuggestions([]);
+        setShowDropdown(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(fetchSuggestions, 200);
+    return () => clearTimeout(debounceTimer);
+  }, [search]);
+
   const handleClick = () => {
     setIsSearchMode(true);
   };
 
   const handleBlur = () => {
+    // Delay hiding search mode to allow selecting from dropdown
+    setTimeout(() => setIsSearchMode(false), 200);
+  };
+
+  const handleSuggestionClick = (suggestion: PlaceSuggestion) => {
+    setSearch(suggestion.description);
+    setShowDropdown(false);
     setIsSearchMode(false);
   };
 
   return (
-    <div
-      className="flex cursor-pointer flex-col justify-center space-y-1 rounded-full px-8 py-2 hover:bg-gray-100"
-      onClick={handleClick}
-    >
-      <p className="text-[12px] font-semibold">{description}</p>
-      {isSearchMode ? (
-        <input
-          ref={inputRef}
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onBlur={handleBlur}
-          className="m-0 border-none bg-transparent p-0 text-base outline-none focus:outline-none focus:ring-0 focus:ring-offset-0"
-          style={{ WebkitAppearance: "none", boxShadow: "none" }}
-          placeholder="Reiseziel eingeben"
-        />
-      ) : search ? (
-        <p className="text-nowrap text-base">{search}</p>
-      ) : (
-        <p className="text-nowrap text-base text-muted-foreground">
-          Reiseziel eingeben
-        </p>
+    <div className="relative">
+      <div
+        className="flex cursor-pointer flex-col justify-center space-y-1 rounded-full px-8 py-2 hover:bg-gray-100"
+        onClick={handleClick}
+      >
+        <p className="text-[12px] font-semibold">{description}</p>
+        {isSearchMode ? (
+          <input
+            ref={inputRef}
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onBlur={handleBlur}
+            className="m-0 border-none bg-transparent p-0 text-base outline-none focus:outline-none focus:ring-0 focus:ring-offset-0"
+            style={{ WebkitAppearance: "none", boxShadow: "none" }}
+            placeholder="Reiseziel eingeben"
+          />
+        ) : search ? (
+          <p className="text-nowrap text-base">{search}</p>
+        ) : (
+          <p className="text-nowrap text-base text-muted-foreground">
+            Reiseziel eingeben
+          </p>
+        )}
+      </div>
+      {showDropdown && (
+        <div
+          ref={dropdownRef}
+          className="absolute z-10 mt-1 w-full rounded-md bg-white shadow-lg"
+        >
+          {isLoading ? (
+            <div className="p-2 text-center">Loading...</div>
+          ) : suggestions.length > 0 ? (
+            <ul className="max-h-60 overflow-auto py-1">
+              {suggestions.map((suggestion) => (
+                <li
+                  key={suggestion.place_id}
+                  className="cursor-pointer px-4 py-2 hover:bg-gray-100"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  {suggestion.description}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="p-2 text-center">No results found</div>
+          )}
+        </div>
       )}
     </div>
   );

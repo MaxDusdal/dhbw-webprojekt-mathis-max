@@ -78,7 +78,6 @@ export const signUpSchema = z.object({
 
 export const vacationhomeCreateSchema = z.object({
   title: z.string().min(3).max(255),
-  location: z.string().min(3).max(255),
   images: z.array(z.string().url()).optional(),
   guestCount: z.number().min(1),
   bedroomCount: z.number().min(1),
