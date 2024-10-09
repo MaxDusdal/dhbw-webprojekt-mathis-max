@@ -55,18 +55,11 @@ export default function ReservationCard({
     return params;
   };
   return (
-    <div className="stick top-20 h-fit w-96 rounded-xl p-6 shadow-lg ring-1 ring-gray-300">
+    <div className="sticky top-20 h-fit w-96 rounded-xl p-6 shadow-lg ring-1 ring-gray-300">
       <p className="text-base font-light">
         <span className="text-2xl font-medium">{`${price_per_night}€`}</span>
         Nacht
       </p>
-      <ReservationDataInput
-        dateRange={dateRange}
-        guests={guests}
-        handleChange={handleChange}
-        handleSelectCheckIn={handleSelectCheckIn}
-        handleSelectCheckOut={handleSelectCheckOut}
-      ></ReservationDataInput>
       <ReservationDataInput
         dateRange={dateRange}
         guests={guests}
