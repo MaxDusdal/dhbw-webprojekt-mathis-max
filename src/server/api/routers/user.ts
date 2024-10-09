@@ -182,6 +182,15 @@ export const usersRouter = createTRPCRouter({
       });
     }),
 
+  updateAvatar: protectedProcedure
+    .input(z.object({ avatar: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      await ctx.db.user.update({
+        where: { id: ctx.session.user.id },
+        data: { avatar: input.avatar },
+      });
+    }),
+
   changeRole: adminProcedure
     .input(z.object({ id: z.string(), role: z.nativeEnum(Role) }))
     .mutation(async ({ input, ctx }) => {

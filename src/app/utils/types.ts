@@ -60,3 +60,7 @@ export interface UserAgentInfo {
   os?: { name?: string; version?: string };
   device?: { vendor?: string; model?: string; type?: string };
 }
+export type ImagesUploadCare = {
+  uuid: string;
+  url: string;
+};

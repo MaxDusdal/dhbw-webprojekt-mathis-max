@@ -6,11 +6,19 @@ await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
 const config = {
+  redirects: async () => {
+    return [
+      {
+        source: "/rooms",
+        destination: "/",
+        permanent: true,
+      },
+    ];
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
   images: {
-
     remotePatterns: [
       {
         protocol: "https",
@@ -27,6 +35,12 @@ const config = {
       {
         protocol: "https",
         hostname: "luftnbn.server.dusdal.dev",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "ucarecdn.com",
         port: "",
         pathname: "/**",
       },

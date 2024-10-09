@@ -23,7 +23,7 @@ export default function SessionItem({ session }: { session: Session }) {
   return (
     <div
       key={session.id}
-      className="mb-3 flex items-center justify-between gap-x-2 rounded-md p-2 ring-1 ring-gray-200"
+      className="mb-3 flex items-center justify-between gap-x-2 rounded-md px-2 py-3 ring-1 ring-gray-200"
     >
       <div className="flex items-center gap-x-2">
         <ArrowRightEndOnRectangleIcon className="mr-2 h-7 w-7 text-gray-400" />

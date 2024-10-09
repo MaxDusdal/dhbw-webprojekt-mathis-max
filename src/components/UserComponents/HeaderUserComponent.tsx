@@ -53,11 +53,11 @@ export default function HeaderUserComponent() {
                   {user.data?.firstName}
                 </p>
                 <Image
-                  src={"/images/randomAvatar.jpeg"}
+                  src={user.data?.avatar ?? "/images/randomAvatar.jpeg"}
                   alt="User"
-                  width={32}
-                  height={32}
-                  className="rounded-full"
+                  width={64}
+                  height={64}
+                  className="rounded-full h-8 w-8"
                 />
               </div>
             </div>

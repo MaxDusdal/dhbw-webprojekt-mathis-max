@@ -21,16 +21,25 @@ import InputField from "~/components/Inputs/InputField";
 import { vacationhomeCreateSchema } from "~/app/utils/zod";
 import AdressAutoComplete from "~/components/Inputs/AdressAutoComplete";
 import { notify } from "~/app/utils/notification";
+import MultiPictureUpload from "~/components/Inputs/MultiPictureUpload";
+import type { ImagesUploadCare } from "~/app/utils/types";
 interface AdressAutoCompleteReturn {
   latitude: number;
   longitude: number;
   locationDescription: string;
 }
 
+const quantityFields = [
+  { name: "guestCount", label: "Gäste" },
+  { name: "bedroomCount", label: "Schlafzimmer" },
+  { name: "bedCount", label: "Betten" },
+  { name: "bathroomCount", label: "Badezimmer/WCs" },
+] as const;
+
 type VacationHomeFormData = z.infer<typeof vacationhomeCreateSchema>;
 
 const VacationHomeForm = () => {
-  const [search, setSearch] = React.useState("");
+  const [images, setImages] = React.useState<ImagesUploadCare[]>([]);
   const [adressAutoCompleteReturn, setAdressAutoCompleteReturn] =
     React.useState<AdressAutoCompleteReturn>();
 
@@ -131,90 +140,35 @@ const VacationHomeForm = () => {
         ></InputField>
       </InputFieldWrapper>
       <div>
-        <label>Allgemein</label>
-        <Card>
-          <CardContent className="pb-0">
+        {quantityFields.map((field, index) => (
+          <>
             <Controller
-              name="guestCount"
+              name={field.name}
               control={control}
-              render={({ field }) => (
+              key={field.name}
+              render={({ field: { onChange, value } }) => (
                 <QuantitySelector
-                  label={<span>Gäste</span>}
-                  value={field.value}
-                  onChange={field.onChange}
+                  label={<span>{field.label}</span>}
+                  value={value}
+                  onChange={onChange}
                   min={1}
                 />
               )}
             />
-            {errors.guestCount && (
+            {errors[field.name] && (
               <p className="mt-1 text-sm text-red-600">
-                {errors.guestCount.message}
+                {errors[field.name]?.message}
               </p>
             )}
-
-            <Separator></Separator>
-            <Controller
-              name="bedroomCount"
-              control={control}
-              render={({ field }) => (
-                <QuantitySelector
-                  label={<span>Schlafzimmer</span>}
-                  value={field.value}
-                  onChange={field.onChange}
-                  min={1}
-                />
-              )}
-            />
-            {errors.bedroomCount && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.bedroomCount.message}
-              </p>
-            )}
-            <Separator></Separator>
-            <Controller
-              name="bedCount"
-              control={control}
-              render={({ field }) => (
-                <QuantitySelector
-                  label={<span>Betten</span>}
-                  value={field.value}
-                  onChange={field.onChange}
-                  min={1}
-                />
-              )}
-            />
-            {errors.bedCount && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.bedCount.message}
-              </p>
-            )}
-
-            <Separator></Separator>
-            <Controller
-              name="bathroomCount"
-              control={control}
-              render={({ field }) => (
-                <QuantitySelector
-                  label={<span>Badezimmer/WCs</span>}
-                  value={field.value}
-                  onChange={field.onChange}
-                  min={1}
-                />
-              )}
-            />
-            {errors.bathroomCount && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.bathroomCount.message}
-              </p>
-            )}
-          </CardContent>
-        </Card>
+            {index < quantityFields.length - 1 && <Separator />}
+          </>
+        ))}
       </div>
       <Separator></Separator>
       {amenitiesQuery.data ? (
         <div>
           <label>Ausstattungsmerkmale</label>
-          <div className="mt-3 grid w-full grid-cols-3 gap-5">
+          <div className="mt-3 grid w-full grid-cols-2 gap-5 sm:grid-cols-3">
             {amenitiesQuery.data.map((amenity) => (
               <div
                 key={amenity.id}
@@ -293,6 +247,7 @@ const VacationHomeForm = () => {
           />
         </div>
       )}
+      <MultiPictureUpload images={images} setImages={setImages} />
       <Separator></Separator>
       <div className="flex w-full justify-end">
         <Button className="mt-3 w-full" type="submit">
