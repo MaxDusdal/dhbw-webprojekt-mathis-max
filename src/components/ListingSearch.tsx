@@ -52,7 +52,7 @@ export default function ListingSearch() {
     params.set("children", guests.children.toString());
     params.set("pets", guests.pets.toString());
 
-    router.push(`/rooms?${params.toString()}`);
+    router.push(`/?${params.toString()}`);
     window.location.reload();
   };
 

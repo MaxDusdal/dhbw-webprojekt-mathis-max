@@ -2,6 +2,7 @@ import React from "react";
 import { Skeleton } from "~/components/ui/skeleton";
 
 export function ListingSearchSkeleton() {
+  //return <></>;
   return (
     <div className="mb-8 flex w-fit items-center rounded-full p-0 shadow-lg ring-1 ring-gray-300">
       <Skeleton className="h-16 w-48 rounded-l-full" />

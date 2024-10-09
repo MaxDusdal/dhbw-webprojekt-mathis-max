@@ -3,7 +3,7 @@
 import ListingSearch from "~/components/ListingSearch";
 import ListingCover from "~/components/listing-cover";
 import { api } from "~/trpc/react";
-import ListingPageSkeleton from "./create-listing/ListingsPageSkeleton";
+import ListingPageSkeleton from "~/components/listings/ListingsPageSkeleton";
 import React from "react";
 
 export default function Rooms() {
@@ -17,7 +17,7 @@ export default function Rooms() {
   const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     listings;
 
-  if (isFetching) {
+  if (isFetching || !listings.data) {
     return <ListingPageSkeleton></ListingPageSkeleton>;
   }
   return (

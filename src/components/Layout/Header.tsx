@@ -30,6 +30,7 @@ import HeaderUserComponent, {
   MobileHeaderUserComponent,
 } from "../UserComponents/HeaderUserComponent";
 import Image from "next/image";
+import Logo from "./logo";
 
 const products = [
   {
@@ -78,14 +79,12 @@ export default function Header() {
         className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
       >
         <div className="flex lg:flex-1">
-          <a href="/rooms" className="-m-1.5 p-1.5">
+          <a href="/">
             <span className="sr-only">Your Company</span>
-            <Image
-              alt="Product image"
-              height="100"
-              width={100}
-              src="/images/logo.svg"
-              />
+            {
+              /*<Image height={130} alt="logo" width={200} src="/images/logo.svg" />*/
+              <Logo height={30}></Logo>
+            }
           </a>
         </div>
         <div className="flex lg:hidden">
@@ -178,9 +177,9 @@ export default function Header() {
             <a href="#" className="-m-1.5 p-1.5">
               <span className="sr-only">Your Company</span>
               <Image
+                className="h-12"
                 alt="Product image"
-                height="100"
-                width={100}
+                height={100}
                 src="/images/logo.svg"
               />
             </a>
