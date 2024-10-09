@@ -9,42 +9,7 @@ import { toast } from "~/hooks/use-toast";
 
 export default function CreateListing() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const createVacationHomeMutation = api.vacationhome.create.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Erfolg",
-        description: "Ihre Unterkunft wurde erfolgreich erstellt.",
-      });
-      setIsSubmitting(false);
-    },
-    onError: (error) => {
-      toast({
-        title: "Fehler",
-        description: `Fehler beim Erstellen der Unterkunft: ${error.message}`,
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
-    },
-  });
-
-  const handleSubmit = async (data: unknown) => {
-    setIsSubmitting(true);
-    try {
-      const validatedData = vacationhomeCreateSchema.parse(data);
-      await createVacationHomeMutation.mutateAsync(validatedData);
-    } catch (error) {
-      console.error("Validierungsfehler:", error);
-      toast({
-        title: "Validierungsfehler",
-        description: "Bitte überprüfen Sie Ihre Eingaben.",
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
-    }
-  };
-  const amenitiesQuery = api.amenities.getAll.useQuery();
-
+ 
   return (
     <div className="flex w-full justify-center">
       <Card className="w-[630px]">
@@ -53,7 +18,7 @@ export default function CreateListing() {
           <Separator></Separator>
         </CardHeader>
         <CardContent>
-          <VacationHomeForm onSubmit={handleSubmit} />
+          <VacationHomeForm />
         </CardContent>
       </Card>
     </div>

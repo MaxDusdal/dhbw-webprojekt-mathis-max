@@ -43,7 +43,7 @@ export const vacationhomeRouter = createTRPCRouter({
         radiusInKm: z.number().positive(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }) => {
       const { latitude, longitude, radiusInKm } = input;
 
       const vacationHomes: any[] = await ctx.db.$queryRaw`
