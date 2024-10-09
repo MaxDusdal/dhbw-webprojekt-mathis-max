@@ -4,10 +4,15 @@ import { addDays, format, isValid, max, parse } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { Calendar } from "./ui/calendar";
 import { Separator } from "./ui/separator";
-import QuantitySelector from "~/app/rooms/create-listing/QuantitySelector";
+import QuantitySelector from "~/components/listings/QuantitySelector";
 import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { de } from "date-fns/locale";
+import {
+  verifyDateParam,
+  verifyAmountParam,
+  useReservation,
+} from "~/hooks/useReservation";
 
 type Guests = {
   adults: number;
@@ -18,80 +23,23 @@ type Guests = {
 export default function ListingSearch() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const sAdults = verifyAmmountParam(searchParams.get("adults"), 1, 5, 1);
-  const sChildren = verifyAmmountParam(searchParams.get("children"), 0, 5, 0);
-  const sPets = verifyAmmountParam(searchParams.get("pets"), 0, 5, 0);
+  const sAdults = verifyAmountParam(searchParams.get("adults"), 1, 5, 1);
+  const sChildren = verifyAmountParam(searchParams.get("children"), 0, 5, 0);
+  const sPets = verifyAmountParam(searchParams.get("pets"), 0, 5, 0);
   const initialDateRange = verifyDateParam(
     searchParams.get("from"),
     searchParams.get("to"),
   );
-
-  const [dateRange, setDateRange] = React.useState<DateRange | undefined>(
-    initialDateRange,
-  );
-  const [guests, setGuests] = React.useState<Guests>({
-    adults: sAdults,
-    children: sChildren,
-    pets: sPets,
-  });
   const [search, setSearch] = React.useState<string>("");
 
-  function verifyAmmountParam(
-    queryParam: string | null | undefined,
-    min: number,
-    max: number,
-    def: number,
-  ) {
-    if (queryParam && !isNaN(Number(queryParam))) {
-      if (Number(queryParam) > min && Number(queryParam) < max) {
-        return Number(queryParam);
-      }
-    }
-    return def;
-  }
-
-  function verifyDateParam(
-    from: string | null | undefined,
-    to: string | null | undefined,
-  ): DateRange {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const parseDate = (
-      dateString: string | null | undefined,
-    ): Date | undefined => {
-      if (!dateString) return undefined;
-      const parsedDate = parse(dateString, "dd.MM.yyyy", new Date());
-      return isValid(parsedDate) ? parsedDate : undefined;
-    };
-
-    let fromDate = parseDate(from);
-    let toDate = parseDate(to);
-
-    return {
-      from: fromDate,
-      to: toDate,
-    };
-  }
-
-  const handleSelectCheckIn = (date: Date | undefined) => {
-    setDateRange((prev) => ({
-      from: date,
-      to: prev?.to && date && date >= prev.to ? undefined : prev?.to,
-    }));
-  };
-
-  const handleSelectCheckOut = (date: Date | undefined) => {
-    setDateRange((prev) => ({
-      from: prev?.from,
-      to: date,
-    }));
-  };
-
-  const handleChange = (type: keyof Guests) => (value: number) => {
-    setGuests((prev) => ({ ...prev, [type]: value }));
-  };
-
+  const {
+    dateRange,
+    setDateRange,
+    guests,
+    handleSelectCheckIn,
+    handleSelectCheckOut,
+    handleChange,
+  } = useReservation(initialDateRange, sAdults, sChildren, sPets);
   const handleSearch = () => {
     const params = new URLSearchParams();
 

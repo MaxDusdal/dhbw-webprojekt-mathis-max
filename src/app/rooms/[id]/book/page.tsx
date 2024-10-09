@@ -5,6 +5,11 @@ import React from "react";
 import { DateRange } from "react-day-picker";
 import { Separator } from "~/components/ui/separator";
 import ReservationBookingOverview from "./ReservationOverview";
+import {
+  useReservation,
+  verifyAmountParam,
+  verifyDateParamWithDefault,
+} from "~/hooks/useReservation";
 
 type Guests = {
   adults: number;
@@ -14,117 +19,31 @@ type Guests = {
 
 export default function BookingOverview() {
   const searchParams = useSearchParams();
-  const sAdults = verifyAmmountParam(searchParams.get("adults"), 1, 5, 1);
-  const sChildren = verifyAmmountParam(searchParams.get("children"), 0, 5, 0);
-  const sPets = verifyAmmountParam(searchParams.get("pets"), 0, 5, 0);
-
-  const initialDateRange = verifyDateParam(
+  const sAdults = verifyAmountParam(searchParams.get("adults"), 1, 5, 1);
+  const sChildren = verifyAmountParam(searchParams.get("children"), 0, 5, 0);
+  const sPets = verifyAmountParam(searchParams.get("pets"), 0, 5, 0);
+  const initialDateRange = verifyDateParamWithDefault(
     searchParams.get("from"),
     searchParams.get("to"),
   );
-  const [dateRange, setDateRange] = React.useState<DateRange | undefined>(
-    () => {
-      return initialDateRange;
-    },
-  );
-  const [guests, setGuests] = React.useState<Guests>({
-    adults: sAdults,
-    children: sChildren,
-    pets: sPets,
-  });
 
-  function verifyAmmountParam(
-    queryParam: string | null | undefined,
-    min: number,
-    max: number,
-    def: number,
-  ) {
-    if (queryParam && !isNaN(Number(queryParam))) {
-      if (Number(queryParam) >= min && Number(queryParam) <= max) {
-        return Number(queryParam);
-      }
-    }
-    return def;
-  }
+  const {
+    dateRange,
+    setDateRange,
+    guests,
+    handleSelectCheckIn,
+    handleSelectCheckOut,
+    handleChange,
+  } = useReservation(initialDateRange, sAdults, sChildren, sPets);
 
-  function verifyDateParam(
-    from: string | null | undefined,
-    to: string | null | undefined,
-  ): DateRange {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const parseDate = (
-      dateString: string | null | undefined,
-    ): Date | undefined => {
-      if (!dateString) return undefined;
-      const parsedDate = parse(dateString, "dd.MM.yyyy", new Date());
-      return isValid(parsedDate) ? parsedDate : undefined;
-    };
-
-    let fromDate = parseDate(from);
-    let toDate = parseDate(to);
-
-    // Wenn weder from noch to gegeben sind
-    if (!fromDate && !toDate) {
-      fromDate = addDays(today, 7);
-      toDate = addDays(fromDate, 5);
-    }
-    // Wenn nur from gegeben ist
-    else if (fromDate && !toDate) {
-      toDate = addDays(fromDate, 5);
-    }
-    // Wenn nur to gegeben ist
-    else if (!fromDate && toDate) {
-      fromDate = max([addDays(toDate, -5), today]);
-    }
-
-    // Sicherstellen, dass from nicht in der Vergangenheit liegt
-    if (fromDate && fromDate < today) {
-      fromDate = today;
-    }
-
-    // Sicherstellen, dass to nicht vor from liegt und mindestens einen Tag in der Zukunft
-    if (fromDate && toDate && toDate <= fromDate) {
-      toDate = addDays(fromDate, 1);
-    }
-
-    // Sicherstellen, dass to mindestens einen Tag in der Zukunft liegt
-    if (toDate && toDate <= today) {
-      toDate = addDays(today, 1);
-    }
-
-    return {
-      from: fromDate,
-      to: toDate,
-    };
-  }
-
-  const handleSelectCheckIn = (date: Date | undefined) => {
-    setDateRange((prev) => ({
-      from: date,
-      to: prev?.to && date && date >= prev.to ? undefined : prev?.to,
-    }));
-  };
-
-  const handleSelectCheckOut = (date: Date | undefined) => {
-    setDateRange((prev) => ({
-      from: prev?.from,
-      to: date,
-    }));
-  };
-
-  const handleChange = (type: keyof Guests) => (value: number) => {
-    setGuests((prev) => ({ ...prev, [type]: value }));
-  };
   return (
     <div className="flex w-full justify-center">
       <div className="flex max-w-7xl flex-grow flex-col p-10">
-        <h1 className="text-2xl font-medium">Ihre Reserviereung</h1>
+        <h1 className="text-2xl font-medium">Bestätigen und Bezahlen</h1>
         <div className="flex w-full flex-row">
           <div className="flex w-2/3 flex-col space-y-10 py-8 pr-8">
             <div className="flex flex-col space-y-8">
-              <h1 className="text-2xl font-medium">Über diese Unterkunft</h1>
+              <h1 className="text-2xl font-medium">Ihre Reise</h1>
               <p>
                 Ein wunderbares seltenes Haus, das von der Künstlerin Gernod
                 Minke in der Nähe der Innenstadt von Kassel gebaut wurde. Es ist

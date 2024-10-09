@@ -15,7 +15,7 @@ import { de } from "date-fns/locale";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import router from "next/navigation";
-import QuantitySelector from "../../create-listing/QuantitySelector";
+import QuantitySelector from "../../../../components/listings/QuantitySelector";
 
 type Guests = {
   adults: number;

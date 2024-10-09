@@ -4,152 +4,42 @@ import { Separator } from "~/components/ui/separator";
 import { api } from "~/trpc/react";
 import { CalendarLarge } from "~/components/ui/calendar";
 import React from "react";
-import { type DateRange } from "react-day-picker";
 import { useParams, useSearchParams } from "next/navigation";
 import ReservationDataCard from "./ReservationDataForm";
 import MapComponent from "./MapComponent";
 import ImageDisplay from "./ImageDisplay";
-import {
-  parse,
-  format,
-  addDays,
-  isValid,
-  max,
-  differenceInCalendarDays,
-} from "date-fns";
-import { de } from "date-fns/locale";
+import { differenceInCalendarDays } from "date-fns";
 import { useRouter } from "next/navigation";
-
-type Guests = {
-  adults: number;
-  children: number;
-  pets: number;
-};
+import {
+  useReservation,
+  verifyAmountParam,
+  verifyDateParamWithDefault,
+} from "~/hooks/useReservation";
 
 export default function RoomDetail() {
   const { id } = useParams<{ id: string }>();
   if (!id || isNaN(Number(id))) {
-    return "Du HS";
+    return "Kein Listing Kefunden";
   }
   const router = useRouter();
   const listing = api.vacationhome.getById.useQuery({ id: Number(id) });
   const searchParams = useSearchParams();
-  const sAdults = verifyAmmountParam(searchParams.get("adults"), 1, 5, 1);
-  const sChildren = verifyAmmountParam(searchParams.get("children"), 0, 5, 0);
-  const sPets = verifyAmmountParam(searchParams.get("pets"), 0, 5, 0);
-
-  const initialDateRange = verifyDateParam(
+  const sAdults = verifyAmountParam(searchParams.get("adults"), 1, 5, 1);
+  const sChildren = verifyAmountParam(searchParams.get("children"), 0, 5, 0);
+  const sPets = verifyAmountParam(searchParams.get("pets"), 0, 5, 0);
+  const initialDateRange = verifyDateParamWithDefault(
     searchParams.get("from"),
     searchParams.get("to"),
   );
-  const [dateRange, setDateRange] = React.useState<DateRange | undefined>(
-    () => {
-      router.push(`/rooms/${id}`);
-      return initialDateRange;
-    },
-  );
-  const [guests, setGuests] = React.useState<Guests>({
-    adults: sAdults,
-    children: sChildren,
-    pets: sPets,
-  });
 
-  function verifyAmmountParam(
-    queryParam: string | null | undefined,
-    min: number,
-    max: number,
-    def: number,
-  ) {
-    if (queryParam && !isNaN(Number(queryParam))) {
-      if (Number(queryParam) >= min && Number(queryParam) <= max) {
-        return Number(queryParam);
-      }
-    }
-    return def;
-  }
-
-  function verifyDateParam(
-    from: string | null | undefined,
-    to: string | null | undefined,
-  ): DateRange {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const parseDate = (
-      dateString: string | null | undefined,
-    ): Date | undefined => {
-      if (!dateString) return undefined;
-      const parsedDate = parse(dateString, "dd.MM.yyyy", new Date());
-      return isValid(parsedDate) ? parsedDate : undefined;
-    };
-
-    let fromDate = parseDate(from);
-    let toDate = parseDate(to);
-
-    // Wenn weder from noch to gegeben sind
-    if (!fromDate && !toDate) {
-      fromDate = addDays(today, 7);
-      toDate = addDays(fromDate, 5);
-    }
-    // Wenn nur from gegeben ist
-    else if (fromDate && !toDate) {
-      toDate = addDays(fromDate, 5);
-    }
-    // Wenn nur to gegeben ist
-    else if (!fromDate && toDate) {
-      fromDate = max([addDays(toDate, -5), today]);
-    }
-
-    // Sicherstellen, dass from nicht in der Vergangenheit liegt
-    if (fromDate && fromDate < today) {
-      fromDate = today;
-    }
-
-    // Sicherstellen, dass to nicht vor from liegt und mindestens einen Tag in der Zukunft
-    if (fromDate && toDate && toDate <= fromDate) {
-      toDate = addDays(fromDate, 1);
-    }
-
-    // Sicherstellen, dass to mindestens einen Tag in der Zukunft liegt
-    if (toDate && toDate <= today) {
-      toDate = addDays(today, 1);
-    }
-
-    return {
-      from: fromDate,
-      to: toDate,
-    };
-  }
-
-  const handleSelectCheckIn = (date: Date | undefined) => {
-    setDateRange((prev) => ({
-      from: date,
-      to: prev?.to && date && date >= prev.to ? undefined : prev?.to,
-    }));
-  };
-
-  const handleSelectCheckOut = (date: Date | undefined) => {
-    setDateRange((prev) => ({
-      from: prev?.from,
-      to: date,
-    }));
-  };
-
-  const handleChange = (type: keyof Guests) => (value: number) => {
-    setGuests((prev) => ({ ...prev, [type]: value }));
-  };
-
-  const updateParams = () => {
-    const params = new URLSearchParams();
-    if (dateRange?.from)
-      params.set("from", format(dateRange.from, "dd.MM.yyyy", { locale: de }));
-    if (dateRange?.to)
-      params.set("to", format(dateRange.to, "dd.MM.yyyy", { locale: de }));
-    params.set("adults", guests.adults.toString());
-    params.set("children", guests.children.toString());
-    params.set("pets", guests.pets.toString());
-    return params;
-  };
+  const {
+    dateRange,
+    setDateRange,
+    guests,
+    handleSelectCheckIn,
+    handleSelectCheckOut,
+    handleChange,
+  } = useReservation(initialDateRange, sAdults, sChildren, sPets);
 
   return (
     <div className="flex w-full justify-center">
