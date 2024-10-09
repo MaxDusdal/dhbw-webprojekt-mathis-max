@@ -1,6 +1,6 @@
 "use client";
-import { addDays, isValid, max, parse } from "date-fns";
-import { useSearchParams } from "next/navigation";
+import Image from "next/image";
+import { useParams, useSearchParams } from "next/navigation";
 import React from "react";
 import { DateRange } from "react-day-picker";
 import { Separator } from "~/components/ui/separator";
@@ -10,14 +10,22 @@ import {
   verifyAmountParam,
   verifyDateParamWithDefault,
 } from "~/hooks/useReservation";
+import { api } from "~/trpc/react";
 
-type Guests = {
-  adults: number;
-  children: number;
-  pets: number;
+type CoverData = {
+  image_url: string;
+  title: string;
+  description: string;
 };
 
 export default function BookingOverview() {
+  const { id } = useParams<{ id: string }>();
+  const listing = api.vacationhome.getById.useQuery({ id: Number(id) });
+  const coverData: CoverData = {
+    image_url: listing.data?.images[0]?.url || "https://picsum.photos/200",
+    title: listing.data?.title || "Unterkunft",
+    description: "Unterkuft: Wohnung",
+  };
   const searchParams = useSearchParams();
   const sAdults = verifyAmountParam(searchParams.get("adults"), 1, 5, 1);
   const sChildren = verifyAmountParam(searchParams.get("children"), 0, 5, 0);
@@ -58,6 +66,7 @@ export default function BookingOverview() {
           </div>
           <div className="relative flex w-1/3 justify-end py-8 pl-10">
             <ReservationBookingOverview
+              coverData={coverData}
               dateRange={dateRange}
               guests={guests}
               handleChange={handleChange}

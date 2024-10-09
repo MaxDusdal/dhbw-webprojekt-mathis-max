@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { round } from "lodash";
 import { format, differenceInCalendarDays } from "date-fns";
 import { Button } from "~/components/ui/button";
@@ -23,7 +24,14 @@ type Guests = {
   pets: number;
 };
 
+type CoverData = {
+  image_url: string;
+  title: string;
+  description: string;
+};
+
 type ReservationData = {
+  coverData: CoverData;
   dateRange: DateRange | undefined;
   handleSelectCheckIn: (date: Date | undefined) => void;
   handleSelectCheckOut: (date: Date | undefined) => void;
@@ -37,6 +45,7 @@ export default function ReservationBookingOverview({
   handleSelectCheckOut,
   guests,
   handleChange,
+  coverData,
 }: ReservationData) {
   const searchParams = useSearchParams();
   const getUpdatedParams = () => {
@@ -52,9 +61,21 @@ export default function ReservationBookingOverview({
   };
   return (
     <div className="sticky top-20 h-fit w-96 rounded-xl p-6 shadow-lg ring-1 ring-gray-300">
-      <p className="text-base font-light">
-        <span className="text-2xl font-medium">85€</span> Nacht
-      </p>
+      <div className="flex w-full items-center space-x-2">
+        <div className="flex h-fit w-fit overflow-hidden rounded-lg">
+          <Image
+            src={coverData.image_url}
+            alt="cover"
+            width={90}
+            height={90}
+          ></Image>
+        </div>
+        <div className="flex flex-col">
+          <p className="text-sm font-medium">{coverData.title}</p>
+          <p className="text-sm font-light">{coverData.description}</p>
+          <div className="h-5"></div>
+        </div>
+      </div>
       <div className="mt-5 flex w-full flex-col rounded-md ring-1 ring-gray-400">
         <div className="flex w-full border-b border-gray-400">
           <div className="h-full w-1/2 border-r border-gray-400">
