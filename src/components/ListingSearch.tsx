@@ -1,11 +1,13 @@
 import React, { useEffect } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { addDays, format } from "date-fns";
+import { addDays, format, isValid, max, parse } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { Calendar } from "./ui/calendar";
 import { Separator } from "./ui/separator";
 import QuantitySelector from "~/app/rooms/create-listing/QuantitySelector";
 import { Search } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { de } from "date-fns/locale";
 
 type Guests = {
   adults: number;
@@ -14,16 +16,63 @@ type Guests = {
 };
 
 export default function ListingSearch() {
-  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
-    from: undefined,
-    to: undefined,
-  });
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const sAdults = verifyAmmountParam(searchParams.get("adults"), 1, 5, 1);
+  const sChildren = verifyAmmountParam(searchParams.get("children"), 0, 5, 0);
+  const sPets = verifyAmmountParam(searchParams.get("pets"), 0, 5, 0);
+  const initialDateRange = verifyDateParam(
+    searchParams.get("from"),
+    searchParams.get("to"),
+  );
+
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>(
+    initialDateRange,
+  );
   const [guests, setGuests] = React.useState<Guests>({
-    adults: 1,
-    children: 0,
-    pets: 0,
+    adults: sAdults,
+    children: sChildren,
+    pets: sPets,
   });
   const [search, setSearch] = React.useState<string>("");
+
+  function verifyAmmountParam(
+    queryParam: string | null | undefined,
+    min: number,
+    max: number,
+    def: number,
+  ) {
+    if (queryParam && !isNaN(Number(queryParam))) {
+      if (Number(queryParam) > min && Number(queryParam) < max) {
+        return Number(queryParam);
+      }
+    }
+    return def;
+  }
+
+  function verifyDateParam(
+    from: string | null | undefined,
+    to: string | null | undefined,
+  ): DateRange {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const parseDate = (
+      dateString: string | null | undefined,
+    ): Date | undefined => {
+      if (!dateString) return undefined;
+      const parsedDate = parse(dateString, "dd.MM.yyyy", new Date());
+      return isValid(parsedDate) ? parsedDate : undefined;
+    };
+
+    let fromDate = parseDate(from);
+    let toDate = parseDate(to);
+
+    return {
+      from: fromDate,
+      to: toDate,
+    };
+  }
 
   const handleSelectCheckIn = (date: Date | undefined) => {
     setDateRange((prev) => ({
@@ -43,8 +92,24 @@ export default function ListingSearch() {
     setGuests((prev) => ({ ...prev, [type]: value }));
   };
 
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+
+    if (search) params.set("location", search);
+    if (dateRange?.from)
+      params.set("from", format(dateRange.from, "dd.MM.yyyy", { locale: de }));
+    if (dateRange?.to)
+      params.set("to", format(dateRange.to, "dd.MM.yyyy", { locale: de }));
+    params.set("adults", guests.adults.toString());
+    params.set("children", guests.children.toString());
+    params.set("pets", guests.pets.toString());
+
+    router.push(`/rooms?${params.toString()}`);
+    window.location.reload();
+  };
+
   return (
-    <div className="mb-8 flex max-w-fit items-center rounded-full p-0 shadow-lg ring-1 ring-gray-300">
+    <div className="mb-8 flex min-w-fit items-center rounded-full p-0 shadow-lg ring-1 ring-gray-300">
       <div className="w-[292px]">
         <LocationSearch
           description="WOHIN"
@@ -69,15 +134,19 @@ export default function ListingSearch() {
         ></ReservationDateSelector>
       </div>
       <Separator orientation="vertical" className="mx-1 h-1/2"></Separator>
-      <div className="flex w-[282px] rounded-full hover:bg-gray-100">
+      <div className="w-[282px]">
         <GuestSelector
           handleChange={handleChange}
           guests={guests}
         ></GuestSelector>
       </div>
-      <div className="aspect-square h-full py-2">
-        <div className="flex aspect-square h-full items-center justify-center rounded-full bg-blue-600">
-          <Search color="white"></Search>
+      <Separator orientation="vertical" className="mx-1 h-1/2"></Separator>
+      <div
+        className="mr-2 flex h-full cursor-pointer items-center justify-center"
+        onClick={handleSearch}
+      >
+        <div className="flex aspect-square h-[46px] w-[46px] items-center justify-center rounded-full bg-blue-600 transition hover:bg-blue-500 active:scale-95">
+          <Search color="white" className="h-6 w-6" />
         </div>
       </div>
     </div>
@@ -102,7 +171,7 @@ function ReservationDateSelector({
           <p className="text-[12px] font-semibold">{description}</p>
           <p className="text-nowrap text-base">
             {date ? (
-              format(date, "P")
+              format(date, "dd.MM.yyyy", { locale: de })
             ) : (
               <span className="text-muted-foreground">Datum hinzufügen</span>
             )}
@@ -230,7 +299,7 @@ function LocationSearch({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onBlur={handleBlur}
-          className="w- border-none bg-transparent p-0 text-base outline-none focus:outline-none focus:ring-0 focus:ring-offset-0"
+          className="m-0 border-none bg-transparent p-0 text-base outline-none focus:outline-none focus:ring-0 focus:ring-offset-0"
           style={{ WebkitAppearance: "none", boxShadow: "none" }}
           placeholder="Reiseziel eingeben"
         />

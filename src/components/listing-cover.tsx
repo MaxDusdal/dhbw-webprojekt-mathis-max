@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Skeleton } from "./ui/skeleton";
+import { useSearchParams } from "next/navigation";
 
 interface Props {
   listing_id: string;
@@ -25,8 +26,12 @@ function ListingImage({ src, alt }: { src: string; alt: string }) {
 }
 
 export default function ListingCover(props: Props) {
+  const searchParams = useSearchParams();
+  const currentParams = new URLSearchParams(searchParams.toString());
+  const newPath = `/rooms/${props.listing_id}?${currentParams.toString()}`;
+
   return (
-    <Link href={`/rooms/${props.listing_id}`}>
+    <Link href={newPath}>
       <div className="flex flex-col justify-start">
         <Suspense
           fallback={<Skeleton className="aspect-square w-full rounded-xl" />}

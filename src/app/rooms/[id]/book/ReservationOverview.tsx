@@ -9,12 +9,13 @@ import {
 } from "~/components/ui/popover";
 import { Separator } from "~/components/ui/separator";
 import { type DateRange } from "react-day-picker";
-import QuantitySelector from "../create-listing/QuantitySelector";
+
 import { number } from "zod";
 import { de } from "date-fns/locale";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import router from "next/navigation";
+import QuantitySelector from "../../create-listing/QuantitySelector";
 
 type Guests = {
   adults: number;
@@ -23,7 +24,6 @@ type Guests = {
 };
 
 type ReservationData = {
-  listing_id: number;
   dateRange: DateRange | undefined;
   handleSelectCheckIn: (date: Date | undefined) => void;
   handleSelectCheckOut: (date: Date | undefined) => void;
@@ -31,8 +31,7 @@ type ReservationData = {
   handleChange: (type: keyof Guests) => (value: number) => void;
 };
 
-export default function ReservationDataCard({
-  listing_id,
+export default function ReservationBookingOverview({
   dateRange,
   handleSelectCheckIn,
   handleSelectCheckOut,
@@ -80,11 +79,6 @@ export default function ReservationDataCard({
           ></GuestSelector>
         </div>
       </div>
-      <Link href={`/rooms/${listing_id}/book?${getUpdatedParams()}`}>
-        <Button className="mt-5 h-12 w-full bg-blue-600 text-white shadow-md hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-          Reservieren
-        </Button>
-      </Link>
       <div className="mt-5 flex w-full flex-col space-y-4">
         <ReservationOverview dateRange={dateRange}></ReservationOverview>
       </div>
@@ -206,11 +200,9 @@ function ReservationOverview({ dateRange }: OverviewProps) {
   );
   return (
     <>
-      <div className="flex flex-col items-center justify-center space-y-2 text-center text-sm font-light text-muted-foreground">
-        <p>Du musst noch nichts bezahlen.</p>
-        <p>Der Preis pro Nacht beinhaltet die MwSt. und sämtliche Gebühren.</p>
-      </div>
+      <Separator></Separator>
       <div className="flex w-full flex-col space-y-4 font-light">
+        <p className="w-full font-medium">Einzeiheiten zum Preis:</p>
         <div className="flex w-full justify-between">
           <p className="w-full">
             {"85€" + " x " + differenceInDays + " Nächte"}

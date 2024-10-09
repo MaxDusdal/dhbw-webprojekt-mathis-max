@@ -4,6 +4,7 @@ import ListingSearch from "~/components/ListingSearch";
 import ListingCover from "~/components/listing-cover";
 import { api } from "~/trpc/react";
 import ListingPageSkeleton from "./create-listing/ListingsPageSkeleton";
+import React from "react";
 
 export default function Rooms() {
   const listings = api.vacationhome.findMany.useInfiniteQuery(
