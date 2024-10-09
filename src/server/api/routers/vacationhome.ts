@@ -136,6 +136,7 @@ export const vacationhomeRouter = createTRPCRouter({
           bedCount: true,
           bathroomCount: true,
           images: true,
+          locationDescription: true,
         },
       });
 

@@ -33,7 +33,7 @@ export default function Rooms() {
                 key={vacationHome.id}
                 price={vacationHome.pricePerNight}
                 image_url={vacationHome.images[0]?.url ?? ""}
-                location={"TEst"}
+                location={vacationHome.locationDescription || "Unknown"}
                 listing_id={vacationHome.id.toString()}
               ></ListingCover>
             );

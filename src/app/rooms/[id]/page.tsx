@@ -106,7 +106,7 @@ export default function RoomDetail() {
                       1
                         ? " Nächte "
                         : " Nacht ") +
-                      listing.data?.city
+                      listing.data?.locationDescription
                     : "Check-Out Datum wählen"
                   : "Chek-In Datum wählen"}
               </h1>
@@ -133,6 +133,7 @@ export default function RoomDetail() {
           </div>
           <div className="relative flex w-1/3 justify-end py-8 pl-10">
             <ReservationDataCard
+              price_per_night={listing.data?.pricePerNight as number}
               listing_id={listing.data?.id as number}
               dateRange={dateRange}
               handleSelectCheckIn={handleSelectCheckIn}

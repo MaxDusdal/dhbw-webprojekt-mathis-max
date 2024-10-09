@@ -24,6 +24,7 @@ type Guests = {
 
 type ReservationData = {
   listing_id: number;
+  price_per_night: number;
   dateRange: DateRange | undefined;
   handleSelectCheckIn: (date: Date | undefined) => void;
   handleSelectCheckOut: (date: Date | undefined) => void;
@@ -33,6 +34,7 @@ type ReservationData = {
 
 export default function ReservationDataCard({
   listing_id,
+  price_per_night,
   dateRange,
   handleSelectCheckIn,
   handleSelectCheckOut,
@@ -54,7 +56,8 @@ export default function ReservationDataCard({
   return (
     <div className="stick top-20 h-fit w-96 rounded-xl p-6 shadow-lg ring-1 ring-gray-300">
       <p className="text-base font-light">
-        <span className="text-2xl font-medium">85€</span> Nacht
+        <span className="text-2xl font-medium">{`${price_per_night}€`}</span>{" "}
+        Nacht
       </p>
       <div className="mt-5 flex w-full flex-col rounded-md ring-1 ring-gray-400">
         <div className="flex w-full border-b border-gray-400">
@@ -86,7 +89,10 @@ export default function ReservationDataCard({
         </Button>
       </Link>
       <div className="mt-5 flex w-full flex-col space-y-4">
-        <ReservationOverview dateRange={dateRange}></ReservationOverview>
+        <ReservationOverview
+          dateRange={dateRange}
+          price_per_night={round(price_per_night)}
+        ></ReservationOverview>
       </div>
     </div>
   );
@@ -194,8 +200,9 @@ function GuestSelector({ guests, handleChange }: GuestSelectorProps) {
 
 type OverviewProps = {
   dateRange: DateRange | undefined;
+  price_per_night: number;
 };
-function ReservationOverview({ dateRange }: OverviewProps) {
+function ReservationOverview({ dateRange, price_per_night }: OverviewProps) {
   if (!dateRange?.from || !dateRange.to) {
     return <></>;
   }
@@ -213,23 +220,23 @@ function ReservationOverview({ dateRange }: OverviewProps) {
       <div className="flex w-full flex-col space-y-4 font-light">
         <div className="flex w-full justify-between">
           <p className="w-full">
-            {"85€" + " x " + differenceInDays + " Nächte"}
+            {price_per_night + "€ x " + differenceInDays + " Nächte"}
           </p>
-          <p className="w-9">{85 * differenceInDays + "€"}</p>
+          <p className="w-fit">{price_per_night * differenceInDays + "€"}</p>
         </div>
         <div className="flex w-full justify-between">
           <p className="w-full">Luftnbn-Servicegebühr</p>
-          <p className="w-9">
-            {10 + round((85 * differenceInDays) / 10) + "€"}
+          <p className="w-fit">
+            {10 + round((price_per_night * differenceInDays) / 10) + "€"}
           </p>
         </div>
         <Separator></Separator>
         <div className="flex w-full justify-between">
           <p className="w-full font-medium">Gesamtbetrag</p>
-          <p className="w-9 font-medium">
-            {85 * differenceInDays +
+          <p className="w-fit font-medium">
+            {price_per_night * differenceInDays +
               10 +
-              round((85 * differenceInDays) / 10) +
+              round((price_per_night * differenceInDays) / 10) +
               "€"}
           </p>
         </div>

@@ -56,8 +56,8 @@ export default function BookingOverview() {
                 <h1 className="text-2xl font-medium">Bestellübersicht</h1>
                 <p>
                   Prüfe bitte ob die Check-In und Check-Out Daten, sowie die
-                  angegebenen Gäste richtig sind. Ansonsten kannst du die rechts
-                  korrigieren.
+                  angegebenen Gäste richtig sind. Ansonsten kannst du diese
+                  rechts korrigieren.
                 </p>
 
                 <div className="grid grid-cols-2">
@@ -100,10 +100,18 @@ export default function BookingOverview() {
                 </p>
               </div>
               <Separator></Separator>
+              <p className="text-sm font-light">
+                Indem ich auf den unten stehenden Button klicke, stimme ich den
+                Hausregeln des Gastgebers bzw. der Gastgeberin, Grundregeln für
+                Gäste, Richtlinien für Umbuchungen und Rückerstattungen auf
+                Airbnb zu und bestätige, dass Luftbnb meine Zahlungsart belasten
+                kann, wenn ich für Schäden verantwortlich bin. Es gelten die
+                Zahlungsbedingungen zwischen dir und Luftbnb Payments Mannheim
+              </p>
               <div>
                 <Button
-                  className="h-14 w-[300px] cursor-pointer bg-blue-600 text-lg hover:bg-blue-500 disabled:bg-gray-400"
-                  disabled={true}
+                  className="h-14 w-[300px] bg-blue-600 text-lg hover:bg-blue-500 disabled:bg-gray-400"
+                  disabled={false}
                 >
                   Bestätigen und Bezahlen
                 </Button>
@@ -112,6 +120,7 @@ export default function BookingOverview() {
           </div>
           <div className="relative flex w-1/3 justify-end py-8 pl-10">
             <ReservationBookingOverview
+              price_per_night={listing.data?.pricePerNight as number}
               coverData={coverData}
               dateRange={dateRange}
               guests={guests}
