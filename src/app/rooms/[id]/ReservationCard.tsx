@@ -15,6 +15,7 @@ import { de } from "date-fns/locale";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import router from "next/navigation";
+import ReservationDataInput from "~/components/listings/ReservationDataInput";
 
 type Guests = {
   adults: number;
@@ -32,7 +33,7 @@ type ReservationData = {
   handleChange: (type: keyof Guests) => (value: number) => void;
 };
 
-export default function ReservationDataCard({
+export default function ReservationCard({
   listing_id,
   price_per_night,
   dateRange,
@@ -59,30 +60,13 @@ export default function ReservationDataCard({
         <span className="text-2xl font-medium">{`${price_per_night}€`}</span>{" "}
         Nacht
       </p>
-      <div className="mt-5 flex w-full flex-col rounded-md ring-1 ring-gray-400">
-        <div className="flex w-full border-b border-gray-400">
-          <div className="h-full w-1/2 border-r border-gray-400">
-            <ReservationDateSelector
-              description="CHECK-IN"
-              date={dateRange?.from}
-              handleSelect={handleSelectCheckIn}
-            ></ReservationDateSelector>
-          </div>
-          <div className="h-full w-1/2">
-            <ReservationDateSelector
-              description="CHECK-OUT"
-              date={dateRange?.to}
-              handleSelect={handleSelectCheckOut}
-            ></ReservationDateSelector>
-          </div>
-        </div>
-        <div className="h-full w-full">
-          <GuestSelector
-            guests={guests}
-            handleChange={handleChange}
-          ></GuestSelector>
-        </div>
-      </div>
+      <ReservationDataInput
+        dateRange={dateRange}
+        guests={guests}
+        handleChange={handleChange}
+        handleSelectCheckIn={handleSelectCheckIn}
+        handleSelectCheckOut={handleSelectCheckOut}
+      ></ReservationDataInput>
       <Link href={`/rooms/${listing_id}/book?${getUpdatedParams()}`}>
         <Button className="mt-5 h-12 w-full bg-blue-600 text-white shadow-md hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
           Reservieren
@@ -103,100 +87,6 @@ type DateSelecorProps = {
   date: Date | undefined;
   handleSelect: (date: Date | undefined) => void;
 };
-
-function ReservationDateSelector({
-  description,
-  date,
-  handleSelect,
-}: DateSelecorProps) {
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <div className="flex w-full cursor-pointer flex-col justify-start space-y-1 rounded-tl-md p-2 hover:bg-gray-100">
-          <p className="text-[10px] font-semibold">{description}</p>
-          <p className="text-sm">
-            {date ? (
-              format(date, "dd.MM.yyyy", { locale: de })
-            ) : (
-              <span className="text-muted-foreground">Datum hinzufügen</span>
-            )}
-          </p>
-        </div>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={handleSelect}
-          initialFocus
-        />
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-type GuestSelectorProps = {
-  guests: Guests;
-  handleChange: (type: keyof Guests) => (value: number) => void;
-};
-
-function GuestSelector({ guests, handleChange }: GuestSelectorProps) {
-  const guestSummary = `${guests.adults} ${guests.adults > 1 ? "Gäste" : "Gast"}${
-    guests.children > 0
-      ? `, ${guests.children} ${guests.children > 1 ? "Kinder" : "Kind"}`
-      : ""
-  }${
-    guests.pets > 0
-      ? `, ${guests.pets} ${guests.pets > 1 ? "Haustiere" : "Haustier"}`
-      : ""
-  }`;
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <div className="flex w-full cursor-pointer flex-col justify-start space-y-1 rounded-b-md p-2 hover:bg-gray-100">
-          <p className="text-[10px] font-semibold">GÄSTE</p>
-          <p className="text-sm">{guestSummary}</p>
-        </div>
-      </PopoverTrigger>
-      <PopoverContent className="w-[296px] px-3">
-        <QuantitySelector
-          onChange={handleChange("adults")}
-          value={guests.adults}
-          min={1}
-          max={5}
-          label={
-            <div className="flex flex-col">
-              <span className="text-base font-medium">Erwachsene</span>
-              <span className="text-sm font-light">Ab 13 Jahren</span>
-            </div>
-          }
-        />
-        <QuantitySelector
-          onChange={handleChange("children")}
-          value={guests.children}
-          max={5}
-          label={
-            <div className="flex flex-col">
-              <span className="text-base font-medium">Kinder</span>
-              <span className="text-sm font-light">Bis 12 Jahren</span>
-            </div>
-          }
-        />
-        <QuantitySelector
-          onChange={handleChange("pets")}
-          value={guests.pets}
-          max={5}
-          label={
-            <div className="flex flex-col">
-              <span className="text-base font-medium">Haustiere</span>
-            </div>
-          }
-        />
-      </PopoverContent>
-    </Popover>
-  );
-}
 
 type OverviewProps = {
   dateRange: DateRange | undefined;

@@ -5,7 +5,7 @@ import { api } from "~/trpc/react";
 import { CalendarLarge } from "~/components/ui/calendar";
 import React from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import ReservationDataCard from "./ReservationDataForm";
+import ReservationCard from "./ReservationCard";
 import MapComponent from "./MapComponent";
 import ImageDisplay from "./ImageDisplay";
 import { differenceInCalendarDays } from "date-fns";
@@ -96,7 +96,9 @@ export default function RoomDetail() {
                 <></>
               )}
             </div>
+
             <Separator></Separator>
+
             <div className="flex flex-col space-y-4">
               <h1 className="text-2xl font-medium">
                 {dateRange?.from
@@ -115,10 +117,25 @@ export default function RoomDetail() {
                 defaultMonth={dateRange?.from}
                 selected={dateRange}
                 onSelect={setDateRange}
+                disabled={(date) => {
+                  const today = new Date();
+                  return dateRange?.to
+                    ? false
+                    : dateRange?.from
+                      ? date <= dateRange.from
+                      : date <
+                        new Date(
+                          today.getFullYear(),
+                          today.getMonth(),
+                          today.getDate(),
+                        );
+                }}
                 numberOfMonths={2}
               />
             </div>
+
             <Separator></Separator>
+
             <div className="mt-10 flex flex-col space-y-4">
               <h1 className="text-2xl font-medium">Hier wirst du sein</h1>
               {listing.data?.latitude && listing.data.longitude ? (
@@ -131,8 +148,9 @@ export default function RoomDetail() {
               )}
             </div>
           </div>
+
           <div className="relative flex w-1/3 justify-end py-8 pl-10">
-            <ReservationDataCard
+            <ReservationCard
               price_per_night={listing.data?.pricePerNight as number}
               listing_id={listing.data?.id as number}
               dateRange={dateRange}
@@ -140,9 +158,10 @@ export default function RoomDetail() {
               handleSelectCheckOut={handleSelectCheckOut}
               guests={guests}
               handleChange={handleChange}
-            ></ReservationDataCard>
+            ></ReservationCard>
           </div>
         </div>
+
         <Separator></Separator>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import { useRouter } from "next/navigation";
-import { parse, isValid, addDays, max } from "date-fns";
+import { parse, isValid, addDays, max, isAfter, isSameDay } from "date-fns";
 import { SelectRangeEventHandler } from "react-day-picker";
 
 interface DateRange {
@@ -128,8 +128,8 @@ export function verifyDateParam(
   from: string | null | undefined,
   to: string | null | undefined,
 ): DateRange {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const td = new Date();
+  const today = new Date(td.getFullYear(), td.getMonth(), td.getDate());
 
   const parseDate = (
     dateString: string | null | undefined,
@@ -141,6 +141,16 @@ export function verifyDateParam(
 
   let fromDate = parseDate(from);
   let toDate = parseDate(to);
+
+  // Prüfe, ob fromDate nach dem heutigen Datum liegt
+  if (fromDate && !(isAfter(fromDate, today) || isSameDay(fromDate, td))) {
+    fromDate = undefined;
+  }
+
+  // Prüfe, ob toDate nach fromDate liegt
+  if (fromDate && toDate && !isAfter(toDate, fromDate)) {
+    toDate = undefined;
+  }
 
   return {
     from: fromDate,

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { addDays, format, isValid, max, parse } from "date-fns";
-import { DateRange } from "react-day-picker";
+import { DateRange, Matcher } from "react-day-picker";
 import { Calendar } from "./ui/calendar";
 import { Separator } from "./ui/separator";
 import QuantitySelector from "~/components/listings/QuantitySelector";
@@ -26,11 +26,12 @@ export default function ListingSearch() {
   const sAdults = verifyAmountParam(searchParams.get("adults"), 1, 5, 1);
   const sChildren = verifyAmountParam(searchParams.get("children"), 0, 5, 0);
   const sPets = verifyAmountParam(searchParams.get("pets"), 0, 5, 0);
+  const sSearch = searchParams.get("location");
   const initialDateRange = verifyDateParam(
     searchParams.get("from"),
     searchParams.get("to"),
   );
-  const [search, setSearch] = React.useState<string>("");
+  const [search, setSearch] = React.useState<string>(sSearch || "");
 
   const {
     dateRange,
@@ -68,6 +69,13 @@ export default function ListingSearch() {
       <Separator orientation="vertical" className="mx-1 h-1/2"></Separator>
       <div className="w-[200px]">
         <ReservationDateSelector
+          disabled={(date) => {
+            const today = new Date();
+            return (
+              date <
+              new Date(today.getFullYear(), today.getMonth(), today.getDate())
+            );
+          }}
           handleSelect={handleSelectCheckIn}
           description="CHECK-IN"
           date={dateRange?.from}
@@ -76,6 +84,19 @@ export default function ListingSearch() {
       <Separator orientation="vertical" className="mx-1 h-1/2"></Separator>
       <div className="w-[200px]">
         <ReservationDateSelector
+          disabled={(date) => {
+            const today = new Date();
+            return (
+              date <=
+              (dateRange?.from
+                ? dateRange.from
+                : new Date(
+                    today.getFullYear(),
+                    today.getMonth(),
+                    today.getDate(),
+                  ))
+            );
+          }}
           handleSelect={handleSelectCheckOut}
           description="CHECK-OUT"
           date={dateRange?.to}
@@ -105,12 +126,14 @@ type DateSelecorProps = {
   description: string;
   date: Date | undefined;
   handleSelect: (date: Date | undefined) => void;
+  disabled: Matcher | Matcher[] | undefined;
 };
 
 function ReservationDateSelector({
   description,
   date,
   handleSelect,
+  disabled,
 }: DateSelecorProps) {
   return (
     <Popover>
@@ -131,7 +154,7 @@ function ReservationDateSelector({
           mode="single"
           selected={date}
           onSelect={handleSelect}
-          initialFocus
+          disabled={disabled}
         />
       </PopoverContent>
     </Popover>
@@ -314,7 +337,7 @@ function LocationSearch({
             placeholder="Reiseziel eingeben"
           />
         ) : search ? (
-          <p className="text-nowrap text-base">{search}</p>
+          <p className="overflow-hidden text-nowrap text-base">{search}</p>
         ) : (
           <p className="text-nowrap text-base text-muted-foreground">
             Reiseziel eingeben
