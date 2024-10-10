@@ -1,5 +1,5 @@
 "use client";
-import { useParams, useSearchParams } from "next/navigation";
+import { redirect, useParams, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 import { Separator } from "~/components/ui/separator";
 import ReservationBookingOverview from "./ReservationOverview";
@@ -26,6 +26,8 @@ export default function BookingOverview() {
   const { id } = useParams<{ id: string }>();
   const listing = api.vacationhome.getById.useQuery({ id: Number(id) });
   const [paymentStatus, setPaymentStatus] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const coverData: CoverData = {
     image_url: listing.data?.images[0]?.url || "https://picsum.photos/200",
     title: listing.data?.title || "Unterkunft",
@@ -39,6 +41,32 @@ export default function BookingOverview() {
     searchParams.get("from"),
     searchParams.get("to"),
   );
+
+  const createBookingMutation = api.booking.create.useMutation({
+    onSuccess: (booking) => {
+      setIsLoading(false);
+      redirect("/");
+    },
+    onError: (error) => {
+      setIsLoading(false);
+      setError(error.message);
+    },
+  });
+
+  const createBooking = async () => {
+    const data = {
+      vacationHomeId: Number(id),
+      checkInDate: dateRange?.from as Date,
+      checkOutDate: dateRange?.to as Date,
+      guestCount: guests.adults,
+    };
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await createBookingMutation.mutateAsync(data);
+    } catch (err) {}
+  };
 
   const {
     dateRange,
@@ -106,7 +134,8 @@ export default function BookingOverview() {
               <div>
                 <Button
                   className="h-14 w-[300px] bg-blue-600 text-lg hover:bg-blue-500 max-sm:w-full"
-                  disabled={!paymentStatus}
+                  disabled={!paymentStatus || isLoading}
+                  onClick={createBooking}
                 >
                   Bestätigen und Bezahlen
                 </Button>
