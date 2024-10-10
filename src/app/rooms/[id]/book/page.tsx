@@ -1,6 +1,6 @@
 "use client";
 import { useParams, useSearchParams } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 import { Separator } from "~/components/ui/separator";
 import ReservationBookingOverview from "./ReservationOverview";
 import {
@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { Button } from "~/components/ui/button";
 import CheckoutOverview from "./CheckoutOverview";
+import { PaymentMethodAnimated } from "./pamentMethodAnimated";
 
 type CoverData = {
   image_url: string;
@@ -24,6 +25,7 @@ type CoverData = {
 export default function BookingOverview() {
   const { id } = useParams<{ id: string }>();
   const listing = api.vacationhome.getById.useQuery({ id: Number(id) });
+  const [paymentStatus, setPaymentStatus] = useState(false);
   const coverData: CoverData = {
     image_url: listing.data?.images[0]?.url || "https://picsum.photos/200",
     title: listing.data?.title || "Unterkunft",
@@ -66,7 +68,10 @@ export default function BookingOverview() {
                   handleSelectCheckOut={handleSelectCheckOut}
                 ></CheckoutOverview>
                 <div className="flex w-full justify-center">
-                  <PaymentMethod></PaymentMethod>
+                  <PaymentMethodAnimated
+                    paymentStatus={paymentStatus}
+                    setPaymentStatus={setPaymentStatus}
+                  ></PaymentMethodAnimated>
                 </div>
               </div>
               <Separator></Separator>
@@ -100,8 +105,8 @@ export default function BookingOverview() {
               </p>
               <div>
                 <Button
-                  className="h-14 w-[300px] bg-blue-600 text-lg hover:bg-blue-500 disabled:bg-gray-400 max-sm:w-full"
-                  disabled={false}
+                  className="h-14 w-[300px] bg-blue-600 text-lg hover:bg-blue-500 max-sm:w-full"
+                  disabled={!paymentStatus}
                 >
                   Bestätigen und Bezahlen
                 </Button>

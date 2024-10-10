@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Icons } from "~/components/ui/icons";
 import { Button } from "~/components/ui/button";
 import {
@@ -19,13 +19,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { motion, AnimatePresence } from "framer-motion";
+import { Check } from "lucide-react";
 
-export function PaymentMethod() {
+type paypemtStatusHook = {
+  paymentStatus: boolean;
+  setPaymentStatus: (status: boolean) => void;
+};
+
+export function PaymentMethodAnimated({
+  paymentStatus,
+  setPaymentStatus,
+}: paypemtStatusHook) {
   const [selectedMethod, setSelectedMethod] = useState("card");
-  const [paymetStatus, setPaymentStatus] = useState("none");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isLoading) {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+        setPaymentStatus(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
+
+  const handlePayment = () => {
+    setIsLoading(true);
+  };
 
   return (
-    <Card className="w-full hover:shadow-lg">
+    <Card className="relative w-full overflow-hidden hover:shadow-lg">
       <CardHeader className="max-[425px]:px-2">
         <CardTitle>Zahlungsmethode</CardTitle>
         <CardDescription>Wähle eine Zahlungsmethode aus.</CardDescription>
@@ -42,19 +66,7 @@ export function PaymentMethod() {
               htmlFor="card"
               className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                className="mb-3 h-6 w-6"
-              >
-                <rect width="20" height="14" x="2" y="5" rx="2" />
-                <path d="M2 10h20" />
-              </svg>
+              <Icons.card className="mb-3 h-6 w-6"></Icons.card>
               Kreditkarte
             </Label>
           </div>
@@ -84,25 +96,69 @@ export function PaymentMethod() {
           </div>
         </RadioGroup>
 
-        {selectedMethod === "card" ? (
-          <MethodCard></MethodCard>
-        ) : (
-          <div className="h-3"></div>
-        )}
+        <AnimatePresence>
+          {paymentStatus === false && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{ overflow: "hidden" }}
+            >
+              {selectedMethod === "card" ? (
+                <MethodCard />
+              ) : (
+                <div className="h-3" />
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </CardContent>
       <CardFooter className="max-[425px]:px-2">
-        <Button
-          className="w-full"
-          onClick={() => {
-            setPaymentStatus(selectedMethod);
-          }}
-        >
-          {getButtonContent(selectedMethod)}
-        </Button>
+        {paymentStatus === true ? (
+          <div className="w-full text-center font-bold text-black">
+            Zahlungsmethode bestätigt
+          </div>
+        ) : (
+          <Button
+            className="w-full"
+            onClick={handlePayment}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              getButtonContent(selectedMethod)
+            )}
+            {isLoading ? "Wird bearbeitet..." : ""}
+          </Button>
+        )}
       </CardFooter>
+
+      <AnimatePresence>
+        {paymentStatus === true && (
+          <motion.div
+            className="absolute inset-0 bg-white"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.15 }}
+          >
+            <div className="flex h-full flex-col items-center justify-center">
+              <div className="text-center">
+                <Check className="mx-auto mb-4 h-16 w-16 text-black" />
+                <h2 className="mb-2 text-2xl font-bold">
+                  Zahlungsmethode bestätigt
+                </h2>
+                <p>Dir wurde noch nichts abgebucht!</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Card>
   );
 }
+
 function getButtonContent(method: string) {
   if (method === "apple") {
     return (
@@ -120,11 +176,12 @@ function getButtonContent(method: string) {
       </>
     );
   }
+  return "Weiter";
 }
 
 function MethodCard() {
   return (
-    <>
+    <div className="grid grid-cols-1 gap-6">
       <div className="grid gap-2">
         <Label htmlFor="name">Name</Label>
         <Input id="name" placeholder="Name des Karteninhabers" />
@@ -176,6 +233,6 @@ function MethodCard() {
           <Input id="cvc" placeholder="CVC" />
         </div>
       </div>
-    </>
+    </div>
   );
 }

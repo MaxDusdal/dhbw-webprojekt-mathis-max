@@ -149,7 +149,7 @@ export default function RoomDetail() {
             </div>
           </div>
 
-          <div className="relative flex w-1/3 justify-end py-8 pl-10">
+          <div className="relative flex w-[379px] justify-end py-8 pl-10">
             <ReservationCard
               price_per_night={listing.data?.pricePerNight as number}
               listing_id={listing.data?.id as number}
