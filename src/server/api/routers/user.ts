@@ -15,7 +15,10 @@ import { TRPCError } from "@trpc/server";
 import { Role, type User } from "@prisma/client";
 import { z } from "zod";
 import { omit } from "lodash";
-import type { UserWithoutSensitiveInfo, UserWithSessions } from "~/app/utils/types";
+import type {
+  UserWithoutSensitiveInfo,
+  UserWithSessions,
+} from "~/app/utils/types";
 
 export const usersRouter = createTRPCRouter({
   create: protectedProcedure
@@ -46,7 +49,7 @@ export const usersRouter = createTRPCRouter({
       return newUser;
     }),
 
-  delete: protectedProcedure
+  delete: adminProcedure
     // TODO: CASCADE DELETION
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
@@ -68,16 +71,6 @@ export const usersRouter = createTRPCRouter({
 
     return users as UserWithSessions[];
   }),
-
-  getByEmail: protectedProcedure
-    .input(z.object({ email: z.string().optional() }))
-    .query(async ({ input, ctx }) => {
-      if (!input?.email) return null;
-      const user = await ctx.db.user.findUnique({
-        where: { email: input.email },
-      });
-      return user;
-    }),
 
   getCallerUser: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.db.user.findUnique({
@@ -140,7 +133,7 @@ export const usersRouter = createTRPCRouter({
       return true;
     }),
 
-  deleteUser: sessionPassProcedure.mutation(async ({ ctx }) => {
+  deleteUser: protectedProcedure.mutation(async ({ ctx }) => {
     // TODO: Check if deletion is cascading to VacationHomes also, invalidate all tokens
     await ctx.db.user.delete({
       where: { id: ctx.session.user.id },

@@ -1,5 +1,5 @@
 import { amenityCreateSchema } from "~/app/utils/zod";
-import { adminProcedure, createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
 
 export const amenitiesRouter = createTRPCRouter({
@@ -7,7 +7,7 @@ export const amenitiesRouter = createTRPCRouter({
     return ctx.db.amenity.findMany();
   }),
 
-  create: protectedProcedure
+  create: adminProcedure
     .input(amenityCreateSchema)
     .mutation(async ({ input, ctx }) => {
       return ctx.db.amenity.create({
@@ -15,7 +15,7 @@ export const amenitiesRouter = createTRPCRouter({
       });
     }),
 
-  createBatch: protectedProcedure
+  createBatch: adminProcedure
     .input(z.array(amenityCreateSchema))
     .mutation(async ({ input, ctx }) => {
       return ctx.db.amenity.createMany({

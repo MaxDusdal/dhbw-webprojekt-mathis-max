@@ -174,3 +174,21 @@ export const changePasswordSchema = z
     message: "Passwörter müssen übereinstimmen",
     path: ["confirmPassword"],
   });
+
+export const bookingCreateSchema = z
+  .object({
+    checkInDate: z.date(),
+    checkOutDate: z.date(),
+    guestCount: z
+      .number()
+      .min(1, "Anzahl der Gäste muss aus mindestens 1 bestehen"),
+    vacationHomeId: z.number(),
+  })
+  .refine((data) => data.checkInDate < data.checkOutDate, {
+    message: "Check-in und Check-out Datum sind ungültig",
+    path: ["checkOutDate"],
+  })
+  .refine((data) => data.checkInDate >= new Date(), {
+    message: "Check-in Datum muss in der Zukunft liegen",
+    path: ["checkInDate"],
+  });
