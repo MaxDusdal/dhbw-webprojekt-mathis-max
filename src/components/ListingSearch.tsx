@@ -58,56 +58,60 @@ export default function ListingSearch() {
   };
 
   return (
-    <div className="mb-8 flex min-w-fit items-center rounded-full p-0 shadow-lg ring-1 ring-gray-300">
-      <div className="w-[292px]">
-        <LocationSearch
-          description="WOHIN"
-          search={search}
-          setSearch={setSearch}
-        ></LocationSearch>
+    <div className="mb-8 flex items-center overflow-hidden rounded-3xl p-0 shadow-lg ring-1 ring-gray-300 max-[1080px]:w-full min-[1080px]:min-w-fit min-[1080px]:rounded-full">
+      <div className="flex max-[1080px]:w-full max-[1080px]:flex-col">
+        <div className="w-full min-[1080px]:w-[292px]">
+          <LocationSearch
+            description="WOHIN"
+            search={search}
+            setSearch={setSearch}
+          ></LocationSearch>
+        </div>
+        <Separator orientation="vertical" className="mx-1 h-1/2"></Separator>
+        <div className="w-full min-[1080px]:w-[200px]">
+          <ReservationDateSelector
+            disabled={(date) => {
+              const today = new Date();
+              return (
+                date <
+                new Date(today.getFullYear(), today.getMonth(), today.getDate())
+              );
+            }}
+            handleSelect={handleSelectCheckIn}
+            description="CHECK-IN"
+            date={dateRange?.from}
+          ></ReservationDateSelector>
+        </div>
       </div>
       <Separator orientation="vertical" className="mx-1 h-1/2"></Separator>
-      <div className="w-[200px]">
-        <ReservationDateSelector
-          disabled={(date) => {
-            const today = new Date();
-            return (
-              date <
-              new Date(today.getFullYear(), today.getMonth(), today.getDate())
-            );
-          }}
-          handleSelect={handleSelectCheckIn}
-          description="CHECK-IN"
-          date={dateRange?.from}
-        ></ReservationDateSelector>
-      </div>
-      <Separator orientation="vertical" className="mx-1 h-1/2"></Separator>
-      <div className="w-[200px]">
-        <ReservationDateSelector
-          disabled={(date) => {
-            const today = new Date();
-            return (
-              date <=
-              (dateRange?.from
-                ? dateRange.from
-                : new Date(
-                    today.getFullYear(),
-                    today.getMonth(),
-                    today.getDate(),
-                  ))
-            );
-          }}
-          handleSelect={handleSelectCheckOut}
-          description="CHECK-OUT"
-          date={dateRange?.to}
-        ></ReservationDateSelector>
-      </div>
-      <Separator orientation="vertical" className="mx-1 h-1/2"></Separator>
-      <div className="w-[282px]">
-        <GuestSelector
-          handleChange={handleChange}
-          guests={guests}
-        ></GuestSelector>
+      <div className="flex max-[1080px]:w-full max-[1080px]:flex-col-reverse">
+        <div className="w-full min-[1080px]:w-[200px]">
+          <ReservationDateSelector
+            disabled={(date) => {
+              const today = new Date();
+              return (
+                date <=
+                (dateRange?.from
+                  ? dateRange.from
+                  : new Date(
+                      today.getFullYear(),
+                      today.getMonth(),
+                      today.getDate(),
+                    ))
+              );
+            }}
+            handleSelect={handleSelectCheckOut}
+            description="CHECK-OUT"
+            date={dateRange?.to}
+          ></ReservationDateSelector>
+        </div>
+        <Separator orientation="vertical" className="mx-1 h-1/2"></Separator>
+        <div className="w-full min-[1080px]:w-[282px]">
+          <GuestSelector
+            handleChange={handleChange}
+            guests={guests}
+          ></GuestSelector>
+        </div>
       </div>
       <Separator orientation="vertical" className="mx-1 h-1/2"></Separator>
       <div
@@ -138,7 +142,7 @@ function ReservationDateSelector({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <div className="flex cursor-pointer flex-col justify-center space-y-1 rounded-full px-8 py-2 hover:bg-gray-100">
+        <div className="flex cursor-pointer flex-col justify-center space-y-1 rounded-3xl px-8 py-2 hover:bg-gray-100 min-[1080px]:rounded-full">
           <p className="text-[12px] font-semibold">{description}</p>
           <p className="text-nowrap text-base">
             {date ? (
@@ -180,7 +184,7 @@ function GuestSelector({ guests, handleChange }: GuestSelectorProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <div className="flex w-full cursor-pointer flex-col justify-start space-y-1 rounded-full px-8 py-2 hover:bg-gray-100">
+        <div className="flex w-full cursor-pointer flex-col justify-start space-y-1 rounded-full px-8 py-2 hover:bg-gray-100 min-[1080px]:rounded-full">
           <p className="text-[12px] font-semibold">GÄSTE</p>
           {guests.adults > 0 ? (
             <p className="text-nowrap text-base">{guestSummary}</p>
@@ -321,7 +325,7 @@ function LocationSearch({
   return (
     <div className="relative">
       <div
-        className="flex cursor-pointer flex-col justify-center space-y-1 rounded-full px-8 py-2 hover:bg-gray-100"
+        className="flex cursor-pointer flex-col justify-center space-y-1 rounded-3xl px-8 py-2 hover:bg-gray-100 min-[1080px]:rounded-full"
         onClick={handleClick}
       >
         <p className="text-[12px] font-semibold">{description}</p>

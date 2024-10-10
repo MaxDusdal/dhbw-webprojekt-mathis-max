@@ -25,17 +25,23 @@ export function ListingCoverSkeleton() {
   );
 }
 
+export function ListingCoversSectionSkeleton() {
+  return (
+    <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3 lg:grid-cols-4">
+      {[...Array(8)].map((_, index) => (
+        <ListingCoverSkeleton key={index} />
+      ))}
+    </div>
+  );
+}
+
 export default function ListingPageSkeleton() {
   return (
     <>
       <div className="flex w-full justify-center">
         <ListingSearchSkeleton />
       </div>
-      <div className="grid grid-cols-4 gap-x-6 gap-y-10">
-        {[...Array(8)].map((_, index) => (
-          <ListingCoverSkeleton key={index} />
-        ))}
-      </div>
+      <ListingCoversSectionSkeleton></ListingCoversSectionSkeleton>
       <div className="mt-6 flex justify-center">
         <Skeleton className="h-10 w-32 rounded-full" />
       </div>
