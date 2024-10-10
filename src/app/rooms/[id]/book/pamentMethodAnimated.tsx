@@ -96,23 +96,11 @@ export function PaymentMethodAnimated({
           </div>
         </RadioGroup>
 
-        <AnimatePresence>
-          {paymentStatus === false && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{ overflow: "hidden" }}
-            >
-              {selectedMethod === "card" ? (
-                <MethodCard />
-              ) : (
-                <div className="h-3" />
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {paymentStatus === false && selectedMethod === "card" ? (
+          <MethodCard />
+        ) : (
+          <div className="h-3" />
+        )}
       </CardContent>
       <CardFooter className="max-[425px]:px-2">
         {paymentStatus === true ? (
