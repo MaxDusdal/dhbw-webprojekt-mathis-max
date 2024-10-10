@@ -53,14 +53,17 @@ export default function Rooms() {
       ) : (
         <></>
       )}
-      <div className="mt-6 flex w-full justify-center">
-        <Button
-          className="h-10 w-32 rounded-full bg-transparent font-medium text-black ring-1 ring-gray-300 hover:bg-gray-100"
-          onClick={() => fetchNextPage()}
-        >
-          Load More
-        </Button>
-      </div>
+      {hasNextPage && (
+        <div className="mt-6 flex w-full justify-center">
+          <Button
+            className="h-10 w-32 rounded-full bg-transparent font-medium text-black ring-1 ring-gray-300 hover:bg-gray-100"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? 'Loading...' : 'Load More'}
+          </Button>
+        </div>
+      )}
     </>
   );
 }

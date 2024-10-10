@@ -94,6 +94,12 @@ const VacationHomeForm = () => {
   const amenitiesQuery = api.amenities.getAll.useQuery();
 
   useEffect(() => {
+    if (images.length > 0) {
+      setValue("images", images.map((image) => image.url));
+    }
+  }, [images]);
+
+  useEffect(() => {
     if (adressAutoCompleteReturn) {
       handlePlaceSelect(adressAutoCompleteReturn);
     }
@@ -126,10 +132,12 @@ const VacationHomeForm = () => {
         ></InputField>
       </InputFieldWrapper>
       {/* TODO: Add currency selector */}
-      <AdressAutoComplete
-        description="Adresse"
-        setAdressAutoCompleteReturn={setAdressAutoCompleteReturn}
-      />
+      <InputFieldWrapper id="locationDescription" label="Adresse">
+        <AdressAutoComplete
+          description="Adresse"
+          setAdressAutoCompleteReturn={setAdressAutoCompleteReturn}
+        />
+      </InputFieldWrapper>
       <InputFieldWrapper id="pricePerNight" label="Preis pro Nacht">
         <InputField
           name="pricePerNight"
@@ -139,7 +147,7 @@ const VacationHomeForm = () => {
           error={errors.pricePerNight as FieldError}
         ></InputField>
       </InputFieldWrapper>
-      <div>
+      <InputFieldWrapper id="quantityFields" label="Quantitäten">
         {quantityFields.map((field, index) => (
           <>
             <Controller
@@ -163,7 +171,7 @@ const VacationHomeForm = () => {
             {index < quantityFields.length - 1 && <Separator />}
           </>
         ))}
-      </div>
+      </InputFieldWrapper>
       <Separator></Separator>
       {amenitiesQuery.data ? (
         <div>
@@ -201,53 +209,9 @@ const VacationHomeForm = () => {
         <></>
       )}
       <Separator></Separator>
-      {true ? (
-        <div>
-          <label>Bilder</label>
-          <div className="mt-3 grid w-full grid-cols-2 gap-5">
-            <Image
-              alt="Product image"
-              className="aspect-square w-full rounded-md object-cover"
-              height="300"
-              src="https://ui.shadcn.com/placeholder.svg"
-              width="300"
-            />
-            <div className="flex flex-col space-y-5">
-              <div className="grid w-full grid-cols-2 gap-5">
-                <Image
-                  alt="Product image"
-                  className="aspect-square w-full rounded-md object-cover"
-                  height="300"
-                  src="https://ui.shadcn.com/placeholder.svg"
-                  width="300"
-                />
-                <Image
-                  alt="Product image"
-                  className="aspect-square w-full rounded-md object-cover"
-                  height="300"
-                  src="https://ui.shadcn.com/placeholder.svg"
-                  width="300"
-                />
-              </div>
-              <div className="flex h-full w-full flex-grow items-center justify-center rounded-md border border-dashed text-sm">
-                <FileUploaderRegular
-                  sourceList="local, camera, dropbox, gdrive"
-                  classNameUploader="uc-light uc-gray"
-                  pubkey="413109ae6155eb8e885e"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div>
-          <FileUploaderMinimal
-            classNameUploader="uc-light uc-gray"
-            pubkey="413109ae6155eb8e885e"
-          />
-        </div>
-      )}
-      <MultiPictureUpload images={images} setImages={setImages} />
+      <InputFieldWrapper id="images" label="Bilder">
+        <MultiPictureUpload images={images} setImages={setImages} />
+      </InputFieldWrapper>
       <Separator></Separator>
       <div className="flex w-full justify-end">
         <Button className="mt-3 w-full" type="submit">

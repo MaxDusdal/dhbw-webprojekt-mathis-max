@@ -5,14 +5,13 @@ import {
 } from "@heroicons/react/20/solid";
 import React, { useEffect } from "react";
 import Image from "next/image";
+import Skeleton from "react-loading-skeleton";
+import type { PlaceSuggestion } from "~/app/utils/types";
+import SuggestionEntry from "../SuggestionEntry";
+
 interface LocationSearchProps {
   description: string;
   setAdressAutoCompleteReturn: (value: AdressAutoCompleteReturn) => void;
-}
-
-interface PlaceSuggestion {
-  place_id: string;
-  description: string;
 }
 
 interface AdressAutoCompleteReturn {
@@ -125,53 +124,48 @@ export default function AdressAutoComplete({
           ref={dropdownRef}
           className="absolute left-0 right-0 z-10 mt-1 rounded-md bg-white shadow-xl shadow-gray-200 ring-1 ring-gray-300"
         >
-          {isLoading ? (
-            <div className="p-2 text-center">Lade Vorschläge...</div>
-          ) : (
-            <ul className="max-h-60 overflow-auto py-1">
-              <div className="flex justify-between">
-                <p className="px-3 py-2 text-sm text-gray-500">
-                  Adress-Vorschläge
-                </p>
-                <Image
-                  src="/images/google-logo.png"
-                  alt="google-logo"
-                  width={60}
-                  height={20}
-                  className="mr-2"
+          <ul className="max-h-60 overflow-auto py-1">
+            <div className="flex justify-between">
+              <p className="px-3 py-2 text-sm text-gray-500">
+                Adress-Vorschläge
+              </p>
+              <Image
+                src="/images/google-logo.png"
+                alt="google-logo"
+                width={60}
+                height={20}
+                className="mr-2"
+              />
+            </div>
+            {isLoading ? (
+              <>
+                <SuggestionEntry
+                  suggestion={null}
+                  handleSuggestionClick={() => {}}
                 />
+                <SuggestionEntry
+                  suggestion={null}
+                  handleSuggestionClick={() => {}}
+                />
+                <SuggestionEntry
+                  suggestion={null}
+                  handleSuggestionClick={() => {}}
+                />
+              </>
+            ) : suggestions.length > 0 ? (
+              suggestions.map((suggestion: PlaceSuggestion) => (
+                <SuggestionEntry
+                  key={suggestion.place_id}
+                  suggestion={suggestion}
+                  handleSuggestionClick={handleSuggestionClick}
+                />
+              ))
+            ) : (
+              <div className="p-2 text-center text-sm text-gray-500">
+                <p>Keine Ergebnisse gefunden</p>
               </div>
-              {suggestions.length > 0 ? (
-                suggestions.map((suggestion) => (
-                  <>
-                    <div
-                      className="group/suggestion flex cursor-pointer items-center px-3 py-3 hover:bg-gray-100"
-                      onClick={() => handleSuggestionClick(suggestion)}
-                    >
-                      <div className="flex w-full justify-between">
-                        <div className="flex items-center">
-                          <MapPinIcon className="mb-1 h-4 w-4 shrink-0 text-gray-400" />
-                          <li
-                            key={suggestion.place_id}
-                            className="ml-2 text-sm text-gray-600"
-                          >
-                            {suggestion.description}
-                          </li>
-                        </div>
-                        <div>
-                          <ChevronRightIcon className="invisible h-5 w-5 text-gray-400 group-hover/suggestion:visible" />
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ))
-              ) : (
-                <div className="p-2 text-center text-sm text-gray-500">
-                  <p>Keine Ergebnisse gefunden</p>
-                </div>
-              )}
-            </ul>
-          )}
+            )}
+          </ul>
         </div>
       )}
     </div>

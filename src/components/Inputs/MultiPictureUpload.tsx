@@ -36,6 +36,7 @@ export default function MultiPictureUpload({
   return (
     <div>
       <FileUploaderRegular
+      className="mb-8"
         classNameUploader="uc-light uc-gray"
         pubkey="413109ae6155eb8e885e"
         imgOnly={true}
@@ -52,7 +53,7 @@ export default function MultiPictureUpload({
       <div className="grid grid-cols-4 gap-4">
         {images.map((image) => (
           <div key={image.uuid} className="group relative">
-            <div className="invisible absolute -right-3 -top-3 z-10 rounded-full bg-white p-1 shadow-lg group-hover:visible">
+            <div className="absolute -right-3 -top-3 z-10 rounded-full bg-gray-100 p-1 shadow-lg opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100">
               <XMarkIcon
                 className="h-5 w-5 cursor-pointer text-black"
                 onClick={() => removeImage(image)}

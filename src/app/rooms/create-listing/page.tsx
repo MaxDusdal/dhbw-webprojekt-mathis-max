@@ -10,7 +10,7 @@ export default function CreateListing() {
     <div className="flex w-full justify-center">
       <Card className="w-[630px]">
         <CardHeader>
-          <CardTitle>Unterkunf erstellen</CardTitle>
+          <CardTitle>Unterkunft erstellen</CardTitle>
           <Separator></Separator>
         </CardHeader>
         <CardContent>

@@ -5,11 +5,13 @@ import CustomButton from "../Buttons/CustomButton";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 export default function HeaderUserComponent() {
   const user = api.user.getCallerUser.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   if (user.isLoading) {
@@ -18,8 +20,8 @@ export default function HeaderUserComponent() {
       <div className="hidden lg:flex lg:flex-1 lg:justify-end">
         <div className="flex items-center gap-3 rounded-md p-2 px-2 transition-all duration-200 hover:cursor-pointer hover:bg-gray-200">
           <div className="flex animate-pulse items-center gap-2">
-            <div className="h-4 w-24 rounded bg-gray-200"></div>
-            <div className="h-8 w-8 rounded-full bg-gray-200"></div>
+            <Skeleton height={24} width={80} />
+            <Skeleton circle width={32} height={32} />
           </div>
         </div>
       </div>

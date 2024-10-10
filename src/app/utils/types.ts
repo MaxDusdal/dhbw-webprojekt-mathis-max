@@ -64,3 +64,8 @@ export type ImagesUploadCare = {
   uuid: string;
   url: string;
 };
+
+export type PlaceSuggestion = {
+  place_id: string;
+  description: string;
+};

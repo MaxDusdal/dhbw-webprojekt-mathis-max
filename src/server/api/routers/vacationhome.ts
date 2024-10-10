@@ -122,7 +122,7 @@ export const vacationhomeRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const vacationHomes = await ctx.db.vacationHome.findMany({
-        take: input.limit,
+        take: input.limit + 1, // Take one extra to check if there's a next page
         skip: input.cursor ? 1 : 0,
         cursor: input.cursor ? { id: input.cursor } : undefined,
         select: {
@@ -140,12 +140,26 @@ export const vacationhomeRouter = createTRPCRouter({
         },
       });
 
-      const lastVacationHome = vacationHomes[vacationHomes.length - 1];
+      const hasNextPage = vacationHomes.length > input.limit;
+      const items = hasNextPage ? vacationHomes.slice(0, -1) : vacationHomes;
+      const lastVacationHome = items[items.length - 1];
+
       return {
-        vacationHomes,
+        vacationHomes: items,
         nextCursor: lastVacationHome ? lastVacationHome.id : undefined,
+        hasNextPage,
       };
     }),
+
+  getVacationHomesByUser: protectedProcedure.query(async ({ ctx }) => {
+    const vacationHomes = await ctx.db.vacationHome.findMany({
+      where: {
+        ownerId: ctx.session.user.id,
+      },
+      include: { images: true },
+    });
+    return vacationHomes;
+  }),
 
   getById: publicProcedure
     .input(z.object({ id: z.number() }))

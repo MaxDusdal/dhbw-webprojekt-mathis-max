@@ -13,6 +13,8 @@ import { notify } from "~/app/utils/notification";
 import { TRPCError } from "@trpc/server";
 import { E164Number } from "libphonenumber-js";
 import AvatarUploadForm from "./AvatarUploadForm";
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 type UserProfileFormValues = z.infer<typeof userProfileSchema>;
 
@@ -67,7 +69,7 @@ export default function UserProfileForm() {
     }
   }
 
-  if (userData.isLoading) return <div>Loading...</div>;
+  if (userData.isLoading) return <UserProfileFormSkeleton />;
 
   const onSubmit: SubmitHandler<UserProfileFormValues> = async (data) => {
     try {
@@ -155,6 +157,50 @@ export default function UserProfileForm() {
           </CustomButton>
         </div>
       </form>
+    </div>
+  );
+}
+
+function UserProfileFormSkeleton() {
+  return (
+    <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">
+      <div>
+        <Skeleton width={200} height={24} />
+        <Skeleton width={300} height={40} className="mt-1" />
+      </div>
+
+      <div className="md:col-span-2">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
+          <div className="col-span-full">
+            <Skeleton circle width={96} height={96}/>
+          </div>
+
+          <div className="sm:col-span-3">
+            <Skeleton height={24} width={80} />
+            <Skeleton height={40} className="mt-2" />
+          </div>
+
+          <div className="sm:col-span-3">
+            <Skeleton height={24} width={80} />
+            <Skeleton height={40} className="mt-2" />
+          </div>
+
+          <div className="col-span-full">
+            <Skeleton height={24} width={120} />
+            <Skeleton height={40} className="mt-2" />
+          </div>
+
+          <div className="col-span-full">
+            <Skeleton height={24} width={120} />
+            <Skeleton height={40} className="mt-2" />
+          </div>
+        </div>
+
+        <div className="mt-8 flex gap-4">
+          <Skeleton width={100} height={40} />
+          <Skeleton width={100} height={40} />
+        </div>
+      </div>
     </div>
   );
 }
