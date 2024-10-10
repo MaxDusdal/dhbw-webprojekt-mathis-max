@@ -24,12 +24,12 @@ export function PaymentMethod() {
   const [selectedMethod, setSelectedMethod] = useState("card");
 
   return (
-    <Card className="w-[526px]">
-      <CardHeader>
+    <Card className="w-full hover:shadow-lg">
+      <CardHeader className="max-[425px]:px-2">
         <CardTitle>Zahlungsmethode</CardTitle>
         <CardDescription>Wähle eine Zahlungsmethode aus.</CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-6">
+      <CardContent className="grid gap-6 max-[425px]:px-2">
         <RadioGroup
           defaultValue="card"
           className="grid grid-cols-3 gap-4"
@@ -89,7 +89,7 @@ export function PaymentMethod() {
           <div className="h-3"></div>
         )}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="max-[425px]:px-2">
         {selectedMethod === "card" ? (
           <Button className="w-full">Weiter</Button>
         ) : selectedMethod === "paypal" ? (

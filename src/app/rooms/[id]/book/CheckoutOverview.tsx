@@ -1,11 +1,17 @@
+import { DateRange } from "react-day-picker";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import Image from "next/image";
-import { round } from "lodash";
-import { format, differenceInCalendarDays } from "date-fns";
-import { Separator } from "~/components/ui/separator";
-import { addToRange, type DateRange } from "react-day-picker";
-import { de } from "date-fns/locale";
-import { useSearchParams } from "next/navigation";
 import ReservationDataInput from "~/components/listings/ReservationDataInput";
+import { Separator } from "~/components/ui/separator";
+import { differenceInCalendarDays } from "date-fns";
+import { round } from "lodash";
 
 type Guests = {
   adults: number;
@@ -18,7 +24,6 @@ type CoverData = {
   title: string;
   description: string;
 };
-
 type ReservationData = {
   coverData: CoverData;
   dateRange: DateRange | undefined;
@@ -28,8 +33,7 @@ type ReservationData = {
   handleChange: (type: keyof Guests) => (value: number) => void;
   price_per_night: number;
 };
-
-export default function ReservationBookingOverview({
+export default function CheckoutOverview({
   dateRange,
   handleSelectCheckIn,
   handleSelectCheckOut,
@@ -38,49 +42,43 @@ export default function ReservationBookingOverview({
   coverData,
   price_per_night,
 }: ReservationData) {
-  const searchParams = useSearchParams();
-  const getUpdatedParams = () => {
-    const params = new URLSearchParams();
-    if (dateRange?.from)
-      params.set("from", format(dateRange.from, "dd.MM.yyyy", { locale: de }));
-    if (dateRange?.to)
-      params.set("to", format(dateRange.to, "dd.MM.yyyy", { locale: de }));
-    params.set("adults", guests.adults.toString());
-    params.set("children", guests.children.toString());
-    params.set("pets", guests.pets.toString());
-    return params;
-  };
   return (
-    <div className="rounded-lg p-6 ring-1 ring-gray-300 hover:shadow-lg">
-      <div className="flex w-full items-center space-x-2">
-        <div className="flex h-fit w-fit overflow-hidden rounded-lg">
-          <Image
-            src={coverData.image_url}
-            alt="cover"
-            width={90}
-            height={90}
-          ></Image>
-        </div>
+    <Card className="w-full hover:shadow-lg">
+      <CardHeader className="flex flex-row justify-between space-x-4 pb-0 max-[425px]:space-x-2 max-[425px]:px-2">
         <div className="flex flex-col">
-          <p className="text-sm font-medium">{coverData.title}</p>
-          <p className="text-sm font-light">{coverData.description}</p>
-          <div className="h-5"></div>
+          <CardTitle>Buchungsübersicht</CardTitle>
+          <CardDescription className="h-10">
+            Üperprüfe alle Angabe und korrigiere diese falls nötig
+          </CardDescription>
+          <ReservationDataInput
+            dateRange={dateRange}
+            guests={guests}
+            handleChange={handleChange}
+            handleSelectCheckIn={handleSelectCheckIn}
+            handleSelectCheckOut={handleSelectCheckOut}
+          ></ReservationDataInput>
         </div>
-      </div>
-      <ReservationDataInput
-        dateRange={dateRange}
-        guests={guests}
-        handleChange={handleChange}
-        handleSelectCheckIn={handleSelectCheckIn}
-        handleSelectCheckOut={handleSelectCheckOut}
-      ></ReservationDataInput>
-      <div className="mt-5 flex w-full flex-col space-y-4">
-        <ReservationOverview
-          dateRange={dateRange}
-          price_per_night={round(price_per_night)}
-        ></ReservationOverview>
-      </div>
-    </div>
+        <div className="flex w-fit flex-col items-end justify-end space-x-2 max-[325px]:justify-start">
+          <div className="flex h-fit max-h-[195px] w-fit max-w-[195px] flex-shrink-0 overflow-hidden rounded-lg max-[597px]:h-[110px] max-[597px]:w-[110px] min-[965px]:max-xl:h-[110px] min-[965px]:max-xl:w-[110px] xl:h-[195px] xl:w-[195px]">
+            <Image
+              className="h-fit w-fit"
+              src={coverData.image_url}
+              alt="cover"
+              width={195}
+              height={195}
+            ></Image>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="max-[425px]:px-2">
+        <div className="mt-5 flex w-full flex-col space-y-4">
+          <ReservationOverview
+            dateRange={dateRange}
+            price_per_night={round(price_per_night)}
+          ></ReservationOverview>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

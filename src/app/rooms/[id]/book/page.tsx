@@ -13,6 +13,7 @@ import { PaymentMethod } from "./paymentMethod";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { Button } from "~/components/ui/button";
+import CheckoutOverview from "./CheckoutOverview";
 
 type CoverData = {
   image_url: string;
@@ -48,36 +49,25 @@ export default function BookingOverview() {
 
   return (
     <div className="flex w-full justify-center">
-      <div className="flex max-w-7xl flex-grow flex-col p-10">
+      <div className="flex max-w-7xl flex-grow flex-col p-5 max-[465px]:p-0 lg:p-10">
         <div className="flex w-full flex-row">
-          <div className="flex w-2/3 flex-col items-center space-y-10 py-8 pr-8">
+          <div className="flex w-full flex-col items-center space-y-10 py-8">
             <div className="flex flex-col space-y-8">
-              <div className="flex flex-col space-y-8">
-                <h1 className="text-2xl font-medium">Bestellübersicht</h1>
-                <p>
-                  Prüfe bitte ob die Check-In und Check-Out Daten, sowie die
-                  angegebenen Gäste richtig sind. Ansonsten kannst du diese
-                  rechts korrigieren.
-                </p>
-
-                <div className="grid grid-cols-2">
-                  <p className="font-medium">Check-In:</p>
-                  <p>
-                    {dateRange?.from
-                      ? format(dateRange.from, "dd.MM.yyyy", { locale: de })
-                      : "error"}
-                  </p>
-                  <p className="font-medium">Check-Out:</p>
-                  <p>
-                    {dateRange?.to
-                      ? format(dateRange.to, "dd.MM.yyyy", { locale: de })
-                      : "error"}
-                  </p>
-                </div>
-              </div>
+              <h1 className="text-3xl font-semibold">Checkout</h1>
               <Separator></Separator>
-              <div className="flex w-full justify-center">
-                <PaymentMethod></PaymentMethod>
+              <div className="grid w-full gap-y-10 md:gap-x-10 min-[965px]:grid-cols-2">
+                <CheckoutOverview
+                  price_per_night={listing.data?.pricePerNight as number}
+                  coverData={coverData}
+                  dateRange={dateRange}
+                  guests={guests}
+                  handleChange={handleChange}
+                  handleSelectCheckIn={handleSelectCheckIn}
+                  handleSelectCheckOut={handleSelectCheckOut}
+                ></CheckoutOverview>
+                <div className="flex w-full justify-center">
+                  <PaymentMethod></PaymentMethod>
+                </div>
               </div>
               <Separator></Separator>
               <div className="flex flex-col space-y-8">
@@ -110,24 +100,13 @@ export default function BookingOverview() {
               </p>
               <div>
                 <Button
-                  className="h-14 w-[300px] bg-blue-600 text-lg hover:bg-blue-500 disabled:bg-gray-400"
+                  className="h-14 w-[300px] bg-blue-600 text-lg hover:bg-blue-500 disabled:bg-gray-400 max-sm:w-full"
                   disabled={false}
                 >
                   Bestätigen und Bezahlen
                 </Button>
               </div>
             </div>
-          </div>
-          <div className="relative flex w-1/3 justify-end py-8 pl-10">
-            <ReservationBookingOverview
-              price_per_night={listing.data?.pricePerNight as number}
-              coverData={coverData}
-              dateRange={dateRange}
-              guests={guests}
-              handleChange={handleChange}
-              handleSelectCheckIn={handleSelectCheckIn}
-              handleSelectCheckOut={handleSelectCheckOut}
-            ></ReservationBookingOverview>
           </div>
         </div>
         <Separator></Separator>
