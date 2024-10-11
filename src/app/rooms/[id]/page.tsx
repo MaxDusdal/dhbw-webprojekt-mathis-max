@@ -210,7 +210,7 @@ export default function RoomDetail() {
                 <div key={booking.id}>{booking.id}</div>
               ))
             : null}
-          <div className="xl:grid xl:grid-cols-2 xl:gap-4">
+          <div className="grid gap-4 xl:grid-cols-2">
             {bookingQuery.data?.bookings?.map((booking) => (
               <BookingCard
                 booking={booking}
