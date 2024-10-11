@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Skeleton } from "./ui/skeleton";
 import { useSearchParams } from "next/navigation";
+import { VacationHome } from "@prisma/client";
+import { VacationHomeWithImages } from "~/app/utils/types";
 
 interface Props {
   listing_id: string;
@@ -13,22 +15,28 @@ interface Props {
 
 function ListingImage({ src, alt }: { src: string; alt: string }) {
   return (
-    <div className="relative aspect-square w-full">
+    <div className="relative aspect-square w-full overflow-hidden">
       <Image
         src={src}
         alt={alt}
-        layout="fill"
-        objectFit="cover"
-        className="rounded-xl"
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        className="rounded-xl object-cover"
       />
     </div>
   );
 }
 
-export default function ListingCover(props: Props) {
+export default function ListingCover({
+  listing,
+}: {
+  listing: VacationHomeWithImages;
+}) {
   const searchParams = useSearchParams();
   const currentParams = new URLSearchParams(searchParams.toString());
-  const newPath = `/rooms/${props.listing_id}?${currentParams.toString()}`;
+  console.log(listing.id);
+  const newPath = `/rooms/${listing.id}?${currentParams.toString()}`;
+  console.log(listing.images[0]?.url);
 
   return (
     <Link href={newPath}>
@@ -37,14 +45,17 @@ export default function ListingCover(props: Props) {
           fallback={<Skeleton className="aspect-square w-full rounded-xl" />}
         >
           <ListingImage
-            src={props.image_url}
-            alt={`Bild von ${props.location}`}
+            src={listing.images[0]?.url || "/images/placeholder.webp"}
+            alt={`Bild von ${listing.title}`}
           />
         </Suspense>
         <div className="mt-1">
-          <p className="font-normal">{props.location}</p>
-          <p className="font-light">
-            <span className="font-normal">{props.price}€</span> Nacht
+          <p className="text-base font-normal">{listing.title}</p>
+          <p className="text-sm font-light text-gray-500">
+            <span className="font-normal">
+              {listing.pricePerNight.toFixed(2)}€{" "}
+            </span>
+            Nacht
           </p>
         </div>
       </div>

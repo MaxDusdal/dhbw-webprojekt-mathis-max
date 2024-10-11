@@ -12,24 +12,59 @@ export const bookingRouter = createTRPCRouter({
     });
   }),
 
+  // This endpoint can return two separte types of bookings:
+  // 1. If the VacationHome is owned by the calling user, it returns all bookings for that vacation home
+  // 2. If the VacationHome is not owned by the calling user, it returns only the bookings that the calling user has made
   getBookingsForVacationHome: protectedProcedure
     .input(z.object({ vacationHomeId: z.number() }))
     .query(async ({ input, ctx }) => {
       const vacationHome = await ctx.db.vacationHome.findUnique({
         where: { id: input.vacationHomeId },
-        include: { owner: true, bookings: true },
+        include: {
+          owner: true,
+          bookings: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      });
+      const booking = await ctx.db.booking.findMany({
+        where: {
+          vacationHomeId: input.vacationHomeId,
+        },
+        include: {
+          vacationHome: true,
+        },
       });
 
-      if (ctx.session.user.id !== vacationHome?.ownerId) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message:
-            "Du kannst nur die Buchungen deiner eigenen Ferienhäuser ansehen",
-        });
+      if (ctx.session.user.id === vacationHome?.ownerId) {
+        return {
+          bookings: vacationHome?.bookings,
+          isOwner: true,
+        };
       }
 
-      return vacationHome?.bookings;
+      // The user can only see its own bookings for that vacation home
+      if (
+        vacationHome?.bookings.some(
+          (booking) => booking.userId === ctx.session.user.id,
+        )
+      ) {
+        return {
+          bookings: vacationHome?.bookings.filter(
+            (booking) => booking.userId === ctx.session.user.id,
+          ),
+          isOwner: false,
+        };
+      }
+
+      return {
+        bookings: [],
+        isOwner: false,
+      };
     }),
+
   create: protectedProcedure
     .input(bookingCreateSchema)
     .mutation(async ({ input, ctx }) => {
@@ -58,7 +93,7 @@ export const bookingRouter = createTRPCRouter({
           (booking) =>
             booking.checkInDate < input.checkOutDate &&
             booking.checkOutDate > input.checkInDate &&
-            booking.status === "CONFIRMED",
+            booking.status === "PAID",
         )
       ) {
         throw new TRPCError({
@@ -75,7 +110,7 @@ export const bookingRouter = createTRPCRouter({
             differenceInDays(input.checkOutDate, input.checkInDate),
           userId: ctx.session.user.id,
           vacationHomeId: input.vacationHomeId,
-          status: "PENDING",
+          status: "PAID",
         },
       });
       return booking;
@@ -142,7 +177,7 @@ export const bookingRouter = createTRPCRouter({
         });
       }
 
-      if (booking?.status === "CONFIRMED") {
+      if (booking?.status === "PAID") {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Buchung ist bereits bestätigt",
@@ -158,7 +193,7 @@ export const bookingRouter = createTRPCRouter({
 
       await ctx.db.booking.update({
         where: { id: input.id },
-        data: { status: "CONFIRMED" },
+        data: { status: "PAID" },
       });
     }),
 
@@ -178,7 +213,7 @@ export const bookingRouter = createTRPCRouter({
         });
       }
 
-      if (booking?.status !== "CONFIRMED") {
+      if (booking?.status !== "PAID") {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Buchung ist nicht bestätigt",

@@ -48,7 +48,7 @@ export default function CheckoutOverview({
         <div className="flex flex-col">
           <CardTitle>Buchungsübersicht</CardTitle>
           <CardDescription className="h-10">
-            Üperprüfe alle Angabe und korrigiere diese falls nötig
+            Überprüfe alle Angaben und korrigiere diese falls nötig
           </CardDescription>
           <ReservationDataInput
             dateRange={dateRange}

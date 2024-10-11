@@ -34,13 +34,7 @@ export default function Rooms() {
         {data?.pages.map((page) => {
           return page.vacationHomes.map((vacationHome) => {
             return (
-              <ListingCover
-                key={vacationHome.id}
-                price={vacationHome.pricePerNight}
-                image_url={vacationHome.images[0]?.url ?? ""}
-                location={vacationHome.locationDescription || "Unknown"}
-                listing_id={vacationHome.id.toString()}
-              ></ListingCover>
+              <ListingCover listing={vacationHome}></ListingCover>
             );
           });
         })}

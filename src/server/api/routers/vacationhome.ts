@@ -125,19 +125,7 @@ export const vacationhomeRouter = createTRPCRouter({
         take: input.limit + 1, // Take one extra to check if there's a next page
         skip: input.cursor ? 1 : 0,
         cursor: input.cursor ? { id: input.cursor } : undefined,
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          isAvailable: true,
-          pricePerNight: true,
-          guestCount: true,
-          bedroomCount: true,
-          bedCount: true,
-          bathroomCount: true,
-          images: true,
-          locationDescription: true,
-        },
+        include: { images: true },
       });
 
       const hasNextPage = vacationHomes.length > input.limit;
@@ -156,7 +144,7 @@ export const vacationhomeRouter = createTRPCRouter({
       where: {
         ownerId: ctx.session.user.id,
       },
-      include: { images: true },
+      include: { images: true, bookings: true },
     });
     return vacationHomes;
   }),

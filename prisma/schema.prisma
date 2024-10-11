@@ -2,116 +2,115 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-    // Further reading:
-    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
+  // Further reading:
+  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
+  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
-    USER
-    HOST
-    ADMIN
+  USER
+  HOST
+  ADMIN
 }
 
 model User {
-    id                String         @id @default(uuid()) @db.Uuid
-    email             String         @unique
-    role              Role           @default(USER)
-    hash              String
-    salt              String
-    avatar            String?
-    firstName         String
-    lastName          String
-    phoneNumber       String?
-    nationality       String?
-    preferredLanguage String?
-    ownedHomes        VacationHome[] @relation("Owner")
-    bookings          Booking[]
-    sessions          Session[]
-    createdAt         DateTime       @default(now())
-    updatedAt         DateTime       @default(now()) @updatedAt
+  id                String         @id @default(uuid()) @db.Uuid
+  email             String         @unique
+  role              Role           @default(USER)
+  hash              String
+  salt              String
+  avatar            String?
+  firstName         String
+  lastName          String
+  phoneNumber       String?
+  nationality       String?
+  preferredLanguage String?
+  ownedHomes        VacationHome[] @relation("Owner")
+  bookings          Booking[]
+  sessions          Session[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @default(now()) @updatedAt
 }
 
 model VacationHome {
-    id                  Int                                   @id @default(autoincrement())
-    title               String
-    guestCount          Int
-    bedroomCount        Int
-    bedCount            Int
-    bathroomCount       Int
-    pricePerNight       Float
-    description         String
-    owner               User                                  @relation("Owner", fields: [ownerId], references: [id])
-    ownerId             String                                @db.Uuid
-    amenities           Amenity[]
-    bookings            Booking[]
-    isAvailable         Boolean                               @default(true)
-    latitude            Float?
-    longitude           Float?
-    houseRules          String?
-    cancellationPolicy  String?
-    images              Image[]
-    location            Unsupported("geometry(Point, 4326)")?
-    locationDescription String?
-    createdAt           DateTime                              @default(now())
-    updatedAt           DateTime                              @updatedAt
+  id                  Int                                   @id @default(autoincrement())
+  title               String
+  guestCount          Int
+  bedroomCount        Int
+  bedCount            Int
+  bathroomCount       Int
+  pricePerNight       Float
+  description         String
+  owner               User                                  @relation("Owner", fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId             String                                @db.Uuid
+  amenities           Amenity[]
+  bookings            Booking[]
+  isAvailable         Boolean                               @default(true)
+  latitude            Float?
+  longitude           Float?
+  houseRules          String?
+  cancellationPolicy  String?
+  images              Image[]
+  location            Unsupported("geometry(Point, 4326)")?
+  locationDescription String?
+  createdAt           DateTime                              @default(now())
+  updatedAt           DateTime                              @updatedAt
 }
 
 model Amenity {
-    id            Int            @id @default(autoincrement())
-    icon          String
-    name          String
-    description   String
-    category      String
-    vacationHomes VacationHome[]
+  id            Int            @id @default(autoincrement())
+  icon          String
+  name          String
+  description   String
+  category      String
+  vacationHomes VacationHome[]
 }
 
 model Booking {
-    id             String        @id @default(uuid()) @db.Uuid
-    user           User          @relation(fields: [userId], references: [id])
-    userId         String        @db.Uuid
-    vacationHome   VacationHome  @relation(fields: [vacationHomeId], references: [id])
-    vacationHomeId Int
-    checkInDate    DateTime
-    checkOutDate   DateTime
-    price          Float
-    guestCount     Int
-    status         BookingStatus @default(PENDING)
-    createdAt      DateTime      @default(now())
-    updatedAt      DateTime      @updatedAt
+  id             String        @id @default(uuid()) @db.Uuid
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String        @db.Uuid
+  vacationHome   VacationHome  @relation(fields: [vacationHomeId], references: [id], onDelete: Cascade)
+  vacationHomeId Int
+  checkInDate    DateTime
+  checkOutDate   DateTime
+  price          Float
+  guestCount     Int
+  status         BookingStatus @default(PAID)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
 
 enum BookingStatus {
-    PENDING
-    CONFIRMED
-    CANCELLED
-    COMPLETED
+  PAID
+  CANCELLED
+  COMPLETED
 }
 
 model Image {
-    id             Int          @id @default(autoincrement())
-    url            String
-    vacationHome   VacationHome @relation(fields: [vacationHomeId], references: [id])
-    vacationHomeId Int
-    createdAt      DateTime     @default(now())
-    updatedAt      DateTime     @updatedAt
+  id             Int          @id @default(autoincrement())
+  url            String
+  vacationHome   VacationHome @relation(fields: [vacationHomeId], references: [id], onDelete: Cascade)
+  vacationHomeId Int
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
 model Session {
-    id        String   @id
-    userId    String   @db.Uuid
-    expiresAt DateTime
-    user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
-    device    String?
-    location  String?
-    ipAddress String?
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id        String   @id
+  userId    String   @db.Uuid
+  expiresAt DateTime
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+  device    String?
+  location  String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

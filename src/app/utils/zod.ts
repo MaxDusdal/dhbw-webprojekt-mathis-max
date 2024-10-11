@@ -87,14 +87,20 @@ export const vacationhomeCreateSchema = z.object({
     .min(1, "Anzahl der Gäste muss aus mindestens 1 bestehen"),
   bedroomCount: z
     .number()
-    .min(1, "Anzahl der Schlafzimmer muss aus mindestens 1 bestehen"),
+    .min(1, "Anzahl der Schlafzimmer muss aus mindestens 1 bestehen")
+    .max(100, "Anzahl der Schlafzimmer darf nicht höher als 100 sein"),
   bedCount: z
     .number()
-    .min(1, "Anzahl der Betten muss aus mindestens 1 bestehen"),
+    .min(1, "Anzahl der Betten muss aus mindestens 1 bestehen")
+    .max(100, "Anzahl der Betten darf nicht höher als 100 sein"),
   bathroomCount: z
     .number()
-    .min(1, "Anzahl der Bäder muss aus mindestens 1 bestehen"),
-  pricePerNight: z.number().min(0, "Preis pro Nacht muss positiv sein"),
+    .min(1, "Anzahl der Bäder muss aus mindestens 1 bestehen")
+    .max(10, "Anzahl der Bäder darf nicht höher als 100 sein"),
+  pricePerNight: z
+    .number()
+    .min(0, "Preis pro Nacht darf nicht niedriger als 0€ sein")
+    .max(5000, "Preis pro Nacht darf nicht höher als 5000€ sein"),
   description: z
     .string()
     .min(10, "Beschreibung muss aus mindestens 10 Zeichen bestehen")
@@ -121,7 +127,6 @@ export const vacationhomeCreateSchema = z.object({
   locationDescription: z.string(),
   isAvailable: z.boolean().optional(),
 });
-
 export const amenityCreateSchema = z.object({
   icon: z.string(),
   name: z.string().min(2).max(255),

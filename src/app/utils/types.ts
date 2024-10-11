@@ -1,4 +1,4 @@
-import { Session, type User } from "@prisma/client";
+import { Session, VacationHome, Image, User } from "@prisma/client";
 
 export type ButtonVariants =
   | "primary"
@@ -68,4 +68,8 @@ export type ImagesUploadCare = {
 export type PlaceSuggestion = {
   place_id: string;
   description: string;
+};
+
+export type VacationHomeWithImages = VacationHome & {
+  images: Image[];
 };

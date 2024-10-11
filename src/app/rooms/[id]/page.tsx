@@ -15,6 +15,13 @@ import {
   verifyAmountParam,
   verifyDateParamWithDefault,
 } from "~/hooks/useReservation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 
 export default function RoomDetail() {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +30,11 @@ export default function RoomDetail() {
   }
   const router = useRouter();
   const listing = api.vacationhome.getById.useQuery({ id: Number(id) });
+
+  const bookingQuery = api.booking.getBookingsForVacationHome.useQuery({
+    vacationHomeId: Number(id),
+  });
+  console.log(bookingQuery.data);
   const searchParams = useSearchParams();
   const sAdults = verifyAmountParam(searchParams.get("adults"), 1, 5, 1);
   const sChildren = verifyAmountParam(searchParams.get("children"), 0, 5, 0);
@@ -41,6 +53,14 @@ export default function RoomDetail() {
     handleChange,
   } = useReservation(initialDateRange, sAdults, sChildren, sPets);
 
+  // TODO: Hier eine "schönen Loading-State
+  if (listing.isLoading) {
+    return <div>Loading...</div>;
+  }
+  // TODO: Hier eine "schöne" Fehlermeldung
+  if (!listing.data) {
+    return "Kein Listing gefunden";
+  }
   return (
     <div className="flex w-full justify-center">
       <div className="flex max-w-7xl flex-grow flex-col p-10">
@@ -54,7 +74,7 @@ export default function RoomDetail() {
             </div>
             <Separator></Separator>
             <div className="flex flex-col space-y-8">
-              <h1 className="text-2xl font-medium">Über diese Unterkunft</h1>
+              <h2 className="text-2xl font-medium">Über diese Unterkunft</h2>
               <p>
                 Ein wunderbares seltenes Haus, das von der Künstlerin Gernod
                 Minke in der Nähe der Innenstadt von Kassel gebaut wurde. Es ist
@@ -68,16 +88,16 @@ export default function RoomDetail() {
             </div>
             <Separator></Separator>
             <div className="flex flex-col space-y-4">
-              <h1 className="text-2xl font-medium">
+              <h2 className="text-2xl font-medium">
                 Das Bietet diese Unterkunft
-              </h1>
+              </h2>
               {listing.data?.amenities ? (
                 <div className="mt-3 grid w-full grid-cols-4 gap-5">
                   {listing.data.amenities.map((amenity) => (
                     <div
                       key={amenity.id}
                       className={
-                        "flex cursor-pointer flex-col items-start gap-2 rounded-md p-4 ring-1 ring-gray-300 hover:bg-gray-100"
+                        "flex flex-col items-start gap-2 rounded-md p-4 ring-1 ring-gray-300"
                       }
                     >
                       <Image
@@ -100,7 +120,7 @@ export default function RoomDetail() {
             <Separator></Separator>
 
             <div className="flex flex-col space-y-4">
-              <h1 className="text-2xl font-medium">
+              <h2 className="text-2xl font-medium">
                 {dateRange?.from
                   ? dateRange.to
                     ? differenceInCalendarDays(dateRange.to, dateRange.from) +
@@ -111,7 +131,7 @@ export default function RoomDetail() {
                       listing.data?.locationDescription
                     : "Check-Out Datum wählen"
                   : "Chek-In Datum wählen"}
-              </h1>
+              </h2>
               <CalendarLarge
                 mode="range"
                 defaultMonth={dateRange?.from}
@@ -137,7 +157,7 @@ export default function RoomDetail() {
             <Separator></Separator>
 
             <div className="mt-10 flex flex-col space-y-4">
-              <h1 className="text-2xl font-medium">Hier wirst du sein</h1>
+              <h2 className="text-2xl font-medium">Hier wirst du sein</h2>
               {listing.data?.latitude && listing.data.longitude ? (
                 <MapComponent
                   longitude={listing.data?.longitude}
@@ -163,6 +183,27 @@ export default function RoomDetail() {
         </div>
 
         <Separator></Separator>
+        <h2 className="text-2xl font-medium">
+          {bookingQuery.data?.isOwner
+            ? " Buchungen für dieses Inserat (Du bist der Besitzer)"
+            : "Deine Buchungen"}
+        </h2>
+        {bookingQuery.data?.isOwner
+          ? bookingQuery.data?.bookings?.map((booking) => (
+              <div key={booking.id}>{booking.id}</div>
+            ))
+          : null}
+        {bookingQuery.data?.bookings?.map((booking) => (
+          <Card key={booking.id}>
+            <CardHeader>
+              <CardTitle>
+                Buchung von {booking.user.firstName} {booking.user.lastName} für{" "}
+                {booking.guestCount} Personen
+              </CardTitle>
+              <CardDescription>{listing.data?.title}</CardDescription>
+            </CardHeader>
+          </Card>
+        ))}
       </div>
     </div>
   );
