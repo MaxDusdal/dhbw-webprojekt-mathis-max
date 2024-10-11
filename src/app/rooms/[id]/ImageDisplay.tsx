@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { useState, useMemo } from "react";
-import { Skeleton } from "~/components/ui/skeleton";
 import {
   Carousel,
   CarouselContent,
@@ -8,8 +7,9 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "~/components/ui/carousel";
-import { Dialog, DialogContent } from "~/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent } from "~/components/ui/dialog";
 import { useEffect } from "react";
+import Skeleton from "react-loading-skeleton";
 
 type ImageData = {
   id: number;
@@ -56,14 +56,20 @@ export default function ImageDisplay({ image_urls }: Props) {
 
   return (
     <>
-      <div className="mt-6 grid h-[516px] w-full grid-cols-2 gap-2 overflow-hidden rounded-2xl">
-        {displayImages[0] && (
+      <div className="relative mt-6 grid h-[300px] w-full grid-cols-1 gap-2 overflow-hidden rounded-md md:h-[516px] md:grid-cols-2">
+        {displayImages[selectedImageIndex] && (
           <ImageTile
-            image={displayImages[0]}
+            image={displayImages[selectedImageIndex]}
             onClick={() => handleImageClick(0)}
           />
         )}
-        <div className="grid h-full w-full grid-cols-2 gap-2">
+        {/* Mobile Overlay to show how many picture there are as well as making it obvious that you can swipe */}
+        <div className="absolute bottom-2 right-2 flex flex-col items-center justify-center rounded-md bg-black/60 px-3 py-1">
+          <p className="text-white text-sm">
+            {selectedImageIndex + 1} / {image_urls.length}
+          </p>
+        </div>
+        <div className="hidden h-full w-full grid-cols-2 gap-2 md:grid">
           {displayImages.slice(1).map((image, index) => (
             <ImageTile
               key={image.id}
@@ -142,7 +148,7 @@ function ImageCarousel({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-full max-w-[90vw] border-none border-opacity-0 bg-transparent bg-opacity-0 px-0 py-10">
+      <DialogContent className="max-h-full max-w-[80vw] border-none border-opacity-0 bg-transparent bg-opacity-0 px-0 py-10">
         <Carousel
           setApi={setApi}
           className="h-full w-full"
@@ -151,7 +157,7 @@ function ImageCarousel({
           <CarouselContent>
             {images.map((image) => (
               <CarouselItem key={image.id}>
-                <div className="felx relative h-[calc(90vh-88px)] w-full flex-grow">
+                <div className="felx s relative h-[calc(90vh-88px)] flex-grow">
                   <Image
                     src={image.url}
                     alt={`Vacation home image ${image.id}`}
@@ -162,8 +168,10 @@ function ImageCarousel({
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          <CarouselPrevious onClick={() => onSelectImage(current - 1)} />
+          <CarouselNext
+            onClick={() => onSelectImage(current + 1 > images.length - 1 ? 0 : current + 1)}
+          />
         </Carousel>
         <div className="mt-4 flex justify-center space-x-2 overflow-x-auto p-2">
           {images.map((image, index) => (

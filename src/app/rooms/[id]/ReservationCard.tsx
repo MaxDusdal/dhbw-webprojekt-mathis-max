@@ -31,6 +31,7 @@ type ReservationData = {
   handleSelectCheckOut: (date: Date | undefined) => void;
   guests: Guests;
   handleChange: (type: keyof Guests) => (value: number) => void;
+  getUpdatedParams: () => URLSearchParams;
 };
 
 export default function ReservationCard({
@@ -41,21 +42,12 @@ export default function ReservationCard({
   handleSelectCheckOut,
   guests,
   handleChange,
+  getUpdatedParams,
 }: ReservationData) {
   const searchParams = useSearchParams();
-  const getUpdatedParams = () => {
-    const params = new URLSearchParams();
-    if (dateRange?.from)
-      params.set("from", format(dateRange.from, "dd.MM.yyyy", { locale: de }));
-    if (dateRange?.to)
-      params.set("to", format(dateRange.to, "dd.MM.yyyy", { locale: de }));
-    params.set("adults", guests.adults.toString());
-    params.set("children", guests.children.toString());
-    params.set("pets", guests.pets.toString());
-    return params;
-  };
+
   return (
-    <div className="sticky top-20 h-fit w-96 rounded-xl p-6 shadow-lg ring-1 ring-gray-300">
+    <div className="sticky top-20 h-fit min-w-[379px] rounded-xl p-6 shadow-lg ring-1 ring-gray-300">
       <p className="text-base font-light">
         <span className="text-2xl font-medium">{`${price_per_night}€`}</span>
         Nacht
@@ -96,7 +88,6 @@ function ReservationOverview({ dateRange, price_per_night }: OverviewProps) {
   if (!dateRange?.from || !dateRange.to) {
     return <></>;
   }
-
   const differenceInDays = differenceInCalendarDays(
     dateRange.to,
     dateRange.from,

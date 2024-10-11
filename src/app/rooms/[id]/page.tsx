@@ -22,6 +22,8 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import StickyBookMobile from "./book/StickyBookMobile";
+import { VacationHomeWithImages } from "~/app/utils/types";
 import BookingCard from "~/components/bookingCard";
 
 export default function RoomDetail() {
@@ -52,6 +54,7 @@ export default function RoomDetail() {
     handleSelectCheckIn,
     handleSelectCheckOut,
     handleChange,
+    getUpdatedParams,
   } = useReservation(initialDateRange, sAdults, sChildren, sPets);
 
   // TODO: Hier eine "schönen Loading-State
@@ -75,11 +78,11 @@ export default function RoomDetail() {
   };
   return (
     <div className="flex w-full justify-center">
-      <div className="flex max-w-7xl flex-grow flex-col p-10">
+      <div className="flex max-w-7xl flex-grow flex-col px-4">
         <h1 className="text-2xl font-medium">{listing.data?.title}</h1>
         <ImageDisplay image_urls={listing.data?.images}></ImageDisplay>
-        <div className="flex w-full flex-row">
-          <div className="flex w-2/3 flex-col space-y-10 py-8 pr-8">
+        <div className="flex w-full flex-col xl:flex-row">
+          <div className="flex flex-col space-y-10 py-8 xl:pr-8">
             <div className="mb-4">
               <h1 className="text-2xl font-medium">Hier steht noch ein Text</h1>
               <p className="font-light">Hier steht die anzahl Betten etc</p>
@@ -104,7 +107,7 @@ export default function RoomDetail() {
                 Das Bietet diese Unterkunft
               </h2>
               {listing.data?.amenities ? (
-                <div className="mt-3 grid w-full grid-cols-4 gap-5">
+                <div className="mt-3 grid w-full grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4">
                   {listing.data.amenities.map((amenity) => (
                     <div
                       key={amenity.id}
@@ -181,7 +184,7 @@ export default function RoomDetail() {
             </div>
           </div>
 
-          <div className="relative flex w-[379px] justify-end py-8 pl-10">
+          <div className="relative order-first mx-auto hidden justify-end py-8 xl:order-last xl:flex xl:w-[379px] xl:pl-10">
             <ReservationCard
               price_per_night={listing.data?.pricePerNight as number}
               listing_id={listing.data?.id as number}
@@ -190,6 +193,7 @@ export default function RoomDetail() {
               handleSelectCheckOut={handleSelectCheckOut}
               guests={guests}
               handleChange={handleChange}
+              getUpdatedParams={getUpdatedParams}
             ></ReservationCard>
           </div>
         </div>
@@ -226,6 +230,11 @@ export default function RoomDetail() {
           <Separator></Separator>
         </div>
       </div>
+      <StickyBookMobile
+        dateRange={dateRange}
+        vacationHome={listing.data as VacationHomeWithImages}
+        getUpdatedParams={getUpdatedParams}
+      ></StickyBookMobile>
     </div>
   );
 }

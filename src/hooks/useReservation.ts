@@ -1,12 +1,17 @@
 import React from "react";
 import { useRouter } from "next/navigation";
-import { parse, isValid, addDays, max, isAfter, isSameDay } from "date-fns";
+import {
+  parse,
+  isValid,
+  addDays,
+  max,
+  isAfter,
+  isSameDay,
+  format,
+} from "date-fns";
+import { de } from "date-fns/locale";
 import { SelectRangeEventHandler } from "react-day-picker";
-
-interface DateRange {
-  from: Date | undefined;
-  to: Date | undefined;
-}
+import { DateRange } from "~/app/utils/types";
 
 interface Guests {
   adults: number;
@@ -55,6 +60,18 @@ export function useReservation(
     setDateRange(range as DateRange | undefined);
   };
 
+  const getUpdatedParams = () => {
+    const params = new URLSearchParams();
+    if (dateRange?.from)
+      params.set("from", format(dateRange.from, "dd.MM.yyyy", { locale: de }));
+    if (dateRange?.to)
+      params.set("to", format(dateRange.to, "dd.MM.yyyy", { locale: de }));
+    params.set("adults", guests.adults.toString());
+    params.set("children", guests.children.toString());
+    params.set("pets", guests.pets.toString());
+    return params;
+  };
+
   return {
     dateRange,
     setDateRange: handleSetDateRange,
@@ -62,6 +79,7 @@ export function useReservation(
     handleSelectCheckIn,
     handleSelectCheckOut,
     handleChange,
+    getUpdatedParams,
   };
 }
 

@@ -73,3 +73,8 @@ export type PlaceSuggestion = {
 export type VacationHomeWithImages = VacationHome & {
   images: Image[];
 };
+
+export type DateRange = {
+  from: Date | undefined;
+  to: Date | undefined;
+};
