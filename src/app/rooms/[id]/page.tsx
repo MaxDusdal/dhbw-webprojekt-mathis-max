@@ -22,6 +22,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import BookingCard from "~/components/bookingCard";
 
 export default function RoomDetail() {
   const { id } = useParams<{ id: string }>();
@@ -61,6 +62,17 @@ export default function RoomDetail() {
   if (!listing.data) {
     return "Kein Listing gefunden";
   }
+  type CoverData = {
+    image_url: string;
+    title: string;
+    description: string;
+  };
+
+  const coverData: CoverData = {
+    image_url: listing.data?.images[0]?.url || "https://picsum.photos/200",
+    title: listing.data?.title || "Unterkunft",
+    description: "Unterkuft: Wohnung",
+  };
   return (
     <div className="flex w-full justify-center">
       <div className="flex max-w-7xl flex-grow flex-col p-10">
@@ -183,18 +195,24 @@ export default function RoomDetail() {
         </div>
 
         <Separator></Separator>
-        <h2 className="text-2xl font-medium">
+        <div className="flex flex-col space-y-10">
+          <h2 className="mt-10 text-2xl font-medium">
+            {bookingQuery.data?.isOwner
+              ? " Buchungen für dieses Inserat (Du bist der Besitzer)"
+              : "Deine Buchungen"}
+          </h2>
           {bookingQuery.data?.isOwner
-            ? " Buchungen für dieses Inserat (Du bist der Besitzer)"
-            : "Deine Buchungen"}
-        </h2>
-        {bookingQuery.data?.isOwner
-          ? bookingQuery.data?.bookings?.map((booking) => (
-              <div key={booking.id}>{booking.id}</div>
-            ))
-          : null}
-        {bookingQuery.data?.bookings?.map((booking) => (
-          <Card key={booking.id}>
+            ? bookingQuery.data?.bookings?.map((booking) => (
+                <div key={booking.id}>{booking.id}</div>
+              ))
+            : null}
+          <div className="xl:grid xl:grid-cols-2 xl:gap-4">
+            {bookingQuery.data?.bookings?.map((booking) => (
+              <BookingCard
+                booking={booking}
+                coverData={coverData}
+              ></BookingCard>
+              /*<Card key={booking.id}>
             <CardHeader>
               <CardTitle>
                 Buchung von {booking.user.firstName} {booking.user.lastName} für{" "}
@@ -202,8 +220,11 @@ export default function RoomDetail() {
               </CardTitle>
               <CardDescription>{listing.data?.title}</CardDescription>
             </CardHeader>
-          </Card>
-        ))}
+          </Card>*/
+            ))}
+          </div>
+          <Separator></Separator>
+        </div>
       </div>
     </div>
   );

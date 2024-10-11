@@ -13,10 +13,10 @@ type Guests = {
 
 type ReservationData = {
   dateRange: DateRange | undefined;
-  handleSelectCheckIn: (date: Date | undefined) => void;
-  handleSelectCheckOut: (date: Date | undefined) => void;
+  handleSelectCheckIn?: (date: Date | undefined) => void;
+  handleSelectCheckOut?: (date: Date | undefined) => void;
   guests: Guests;
-  handleChange: (type: keyof Guests) => (value: number) => void;
+  handleChange?: (type: keyof Guests) => (value: number) => void;
 };
 
 export default function ReservationDataInput({
@@ -27,7 +27,7 @@ export default function ReservationDataInput({
   handleChange,
 }: ReservationData) {
   return (
-    <div className="mt-5 flex w-full flex-col rounded-md ring-1 ring-gray-400">
+    <div className="mt-5 flex w-full flex-col overflow-hidden rounded-md ring-1 ring-gray-400">
       <div className="flex w-full border-b border-gray-400">
         <div className="h-full w-1/2 border-r border-gray-400">
           <ReservationDateSelector
@@ -76,8 +76,8 @@ export default function ReservationDataInput({
 type DateSelecorProps = {
   description: string;
   date: Date | undefined;
-  handleSelect: (date: Date | undefined) => void;
-  disabled: Matcher | Matcher[] | undefined;
+  handleSelect?: (date: Date | undefined) => void;
+  disabled?: Matcher | Matcher[] | undefined;
 };
 
 function ReservationDateSelector({
@@ -86,36 +86,50 @@ function ReservationDateSelector({
   handleSelect,
   disabled,
 }: DateSelecorProps) {
+  if (handleSelect) {
+    return (
+      <Popover>
+        <PopoverTrigger asChild>
+          <div className="flex w-full cursor-pointer flex-col justify-start space-y-1 p-2 hover:bg-gray-100">
+            <p className="text-[10px] font-semibold">{description}</p>
+            <p className="text-sm">
+              {date ? (
+                format(date, "dd.MM.yyyy", { locale: de })
+              ) : (
+                <span className="text-muted-foreground">Datum hinzufügen</span>
+              )}
+            </p>
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0">
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={handleSelect}
+            disabled={disabled}
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
+    );
+  }
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <div className="flex w-full cursor-pointer flex-col justify-start space-y-1 rounded-tl-md p-2 hover:bg-gray-100">
-          <p className="text-[10px] font-semibold">{description}</p>
-          <p className="text-sm">
-            {date ? (
-              format(date, "dd.MM.yyyy", { locale: de })
-            ) : (
-              <span className="text-muted-foreground">Datum hinzufügen</span>
-            )}
-          </p>
-        </div>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={handleSelect}
-          disabled={disabled}
-          initialFocus
-        />
-      </PopoverContent>
-    </Popover>
+    <div className="flex w-full flex-col justify-start space-y-1 p-2">
+      <p className="text-[10px] font-semibold">{description}</p>
+      <p className="text-sm">
+        {date ? (
+          format(date, "dd.MM.yyyy", { locale: de })
+        ) : (
+          <span className="text-muted-foreground">Unbekanntes Datum</span>
+        )}
+      </p>
+    </div>
   );
 }
 
 type GuestSelectorProps = {
   guests: Guests;
-  handleChange: (type: keyof Guests) => (value: number) => void;
+  handleChange?: (type: keyof Guests) => (value: number) => void;
 };
 
 function GuestSelector({ guests, handleChange }: GuestSelectorProps) {
@@ -129,49 +143,57 @@ function GuestSelector({ guests, handleChange }: GuestSelectorProps) {
       : ""
   }`;
 
+  if (handleChange) {
+    return (
+      <Popover>
+        <PopoverTrigger asChild>
+          <div className="flex w-full cursor-pointer flex-col justify-start space-y-1 rounded-b-md p-2 hover:bg-gray-100">
+            <p className="text-[10px] font-semibold">GÄSTE</p>
+            <p className="text-sm">{guestSummary}</p>
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-[296px] px-3">
+          <QuantitySelector
+            onChange={handleChange("adults")}
+            value={guests.adults}
+            min={1}
+            max={5}
+            label={
+              <div className="flex flex-col">
+                <span className="text-base font-medium">Erwachsene</span>
+                <span className="text-sm font-light">Ab 13 Jahren</span>
+              </div>
+            }
+          />
+          <QuantitySelector
+            onChange={handleChange("children")}
+            value={guests.children}
+            max={5}
+            label={
+              <div className="flex flex-col">
+                <span className="text-base font-medium">Kinder</span>
+                <span className="text-sm font-light">Bis 12 Jahren</span>
+              </div>
+            }
+          />
+          <QuantitySelector
+            onChange={handleChange("pets")}
+            value={guests.pets}
+            max={5}
+            label={
+              <div className="flex flex-col">
+                <span className="text-base font-medium">Haustiere</span>
+              </div>
+            }
+          />
+        </PopoverContent>
+      </Popover>
+    );
+  }
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <div className="flex w-full cursor-pointer flex-col justify-start space-y-1 rounded-b-md p-2 hover:bg-gray-100">
-          <p className="text-[10px] font-semibold">GÄSTE</p>
-          <p className="text-sm">{guestSummary}</p>
-        </div>
-      </PopoverTrigger>
-      <PopoverContent className="w-[296px] px-3">
-        <QuantitySelector
-          onChange={handleChange("adults")}
-          value={guests.adults}
-          min={1}
-          max={5}
-          label={
-            <div className="flex flex-col">
-              <span className="text-base font-medium">Erwachsene</span>
-              <span className="text-sm font-light">Ab 13 Jahren</span>
-            </div>
-          }
-        />
-        <QuantitySelector
-          onChange={handleChange("children")}
-          value={guests.children}
-          max={5}
-          label={
-            <div className="flex flex-col">
-              <span className="text-base font-medium">Kinder</span>
-              <span className="text-sm font-light">Bis 12 Jahren</span>
-            </div>
-          }
-        />
-        <QuantitySelector
-          onChange={handleChange("pets")}
-          value={guests.pets}
-          max={5}
-          label={
-            <div className="flex flex-col">
-              <span className="text-base font-medium">Haustiere</span>
-            </div>
-          }
-        />
-      </PopoverContent>
-    </Popover>
+    <div className="flex w-full flex-col justify-start space-y-1 rounded-b-md p-2">
+      <p className="text-[10px] font-semibold">GÄSTE</p>
+      <p className="text-sm">{guestSummary}</p>
+    </div>
   );
 }
