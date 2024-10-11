@@ -43,7 +43,7 @@ export default function CheckoutOverview({
   price_per_night,
 }: ReservationData) {
   return (
-    <Card className="w-full hover:shadow-lg">
+    <Card className="w-full">
       <CardHeader className="flex flex-row justify-between space-x-4 pb-0 max-[425px]:space-x-2 max-[425px]:px-2">
         <div className="flex flex-col">
           <CardTitle>Buchungsübersicht</CardTitle>

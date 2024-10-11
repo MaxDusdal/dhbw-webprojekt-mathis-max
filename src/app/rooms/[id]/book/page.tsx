@@ -1,6 +1,11 @@
 "use client";
-import { redirect, useParams, useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import {
+  useRouter,
+  redirect,
+  useParams,
+  useSearchParams,
+} from "next/navigation";
+import React, { useEffect, useState } from "react";
 import { Separator } from "~/components/ui/separator";
 import ReservationBookingOverview from "./ReservationOverview";
 import {
@@ -9,7 +14,6 @@ import {
   verifyDateParamWithDefault,
 } from "~/hooks/useReservation";
 import { api } from "~/trpc/react";
-import { PaymentMethod } from "./paymentMethod";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { Button } from "~/components/ui/button";
@@ -28,6 +32,7 @@ export default function BookingOverview() {
   const [paymentStatus, setPaymentStatus] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [bookingId, setBookingId] = useState<string | undefined>(undefined);
   const coverData: CoverData = {
     image_url: listing.data?.images[0]?.url || "https://picsum.photos/200",
     title: listing.data?.title || "Unterkunft",
@@ -45,13 +50,19 @@ export default function BookingOverview() {
   const createBookingMutation = api.booking.create.useMutation({
     onSuccess: (booking) => {
       setIsLoading(false);
-      redirect("/");
+      setBookingId("string");
     },
     onError: (error) => {
       setIsLoading(false);
       setError(error.message);
     },
   });
+
+  useEffect(() => {
+    if (bookingId) {
+      redirect("/");
+    }
+  }, [bookingId]);
 
   const createBooking = async () => {
     const data = {

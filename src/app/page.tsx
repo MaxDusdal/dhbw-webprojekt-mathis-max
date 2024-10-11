@@ -33,7 +33,12 @@ export default function Rooms() {
       <div className="grid grid-cols-2 gap-x-6 gap-y-10 max-sm:px-2 md:grid-cols-3 lg:grid-cols-4">
         {data?.pages.map((page) => {
           return page.vacationHomes.map((vacationHome) => {
-            return <ListingCover key={vacationHome.id} listing={vacationHome}></ListingCover>;
+            return (
+              <ListingCover
+                key={vacationHome.id}
+                listing={vacationHome}
+              ></ListingCover>
+            );
           });
         })}
       </div>
