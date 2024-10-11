@@ -44,7 +44,6 @@ export default function HeaderUserComponent() {
     );
   }
   if (user) {
-    console.log(user.data);
     return (
       <Menu as="div" className="hidden lg:relative text-left lg:flex lg:flex-1 lg:justify-end">
         <div>

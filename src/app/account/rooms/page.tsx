@@ -52,7 +52,7 @@ export default function RoomsPage() {
                     {vacationHome.bookings.length} Buchungen insgesamt |{" "}
                     {
                       vacationHome.bookings.filter(
-                        (booking) => booking.status === "PENDING",
+                        (booking) => booking.status === "PAID",
                       ).length
                     }{" "}
                     Buchungen offen

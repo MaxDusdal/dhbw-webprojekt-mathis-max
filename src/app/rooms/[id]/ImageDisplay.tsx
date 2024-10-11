@@ -98,8 +98,9 @@ function ImageTile({ image, onClick }: ImageTileProps) {
       <Image
         src={image.url}
         alt={`Vacation home image ${image.id}`}
-        layout="fill"
-        objectFit="cover"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        fill
+        className="object-cover"
       />
     </div>
   );

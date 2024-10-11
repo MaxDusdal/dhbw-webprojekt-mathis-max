@@ -34,9 +34,7 @@ export default function ListingCover({
 }) {
   const searchParams = useSearchParams();
   const currentParams = new URLSearchParams(searchParams.toString());
-  console.log(listing.id);
   const newPath = `/rooms/${listing.id}?${currentParams.toString()}`;
-  console.log(listing.images[0]?.url);
 
   return (
     <Link href={newPath}>
