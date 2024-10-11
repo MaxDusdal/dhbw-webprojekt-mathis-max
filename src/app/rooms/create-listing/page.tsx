@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
 
 export default function CreateListing() {
- 
+  
   return (
     <div className="flex w-full justify-center">
       <Card className="w-[630px]">

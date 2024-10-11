@@ -95,7 +95,10 @@ const VacationHomeForm = () => {
 
   useEffect(() => {
     if (images.length > 0) {
-      setValue("images", images.map((image) => image.url));
+      setValue(
+        "images",
+        images.map((image) => image.url),
+      );
     }
   }, [images]);
 

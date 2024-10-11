@@ -2,9 +2,20 @@ import Link from "next/link";
 import Image from "next/image";
 import { api } from "~/trpc/react";
 import CustomButton from "../Buttons/CustomButton";
-import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowRightCircleIcon,
+  ChevronDownIcon,
+} from "@heroicons/react/24/outline";
 import { useState } from "react";
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import {
+  Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+} from "@headlessui/react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 export default function HeaderUserComponent() {
@@ -45,20 +56,21 @@ export default function HeaderUserComponent() {
   }
   if (user) {
     return (
-      <Menu as="div" className="hidden lg:relative text-left lg:flex lg:flex-1 lg:justify-end">
+      <Menu
+        as="div"
+        className="hidden text-left lg:relative lg:flex lg:flex-1 lg:justify-end"
+      >
         <div>
           <MenuButton>
             <div className="hidden lg:flex lg:flex-1 lg:justify-end">
               <div className="flex items-center gap-3 rounded-md p-2 px-2 transition-all duration-200 hover:cursor-pointer hover:bg-gray-200">
-                <p>
-                  {user.data?.firstName}
-                </p>
+                <p>{user.data?.firstName}</p>
                 <Image
                   src={user.data?.avatar ?? "/images/randomAvatar.jpeg"}
                   alt="User"
                   width={64}
                   height={64}
-                  className="rounded-full h-8 w-8"
+                  className="h-8 w-8 rounded-full"
                 />
               </div>
             </div>
@@ -67,7 +79,7 @@ export default function HeaderUserComponent() {
 
         <MenuItems
           transition
-          className="absolute top-12 right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
+          className="absolute right-0 top-12 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
         >
           <div className="px-4 py-3">
             <p className="text-sm">Eingeloggt als</p>
@@ -141,20 +153,46 @@ export function MobileHeaderUserComponent() {
   }
   if (user.data) {
     return (
-      <div className="py-6">
-        <div className="flex items-center gap-3 rounded-md p-2 px-2 transition-all duration-200 hover:cursor-pointer hover:bg-gray-200">
-          <Image
-            src={user.data?.avatar ?? "/images/randomAvatar.jpeg"}
-            alt="User"
-            width={32}
-            height={32}
-            className="rounded-full"
-          />
-          <p>
-            {user.data?.firstName} {user.data?.lastName}
-          </p>
-        </div>
-      </div>
+      <Disclosure as="div" className="py-6">
+        {({ open }) => (
+          <>
+            <DisclosureButton
+              as="div"
+              className="flex items-center gap-3 rounded-md p-2 px-2 transition-all duration-200 hover:cursor-pointer hover:bg-gray-200"
+            >
+              <div className="flex w-full flex-row items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Image
+                    src={user.data?.avatar ?? "/images/randomAvatar.jpeg"}
+                    alt="User"
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                  <p>
+                    {user.data?.firstName} {user.data?.lastName}
+                  </p>
+                </div>
+                <ChevronDownIcon
+                  className={`h-5 w-5 transition-transform duration-200 ${
+                    open ? "rotate-180 transform" : ""
+                  }`}
+                />
+              </div>
+            </DisclosureButton>
+            <DisclosurePanel>
+              <div className="flex flex-col gap-4 pt-2 px-12 text-gray-800 ">
+                <Link href="/account/profile" >Account Einstellungen</Link>
+                <Link href="/account/bookings">Ihre Buchungen</Link>
+                <Link href="/account/rooms">Ihre Inserate</Link>
+                <form action="/api/auth/signout" method="POST">
+                  <button type="submit">Abmelden</button>
+                </form>
+              </div>
+            </DisclosurePanel>
+          </>
+        )}
+      </Disclosure>
     );
   }
 }

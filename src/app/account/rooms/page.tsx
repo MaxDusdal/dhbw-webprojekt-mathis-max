@@ -61,7 +61,7 @@ export default function RoomsPage() {
               </div>
               <div className="mt-4 flex flex-row gap-2">
                 <CustomButton
-                  href={`/rooms/${vacationHome.id}`}
+                  href={`/rooms/${vacationHome.id}#bookings`}
                   variant="primary"
                   fullWidth={false}
                 >

@@ -200,7 +200,7 @@ export default function RoomDetail() {
 
         <Separator></Separator>
         <div className="flex flex-col space-y-10">
-          <h2 className="mt-10 text-2xl font-medium">
+          <h2 className="mt-10 text-2xl font-medium" id="bookings">
             {bookingQuery.data?.isOwner
               ? " Buchungen für dieses Inserat (Du bist der Besitzer)"
               : "Deine Buchungen"}
