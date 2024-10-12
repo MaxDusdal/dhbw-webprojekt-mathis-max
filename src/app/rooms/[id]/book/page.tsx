@@ -26,6 +26,12 @@ type CoverData = {
   description: string;
 };
 
+enum SectionState {
+  VALID,
+  INVALID,
+  INCOMPLETE,
+}
+
 export default function BookingOverview() {
   const { id } = useParams<{ id: string }>();
   const listing = api.vacationhome.getById.useQuery({ id: Number(id) });
@@ -89,8 +95,32 @@ export default function BookingOverview() {
     handleSelectCheckIn,
     handleSelectCheckOut,
     handleChange,
+    updateSectionState,
+    sectionState,
   } = useReservation(initialDateRange, sAdults, sChildren, sPets);
 
+  const [hasUpdated, setHasUpdated] = useState(false);
+
+  useEffect(() => {
+    if (!hasUpdated && blockedDatesQuery.data) {
+      updateSectionState(blockedDatesQuery.data);
+      setHasUpdated(true);
+    }
+  }, [blockedDatesQuery.data, hasUpdated]);
+
+  function handleSelectCheckInWBooked(selectedDay: Date | undefined) {
+    handleSelectCheckIn(
+      selectedDay,
+      blockedDatesQuery.data ? blockedDatesQuery.data : [],
+    );
+  }
+
+  function handleSelectCheckOutWBooked(selectedDay: Date | undefined) {
+    handleSelectCheckOut(
+      selectedDay,
+      blockedDatesQuery.data ? blockedDatesQuery.data : [],
+    );
+  }
   return (
     <div className="flex w-full justify-center">
       <div className="flex max-w-7xl flex-grow flex-col p-5 max-[465px]:p-0 lg:p-10">
@@ -107,8 +137,8 @@ export default function BookingOverview() {
                   dateRange={dateRange}
                   guests={guests}
                   handleChange={handleChange}
-                  handleSelectCheckIn={handleSelectCheckIn}
-                  handleSelectCheckOut={handleSelectCheckOut}
+                  handleSelectCheckIn={handleSelectCheckInWBooked}
+                  handleSelectCheckOut={handleSelectCheckOutWBooked}
                 ></CheckoutOverview>
                 <div className="flex w-full justify-center">
                   <PaymentMethodAnimated
@@ -149,7 +179,11 @@ export default function BookingOverview() {
               <div>
                 <Button
                   className="h-14 w-[300px] bg-blue-600 text-lg hover:bg-blue-500 max-sm:w-full"
-                  disabled={!paymentStatus || isLoading}
+                  disabled={
+                    !paymentStatus ||
+                    isLoading ||
+                    sectionState !== SectionState.VALID
+                  }
                   onClick={createBooking}
                 >
                   Bestätigen und Bezahlen

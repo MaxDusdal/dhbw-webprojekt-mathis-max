@@ -189,7 +189,7 @@ function isSelectionAvailable(
   const end = new Date(selection.to);
 
   if (!Array.isArray(bookedDates) || bookedDates.length === 0) {
-    notify.success("Gültige Auswahl");
+    //notify.success("Gültige Auswahl");
     return SectionState.VALID;
   }
 

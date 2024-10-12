@@ -4,8 +4,9 @@ import { format, differenceInCalendarDays } from "date-fns";
 import { Separator } from "~/components/ui/separator";
 import { addToRange, type DateRange } from "react-day-picker";
 import { de } from "date-fns/locale";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import ReservationDataInput from "~/components/listings/ReservationDataInput";
+import { api } from "~/trpc/react";
 
 type Guests = {
   adults: number;
@@ -50,6 +51,7 @@ export default function ReservationBookingOverview({
     params.set("pets", guests.pets.toString());
     return params;
   };
+
   return (
     <div className="rounded-lg p-6 ring-1 ring-gray-300 hover:shadow-lg">
       <div className="flex w-full items-center space-x-2">
