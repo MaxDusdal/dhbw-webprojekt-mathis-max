@@ -22,7 +22,7 @@ export default function HeaderUserComponent() {
   const user = api.user.getCallerUser.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
   });
 
   if (user.isLoading) {
@@ -181,8 +181,8 @@ export function MobileHeaderUserComponent() {
               </div>
             </DisclosureButton>
             <DisclosurePanel>
-              <div className="flex flex-col gap-4 pt-2 px-12 text-gray-800 ">
-                <Link href="/account/profile" >Account Einstellungen</Link>
+              <div className="flex flex-col gap-4 px-12 pt-2 text-gray-800">
+                <Link href="/account/profile">Account Einstellungen</Link>
                 <Link href="/account/bookings">Ihre Buchungen</Link>
                 <Link href="/account/rooms">Ihre Inserate</Link>
                 <form action="/api/auth/signout" method="POST">

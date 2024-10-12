@@ -19,7 +19,7 @@ type FormValues = z.infer<typeof credentialsSchema>;
 const LoginForm = () => {
   const [error, setError] = useState("");
   const params = useSearchParams();
-  const callbackUrl = params.get("callbackUrl") || "/rooms";
+  const callbackUrl = params.get("callbackUrl") || "/";
 
   const schema = credentialsSchema;
 
@@ -42,24 +42,26 @@ const LoginForm = () => {
     try {
       const response = await fetch("/api/auth/signin", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
         },
-        body: JSON.stringify(data),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        // Redirect to dashboard or home page after successful signup
-        router.push("/");
-      } else {
+      );
+      if (!response.ok) {
         const errorData = await response.json();
-        console.error("Signup error:", errorData.error);
+        console.error("Login error:", errorData.error);
         setError(errorData.error);
+        return; // Exit the function early if login failed
       }
     } catch (error) {
       setError("An unexpected error occurred. Please try again.");
       console.error(error);
+      return; // Exit the function early if an error occurred
     }
+
+    // If we reach here, login was successful
+    router.replace(callbackUrl);
   };
 
   return (
@@ -99,13 +101,11 @@ const LoginForm = () => {
       </form>
 
       <div className="flex justify-center">
-          <Link
-            className="text-sm text-gray-500 mt-6"
-          href="/signup"
-        >
-            Noch kein Account? <span className="text-blue-500">Jetzt registrieren</span>
-          </Link>
-        </div>
+        <Link className="mt-6 text-sm text-gray-500" href="/signup">
+          Noch kein Account?{" "}
+          <span className="text-blue-500">Jetzt registrieren</span>
+        </Link>
+      </div>
 
       {error && (
         <div className="-mb-4 pt-5">

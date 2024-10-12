@@ -88,7 +88,7 @@ export default function Impressum() {
         ausgesperrt werden.
       </p>
       <br></br>
-      <h2 id="m65" className="text-xl font-bold">
+      <h2 id="m65" className="text-xl˘ font-bold">
         Haftungs- und Schutzrechtshinweise
       </h2>
       <p>

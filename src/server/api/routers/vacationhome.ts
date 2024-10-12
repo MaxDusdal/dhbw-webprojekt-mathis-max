@@ -184,14 +184,12 @@ export const vacationhomeRouter = createTRPCRouter({
         include: { images: true },
       });
 
-      const hasNextPage = vacationHomes.length > input.limit;
-      const items = hasNextPage ? vacationHomes.slice(0, -1) : vacationHomes;
+      const items = vacationHomes.slice(0, input.limit);
       const lastVacationHome = items[items.length - 1];
 
       return {
         vacationHomes: items,
-        nextCursor: lastVacationHome ? lastVacationHome.id : undefined,
-        hasNextPage,
+        nextCursor: vacationHomes.length > input.limit ? lastVacationHome?.id : undefined,
       };
     }),
 

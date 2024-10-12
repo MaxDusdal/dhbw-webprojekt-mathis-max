@@ -10,8 +10,11 @@ import ListingPageSkeleton, {
 import React from "react";
 import CustomButton from "~/components/Buttons/CustomButton";
 import { Button } from "~/components/ui/button";
+import { useEffect, useRef, useCallback } from 'react';
 
 export default function Rooms() {
+  const observerTarget = useRef(null);
+
   const listings = api.vacationhome.findMany.useInfiniteQuery(
     { limit: 20 },
     {
@@ -21,6 +24,28 @@ export default function Rooms() {
 
   const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     listings;
+
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const [entry] = entries;
+    if (entry && entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  useEffect(() => {
+    const element = observerTarget.current;
+    if (!element) return;
+
+    const option = {
+      threshold: 0,
+    };
+
+    const observer = new IntersectionObserver(handleObserver, option);
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [handleObserver]);
+
 
   if ((isFetching && !listings.data) || !listings.data) {
     return <ListingPageSkeleton></ListingPageSkeleton>;
@@ -47,17 +72,9 @@ export default function Rooms() {
       ) : (
         <></>
       )}
-      {hasNextPage && (
-        <div className="mt-6 flex w-full justify-center">
-          <Button
-            className="h-10 w-32 rounded-full bg-transparent font-medium text-black ring-1 ring-gray-300 hover:bg-gray-100"
-            onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-          >
-            {isFetchingNextPage ? "Loading..." : "Load More"}
-          </Button>
-        </div>
-      )}
+
+      {(isFetching || isFetchingNextPage) && <div>Loading more...</div>}
+      <div ref={observerTarget} style={{ height: "1px" }} />
     </div>
   );
 }
