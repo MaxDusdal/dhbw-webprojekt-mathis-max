@@ -4,10 +4,17 @@ import { useParams } from "next/navigation";
 import { BookingWithVhAndImageAndAm } from "~/app/utils/types";
 import { Separator } from "~/components/ui/separator";
 import BookingCard from "~/components/bookingCard";
-import { startOfMonth, endOfMonth, isWithinInterval, setMonth } from "date-fns";
+import {
+  startOfMonth,
+  endOfMonth,
+  isWithinInterval,
+  setMonth,
+  getYear,
+} from "date-fns";
 
 import Dashboard from "./dashboard";
 import { DashboardSkeleton } from "./dashboardSkeleton";
+import { useState } from "react";
 
 interface MonthlyEarningsResult {
   monthlyEarnings: number[];
@@ -16,6 +23,9 @@ interface MonthlyEarningsResult {
 
 export default function DashboardPage() {
   const { id } = useParams<{ id: string }>();
+  const [overviewYear, setOverviewYear] = useState(() => {
+    return getYear(new Date());
+  });
   if (!id || isNaN(Number(id))) {
     return "Kein Listing Kefunden";
   }
@@ -63,24 +73,22 @@ export default function DashboardPage() {
     return bookings.reduce((total, booking) => total + booking.price, 0);
   }
 
-  function calculateMonthEarnings(month: number): number {
+  function calculateMonthEarnings(month: number, year?: number): number {
     const bookings = bookingQuery.data?.bookings || [];
+
     if (month < 1 || month > 12) {
       return -1;
     }
 
-    const currentYear = new Date().getFullYear();
-    const targetMonth = setMonth(new Date(currentYear, 0), month - 1);
-    const monthStart = startOfMonth(targetMonth);
-    const monthEnd = endOfMonth(targetMonth);
+    const targetYear = year || new Date().getFullYear();
+    const targetDate = new Date(targetYear, month - 1, 1);
+
+    const monthStart = startOfMonth(targetDate);
+    const monthEnd = endOfMonth(targetDate);
 
     return bookings.reduce((total, booking) => {
-      if (
-        isWithinInterval(booking.createdAt, {
-          start: monthStart,
-          end: monthEnd,
-        })
-      ) {
+      const bookingDate = new Date(booking.createdAt);
+      if (isWithinInterval(bookingDate, { start: monthStart, end: monthEnd })) {
         return total + booking.price;
       }
       return total;
@@ -92,10 +100,10 @@ export default function DashboardPage() {
     return bookings.filter((booking) => booking.status === "PAID").length;
   }
 
-  function calculateAllMonthlyEarnings(): MonthlyEarningsResult {
+  function calculateAllMonthlyEarnings(year: number): MonthlyEarningsResult {
     const monthlyEarnings = Array(12)
       .fill(0)
-      .map((_, index) => calculateMonthEarnings(index + 1));
+      .map((_, index) => calculateMonthEarnings(index + 1, year));
 
     const bestMonth = Math.max(...monthlyEarnings);
 
@@ -153,7 +161,7 @@ export default function DashboardPage() {
     : 0;
   const openBookings = calculateOpenBookings();
   const newMonthlyBookings = getNewBookingsForCurrentMonth();
-  const overview = calculateAllMonthlyEarnings();
+  const overview = calculateAllMonthlyEarnings(overviewYear);
   const recentBookings = transformBookingData();
 
   const data = {
@@ -167,10 +175,14 @@ export default function DashboardPage() {
     overview,
     recentBookings,
   };
+  const overviewYearHook = {
+    year: overviewYear,
+    setYear: setOverviewYear,
+  };
 
   return (
     <div className="flex flex-col space-y-10">
-      <Dashboard data={data}></Dashboard>
+      <Dashboard data={data} overviewYearHook={overviewYearHook}></Dashboard>
 
       <Separator></Separator>
       {bookingData && (

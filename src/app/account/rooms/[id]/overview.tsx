@@ -77,6 +77,7 @@ export default function Overview({
           axisLine={false}
           tickFormatter={(value) => `€${value}`}
           domain={[0, yAxisMax]}
+          allowDataOverflow={true}
         />
         <Tooltip
           content={<CustomTooltip />}

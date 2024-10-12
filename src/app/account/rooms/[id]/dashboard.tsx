@@ -11,6 +11,8 @@ import { RecentSales } from "./recent-sales";
 
 import { floor } from "lodash";
 import { Booking, User } from "@prisma/client";
+import { getYear } from "date-fns";
+import { Data } from "@react-google-maps/api";
 
 interface OverviewProps {
   monthlyEarnings: number[];
@@ -38,13 +40,17 @@ type Props = {
     overview: OverviewProps;
     recentBookings: recentBooking[];
   };
+  overviewYearHook: {
+    year: number;
+    setYear: (year: number) => void;
+  };
 };
 
 export function formatNumber(num: number): string {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
-export default function Dashboard({ data }: Props) {
+export default function Dashboard({ data, overviewYearHook }: Props) {
   return (
     <>
       <div className="flex-1 space-y-4 pt-6">
@@ -165,8 +171,27 @@ export default function Dashboard({ data }: Props) {
           </div>
           <div className="grid gap-4 min-[975px]:grid-cols-7">
             <Card className="min-[975px]:col-span-4">
-              <CardHeader>
+              <CardHeader className="flex justify-between">
                 <CardTitle>Overview</CardTitle>
+                <div className="flex">
+                  {" "}
+                  <Button
+                    onClick={() => {
+                      overviewYearHook.setYear(overviewYearHook.year - 1);
+                    }}
+                  >
+                    -
+                  </Button>
+                  <CardTitle>{overviewYearHook.year}</CardTitle>
+                  <Button
+                    onClick={() => {
+                      overviewYearHook.setYear(overviewYearHook.year + 1);
+                    }}
+                    disabled={overviewYearHook.year === getYear(new Date())}
+                  >
+                    +
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="pl-2">
                 <Overview

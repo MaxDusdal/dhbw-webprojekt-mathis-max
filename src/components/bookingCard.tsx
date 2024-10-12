@@ -57,6 +57,7 @@ export default function BookingCard({ booking, bookingPage }: Props) {
           </CardTitle>
           <CardDescription className="h-10">{`Buchung von ${booking.user.firstName} ${booking.user.lastName}`}</CardDescription>
           <ReservationDataInput
+            maxGuests={booking.vacationHome.guestCount}
             dateRange={dateRange}
             guests={guests}
           ></ReservationDataInput>

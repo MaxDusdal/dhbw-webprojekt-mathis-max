@@ -16,7 +16,7 @@ type ReservationData = {
   handleSelectCheckIn?: (date: Date | undefined) => void;
   handleSelectCheckOut?: (date: Date | undefined) => void;
   guests: Guests;
-  maxGuests: number;
+  maxGuests?: number;
   handleChange?: (type: keyof Guests) => (value: number) => void;
 };
 
@@ -70,7 +70,7 @@ export default function ReservationDataInput({
         <GuestSelector
           guests={guests}
           handleChange={handleChange}
-          maxGuests={maxGuests}
+          maxGuests={maxGuests || 9999}
         ></GuestSelector>
       </div>
     </div>
