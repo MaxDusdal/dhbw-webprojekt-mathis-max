@@ -155,8 +155,8 @@ export default function Dashboard({ data }: Props) {
               </CardContent>
             </Card>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card className="col-span-4">
+          <div className="grid gap-4 min-[975px]:grid-cols-7">
+            <Card className="min-[975px]:col-span-4">
               <CardHeader>
                 <CardTitle>Overview</CardTitle>
               </CardHeader>
@@ -167,7 +167,7 @@ export default function Dashboard({ data }: Props) {
                 />
               </CardContent>
             </Card>
-            <Card className="col-span-3">
+            <Card className="min-[975px]:col-span-3">
               <CardHeader>
                 <CardTitle>Neuste Buchungen</CardTitle>
                 <CardDescription>
