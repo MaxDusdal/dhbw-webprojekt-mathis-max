@@ -39,6 +39,7 @@ type ReservationData = {
   handleChange: (type: keyof Guests) => (value: number) => void;
   getUpdatedParams: () => URLSearchParams;
   sectionState: SectionState;
+  booked?: DateRange[];
 };
 
 export default function ReservationCard({
@@ -52,6 +53,7 @@ export default function ReservationCard({
   handleChange,
   getUpdatedParams,
   sectionState,
+  booked,
 }: ReservationData) {
   const searchParams = useSearchParams();
 
@@ -68,6 +70,7 @@ export default function ReservationCard({
         Nacht
       </p>
       <ReservationDataInput
+        booked={booked}
         dateRange={dateRange}
         guests={guests}
         maxGuests={maxGuests}

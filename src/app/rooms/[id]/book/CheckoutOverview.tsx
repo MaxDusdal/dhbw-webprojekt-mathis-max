@@ -33,6 +33,7 @@ type ReservationData = {
   maxGuests: number;
   handleChange: (type: keyof Guests) => (value: number) => void;
   price_per_night: number;
+  booked?: DateRange[];
 };
 export default function CheckoutOverview({
   dateRange,
@@ -43,6 +44,7 @@ export default function CheckoutOverview({
   handleChange,
   coverData,
   price_per_night,
+  booked,
 }: ReservationData) {
   return (
     <Card className="w-full">
@@ -53,6 +55,7 @@ export default function CheckoutOverview({
             Überprüfe alle Angaben und korrigiere diese falls nötig
           </CardDescription>
           <ReservationDataInput
+            booked={booked}
             maxGuests={maxGuests}
             dateRange={dateRange}
             guests={guests}

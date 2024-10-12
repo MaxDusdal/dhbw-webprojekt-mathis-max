@@ -2,8 +2,9 @@ import { format } from "date-fns";
 import { Calendar } from "../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { de } from "date-fns/locale";
-import { DateRange, Matcher } from "react-day-picker";
+import { DateRange, DayModifiers, Matcher } from "react-day-picker";
 import QuantitySelector from "./QuantitySelector";
+import { notify } from "~/app/utils/notification";
 
 type Guests = {
   adults: number;
@@ -18,6 +19,7 @@ type ReservationData = {
   guests: Guests;
   maxGuests?: number;
   handleChange?: (type: keyof Guests) => (value: number) => void;
+  booked?: DateRange[];
 };
 
 export default function ReservationDataInput({
@@ -27,12 +29,14 @@ export default function ReservationDataInput({
   guests,
   handleChange,
   maxGuests,
+  booked,
 }: ReservationData) {
   return (
     <div className="mt-5 flex w-full flex-col overflow-hidden rounded-md ring-1 ring-gray-400">
       <div className="flex w-full border-b border-gray-400">
         <div className="h-full w-1/2 border-r border-gray-400">
           <ReservationDateSelector
+            booked={booked}
             disabled={(date) => {
               const today = new Date();
               return (
@@ -47,6 +51,7 @@ export default function ReservationDataInput({
         </div>
         <div className="h-full w-1/2">
           <ReservationDateSelector
+            booked={booked}
             disabled={(date) => {
               const today = new Date();
               return (
@@ -81,6 +86,7 @@ type DateSelecorProps = {
   date: Date | undefined;
   handleSelect?: (date: Date | undefined) => void;
   disabled?: Matcher | Matcher[] | undefined;
+  booked?: DateRange[];
 };
 
 function ReservationDateSelector({
@@ -88,6 +94,7 @@ function ReservationDateSelector({
   date,
   handleSelect,
   disabled,
+  booked,
 }: DateSelecorProps) {
   if (handleSelect) {
     return (
@@ -110,6 +117,18 @@ function ReservationDateSelector({
             selected={date}
             onSelect={handleSelect}
             disabled={disabled}
+            modifiers={{
+              blocked: booked ? booked : [],
+            }}
+            onDayClick={(date, modfiiers) => {
+              console.log(date);
+              if (modfiiers.blocked) {
+                notify.error("Diese Daten sind bereits reserviert");
+              }
+            }}
+            modifiersClassNames={{
+              blocked: "line-through text-gray-400 opacity-50",
+            }}
             initialFocus
           />
         </PopoverContent>

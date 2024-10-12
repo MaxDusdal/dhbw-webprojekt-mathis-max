@@ -248,6 +248,7 @@ export default function RoomDetail() {
 
           <div className="relative order-first mx-auto hidden justify-end py-8 xl:order-last xl:flex xl:w-[379px] xl:pl-10">
             <ReservationCard
+              booked={blockedDatesQuery.data ? blockedDatesQuery.data : []}
               sectionState={sectionState}
               maxGuests={listing.data.guestCount}
               price_per_night={listing.data?.pricePerNight as number}
