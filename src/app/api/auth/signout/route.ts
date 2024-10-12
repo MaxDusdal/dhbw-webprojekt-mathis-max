@@ -9,7 +9,14 @@ export async function POST(req: NextRequest, res: NextResponse) {
   await lucia.invalidateSession(sessionId);
   const blankSessionCookie = lucia.createBlankSessionCookie();
 
-  const response = NextResponse.redirect(new URL("/login", req.url));
+  const response = NextResponse.redirect(
+    new URL(
+      "/login",
+      process.env.NODE_ENV === "production"
+        ? `http://127.0.0.1:3000`
+        : req.nextUrl.origin,
+    ),
+  );
 
   response.headers.set("Set-Cookie", blankSessionCookie.serialize());
 

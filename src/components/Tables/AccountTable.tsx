@@ -6,6 +6,7 @@ import { type User } from "@prisma/client";
 import { api } from "~/trpc/react";
 import { notify } from "~/app/utils/notification";
 import { UserWithSessions } from "~/app/utils/types";
+import Image from "next/image";
 
 export default function UsersTable({
   users,
@@ -59,10 +60,12 @@ export default function UsersTable({
         <li key={user.email} className="flex justify-between gap-x-6 py-5">
           <div className="flex min-w-0 gap-x-4">
             {user.avatar ? (
-              <img
+              <Image
                 src={user.avatar}
                 alt={user.firstName + " " + user.lastName}
                 className="h-12 w-12 flex-none rounded-full bg-gray-50 text-blue-500 p-1"
+                width={48}
+                height={48}
               />
             ) : (
               <UserCircleIcon className="h-12 w-12 flex-none rounded-full bg-gray-50 text-blue-500" />

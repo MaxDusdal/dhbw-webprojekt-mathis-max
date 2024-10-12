@@ -30,6 +30,7 @@ import {
 } from "~/app/utils/types";
 import BookingCard from "~/components/bookingCard";
 import { Skeleton } from "~/components/ui/skeleton";
+import { notify } from "~/app/utils/notification";
 
 export default function RoomDetail() {
   const { id } = useParams<{ id: string }>();
@@ -43,6 +44,11 @@ export default function RoomDetail() {
     vacationHomeId: Number(id),
   });
 
+  const blockedDatesQuery = api.booking.getBlockedDates.useQuery({
+    vacationHomeId: Number(id),
+  });
+
+  console.log(blockedDatesQuery.data);
   const bookingData: BookingWithVhAndImageAndAm[] | undefined =
     bookingQuery.data?.bookings.map((booking) => {
       if (!listing.data) {
@@ -78,6 +84,7 @@ export default function RoomDetail() {
     getUpdatedParams,
   } = useReservation(initialDateRange, sAdults, sChildren, sPets);
 
+  
   // TODO: Hier eine "schönen Loading-State
   if (listing.isLoading) {
     return (
@@ -160,11 +167,26 @@ export default function RoomDetail() {
                     : "Check-Out Datum wählen"
                   : "Chek-In Datum wählen"}
               </h2>
+              
               <CalendarLarge
                 mode="range"
                 defaultMonth={dateRange?.from}
                 selected={dateRange}
                 onSelect={setDateRange}
+                modifiers={{
+                  blocked: blockedDatesQuery.data
+                    ? blockedDatesQuery.data
+                    : [],
+                }}
+                onDayClick={(date, modfiiers) => {
+                  console.log(date)
+                  if (modfiiers.blocked) {
+                    notify.error("Diese Daten sind bereits reserviert");
+                  }
+                }}
+                modifiersClassNames={{
+                  blocked: "line-through text-gray-400 opacity-50",
+                }}
                 disabled={(date) => {
                   const today = new Date();
                   return dateRange?.to

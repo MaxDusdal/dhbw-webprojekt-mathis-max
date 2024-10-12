@@ -248,4 +248,26 @@ export const bookingRouter = createTRPCRouter({
         data: { status: "COMPLETED" },
       });
     }),
+
+  getBlockedDates: protectedProcedure
+    .input(z.object({ vacationHomeId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      const bookings = await ctx.db.booking.findMany({
+        where: { vacationHomeId: input.vacationHomeId },
+        select: {
+          checkInDate: true,
+          checkOutDate: true,
+        },
+      });
+      const blockedDates: { from: Date; to: Date }[] = [];
+
+      for (const booking of bookings) {
+        blockedDates.push({
+          from: booking.checkInDate,
+          to: booking.checkOutDate,
+        });
+      }
+
+      return blockedDates;
+    }),
 });

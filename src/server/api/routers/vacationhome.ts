@@ -92,74 +92,6 @@ export const vacationhomeRouter = createTRPCRouter({
       return updatedVacationHome;
     }),
 
-  searchByLocation: publicProcedure
-    .input(
-      z.object({
-        latitude: z.number(),
-        longitude: z.number(),
-        radiusInKm: z.number().positive(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const { latitude, longitude, radiusInKm } = input;
-
-      const vacationHomes: any[] = await ctx.db.$queryRaw`
-        SELECT 
-          vh.id,
-          vh.title,
-          vh."guestCount",
-          vh."bedroomCount",
-          vh."bedCount",
-          vh."bathroomCount",
-          vh."pricePerNight",
-          vh.description,
-          vh."ownerId",
-          vh."isAvailable",
-          ST_X(vh.location::geometry) as longitude,
-          ST_Y(vh.location::geometry) as latitude,
-          ST_AsText(vh.location) as location,
-          ST_Distance(
-            vh.location::geography,
-            ST_SetSRID(ST_MakePoint(${longitude}, ${latitude})::geometry, 4326)::geography
-          ) as distance,
-          json_agg(
-            DISTINCT jsonb_build_object(
-              'id', b.id,
-              'checkInDate', b."checkInDate",
-              'checkOutDate', b."checkOutDate",
-              'userId', b."userId"
-            )
-          ) FILTER (WHERE b.id IS NOT NULL) as bookings,
-          json_agg(
-            DISTINCT jsonb_build_object(
-              'id', img.id,
-              'url', img.url
-            )
-          ) FILTER (WHERE img.id IS NOT NULL) as images
-        FROM "VacationHome" vh
-        LEFT JOIN "Booking" b ON vh.id = b."vacationHomeId"
-        LEFT JOIN "Image" img ON vh.id = img."vacationHomeId"
-        WHERE ST_DWithin(
-          vh.location::geography,
-          ST_SetSRID(ST_MakePoint(${longitude}, ${latitude})::geometry, 4326)::geography,
-          ${radiusInKm * 1000}
-        )
-        GROUP BY vh.id
-        ORDER BY distance
-      `;
-
-      return vacationHomes.map((home: any) => ({
-        ...home,
-        geoLocation: {
-          longitude: parseFloat(home.longitude),
-          latitude: parseFloat(home.latitude),
-        },
-        distance: parseFloat(home.distance),
-        bookings: home.bookings || [],
-        images: home.images || [],
-      }));
-    }),
-
   delete: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
@@ -188,15 +120,86 @@ export const vacationhomeRouter = createTRPCRouter({
         },
       });
     }),
+
+  searchByLocation: publicProcedure
+    .input(
+      z.object({
+        latitude: z.number(),
+        longitude: z.number(),
+        radiusInKm: z.number().positive(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { latitude, longitude, radiusInKm } = input;
+
+      const vacationHomes: any[] = await ctx.db.$queryRaw`
+            SELECT 
+              vh.id,
+              vh.title,
+              vh."guestCount",
+              vh."bedroomCount",
+              vh."bedCount",
+              vh."bathroomCount",
+              vh."pricePerNight",
+              vh.description,
+              vh."ownerId",
+              vh."isAvailable",
+              ST_X(vh.location::geometry) as longitude,
+              ST_Y(vh.location::geometry) as latitude,
+              ST_AsText(vh.location) as location,
+              ST_Distance(
+                vh.location::geography,
+                ST_SetSRID(ST_MakePoint(${longitude}, ${latitude})::geometry, 4326)::geography
+              ) as distance,
+              json_agg(
+                DISTINCT jsonb_build_object(
+                  'id', b.id,
+                  'checkInDate', b."checkInDate",
+                  'checkOutDate', b."checkOutDate",
+                  'userId', b."userId"
+                )
+              ) FILTER (WHERE b.id IS NOT NULL) as bookings,
+              json_agg(
+                DISTINCT jsonb_build_object(
+                  'id', img.id,
+                  'url', img.url
+                )
+              ) FILTER (WHERE img.id IS NOT NULL) as images
+            FROM "VacationHome" vh
+            LEFT JOIN "Booking" b ON vh.id = b."vacationHomeId"
+            LEFT JOIN "Image" img ON vh.id = img."vacationHomeId"
+            WHERE ST_DWithin(
+              vh.location::geography,
+              ST_SetSRID(ST_MakePoint(${longitude}, ${latitude})::geometry, 4326)::geography,
+              ${radiusInKm * 1000}
+            )
+            GROUP BY vh.id
+            ORDER BY distance
+          `;
+
+      return vacationHomes.map((home: any) => ({
+        ...home,
+        geoLocation: {
+          longitude: parseFloat(home.longitude),
+          latitude: parseFloat(home.latitude),
+        },
+        distance: parseFloat(home.distance),
+        bookings: home.bookings || [],
+        images: home.images || [],
+      }));
+    }),
+    
   findMany: publicProcedure
     .input(
       z.object({
         limit: z.number(),
         cursor: z.number().optional(),
-        coordinates: z.object({
-          lat: z.number().optional(),
-          lng: z.number().optional(),
-        }).optional(),
+        coordinates: z
+          .object({
+            lat: z.number().optional(),
+            lng: z.number().optional(),
+          })
+          .optional(),
         checkIn: z.string().optional(),
         checkOut: z.string().optional(),
         adults: z.number().optional(),
@@ -234,9 +237,9 @@ export const vacationhomeRouter = createTRPCRouter({
           const hasConflictingBooking = home.bookings?.some(
             (booking: any) =>
               // @ts-ignore
-              (booking.checkInDate <= input.checkOut &&
-                // @ts-ignore
-                booking.checkOutDate >= input.checkIn)
+              booking.checkInDate <= input.checkOut &&
+              // @ts-ignore
+              booking.checkOutDate >= input.checkIn,
           );
           if (hasConflictingBooking) {
             return false;
@@ -249,13 +252,14 @@ export const vacationhomeRouter = createTRPCRouter({
       // Apply pagination
       const items = vacationHomes.slice(
         input.cursor ? 1 : 0,
-        (input.cursor ? 1 : 0) + input.limit
+        (input.cursor ? 1 : 0) + input.limit,
       );
       const lastVacationHome = items[items.length - 1];
 
       return {
         vacationHomes: items,
-        nextCursor: vacationHomes.length > input.limit ? lastVacationHome?.id : undefined,
+        nextCursor:
+          vacationHomes.length > input.limit ? lastVacationHome?.id : undefined,
       };
     }),
 

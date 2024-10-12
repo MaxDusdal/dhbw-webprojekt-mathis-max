@@ -66,7 +66,7 @@ export default function HeaderUserComponent() {
               <div className="flex items-center gap-3 rounded-md p-2 px-2 transition-all duration-200 hover:cursor-pointer hover:bg-gray-200">
                 <p>{user.data?.firstName}</p>
                 <Image
-                  src={user.data?.avatar ?? "/images/randomAvatar.jpeg"}
+                  src={user.data?.avatar || "/images/randomAvatar.jpeg"}
                   alt="User"
                   width={64}
                   height={64}
@@ -163,7 +163,7 @@ export function MobileHeaderUserComponent() {
               <div className="flex w-full flex-row items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <Image
-                    src={user.data?.avatar ?? "/images/randomAvatar.jpeg"}
+                    src={user.data?.avatar || "/images/randomAvatar.jpeg"}
                     alt="User"
                     width={32}
                     height={32}
