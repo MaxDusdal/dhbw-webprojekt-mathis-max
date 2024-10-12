@@ -1,4 +1,11 @@
-import { Session, VacationHome, Image, User } from "@prisma/client";
+import {
+  Session,
+  VacationHome,
+  Image,
+  User,
+  Booking,
+  Amenity,
+} from "@prisma/client";
 
 export type ButtonVariants =
   | "primary"
@@ -78,3 +85,27 @@ export type DateRange = {
   from: Date | undefined;
   to: Date | undefined;
 };
+
+export type BookingWithVhAndImage = Booking & {
+  user: User;
+  vacationHome: VacationHome & {
+    images: Image[];
+  };
+};
+
+export type BookingWithVhAndImageAndAm = Booking & {
+  user: User;
+  vacationHome: VacationHome & {
+    images: Image[];
+    amenities: Amenity[];
+  };
+};
+
+export type VacationHomeWithDetails = VacationHome & {
+  images: Image[];
+  bookings: (Booking & {
+    user: User;
+  })[];
+};
+
+export type GetVacationHomesByUserResult = VacationHomeWithDetails[];

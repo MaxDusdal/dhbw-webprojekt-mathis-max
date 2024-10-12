@@ -1,92 +1,61 @@
 "use client";
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardTitle,
-} from "~/components/ui/card";
-import Image from "next/image";
 import { api } from "~/trpc/react";
-import Link from "next/link";
-import CustomButton from "~/components/Buttons/CustomButton";
+
 import MainContainer from "~/components/Utility/MainContainer";
-import NarrowContainer from "~/components/Utility/NarrowContainer";
-import { Separator } from "~/components/ui/separator";
+import ListingCard from "~/components/listings/listingCard";
+import { Skeleton } from "~/components/ui/skeleton";
 
 export default function RoomsPage() {
   const vacationHomes = api.vacationhome.getVacationHomesByUser.useQuery();
+
+  if (vacationHomes.isLoading) {
+    return RoomsPageSkeleton();
+  }
+
   return (
     <main>
-      <NarrowContainer>
+      <MainContainer>
         {vacationHomes.data?.map((vacationHome, index) => (
-          <>
-            <div
-              key={vacationHome.id}
-              className="my-4 p-5 transition-all duration-300"
-            >
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <ListingCard
+              vacationHome={vacationHome}
+              index={index}
+              bookings={vacationHome.bookings}
+            ></ListingCard>
+          </div>
+        ))}
+      </MainContainer>
+    </main>
+  );
+}
+
+function RoomsPageSkeleton() {
+  return (
+    <main>
+      <MainContainer>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {[...Array(4)].map((_, index) => (
+            <div key={index} className="my-4 rounded-lg border p-5 shadow-sm">
               <div className="flex flex-row gap-4">
-                <div className="relative h-24 w-24 overflow-hidden rounded-md">
-                  <Image
-                    src={
-                      vacationHome.images[0]?.url || "/images/placeholder.webp"
-                    }
-                    alt={vacationHome.title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="flex flex-col justify-between gap-1">
+                <Skeleton className="h-24 w-24 rounded-md" />
+                <div className="flex flex-1 flex-col justify-between gap-1">
                   <div>
-                    <p className="text-xs text-gray-500">
-                      {vacationHome.locationDescription || "Unbekannt"}
-                    </p>
-                    <CardTitle className="text-lg">
-                      {vacationHome.title}
-                    </CardTitle>
-                    <CardDescription>
-                      {vacationHome.pricePerNight.toFixed(2)}€ pro Nacht
-                    </CardDescription>
+                    <Skeleton className="mb-2 h-4 w-1/4" />
+                    <Skeleton className="mb-2 h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
                   </div>
-                  <p className="text-xs text-gray-500">
-                    {vacationHome.bookings.length} Buchungen insgesamt |{" "}
-                    {
-                      vacationHome.bookings.filter(
-                        (booking) => booking.status === "PAID",
-                      ).length
-                    }{" "}
-                    Buchungen offen
-                  </p>
+                  <Skeleton className="h-4 w-2/3" />
                 </div>
               </div>
               <div className="mt-4 flex flex-row gap-2">
-                <CustomButton
-                  href={`/rooms/${vacationHome.id}#bookings`}
-                  variant="primary"
-                  fullWidth={false}
-                >
-                  Buchungen
-                </CustomButton>
-                <CustomButton
-                  href={`/rooms/${vacationHome.id}/edit`}
-                  variant="tertiary"
-                  fullWidth={false}
-                >
-                  Bearbeiten
-                </CustomButton>
-                <CustomButton
-                  href={`/rooms/${vacationHome.id}`}
-                  variant="tertiary"
-                  fullWidth={false}
-                >
-                  Ansehen
-                </CustomButton>
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-24" />
               </div>
             </div>
-            {index < vacationHomes.data?.length - 1 && <Separator />}
-          </>
-        ))}
-      </NarrowContainer>
+          ))}
+        </div>
+      </MainContainer>
     </main>
   );
 }

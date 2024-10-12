@@ -144,7 +144,14 @@ export const vacationhomeRouter = createTRPCRouter({
       where: {
         ownerId: ctx.session.user.id,
       },
-      include: { images: true, bookings: true },
+      include: {
+        images: true,
+        bookings: {
+          include: {
+            user: true,
+          },
+        },
+      },
     });
     return vacationHomes;
   }),

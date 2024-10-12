@@ -26,6 +26,9 @@ export const bookingRouter = createTRPCRouter({
             include: {
               user: true,
             },
+            orderBy: {
+              createdAt: "desc",
+            },
           },
         },
       });
@@ -63,6 +66,26 @@ export const bookingRouter = createTRPCRouter({
         bookings: [],
         isOwner: false,
       };
+    }),
+
+  getBookingsForUserId: protectedProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const bookings = await ctx.db.booking.findMany({
+        where: {
+          userId: input.userId,
+        },
+        include: {
+          user: true,
+          vacationHome: {
+            include: {
+              images: true,
+            },
+          },
+        },
+      });
+
+      return { bookings: bookings };
     }),
 
   create: protectedProcedure

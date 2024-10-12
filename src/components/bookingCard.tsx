@@ -1,4 +1,4 @@
-import { Booking, User } from "@prisma/client";
+import { Booking, User, VacationHome } from "@prisma/client";
 
 import { DateRange } from "react-day-picker";
 import {
@@ -14,6 +14,10 @@ import ReservationDataInput from "~/components/listings/ReservationDataInput";
 import { Separator } from "~/components/ui/separator";
 import { differenceInCalendarDays } from "date-fns";
 import { round } from "lodash";
+import {
+  BookingWithVhAndImage,
+  BookingWithVhAndImageAndAm,
+} from "~/app/utils/types";
 
 type Guests = {
   adults: number;
@@ -34,11 +38,11 @@ type ReservationData = {
 };
 
 type Props = {
-  booking: Booking & { user: User };
-  coverData: CoverData;
+  booking: BookingWithVhAndImage | BookingWithVhAndImageAndAm;
+  bookingPage: boolean;
 };
 
-export default function BookingCard({ booking, coverData }: Props) {
+export default function BookingCard({ booking, bookingPage }: Props) {
   const dateRange: DateRange = {
     from: booking.checkInDate,
     to: booking.checkOutDate,
@@ -48,7 +52,9 @@ export default function BookingCard({ booking, coverData }: Props) {
     <Card className="w-full">
       <CardHeader className="flex flex-row justify-between space-x-4 pb-0 max-[425px]:space-x-2 max-[425px]:px-2">
         <div className="flex w-full max-w-[450px] flex-col">
-          <CardTitle>Buchungsübersicht</CardTitle>
+          <CardTitle>
+            {bookingPage ? booking.vacationHome.title : "Buchungsübersicht"}
+          </CardTitle>
           <CardDescription className="h-10">{`Buchung von ${booking.user.firstName} ${booking.user.lastName}`}</CardDescription>
           <ReservationDataInput
             dateRange={dateRange}
@@ -59,7 +65,7 @@ export default function BookingCard({ booking, coverData }: Props) {
           <div className="flex h-fit max-h-[195px] w-fit max-w-[195px] flex-shrink-0 overflow-hidden rounded-lg max-[597px]:h-[110px] max-[597px]:w-[110px] xl:h-[195px] xl:w-[195px]">
             <Image
               className="h-fit w-fit"
-              src={coverData.image_url}
+              src={booking.vacationHome.images[0]?.url as string}
               alt="cover"
               width={195}
               height={195}

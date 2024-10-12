@@ -23,7 +23,11 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import StickyBookMobile from "./book/StickyBookMobile";
-import { VacationHomeWithImages } from "~/app/utils/types";
+import {
+  BookingWithVhAndImage,
+  BookingWithVhAndImageAndAm,
+  VacationHomeWithImages,
+} from "~/app/utils/types";
 import BookingCard from "~/components/bookingCard";
 
 export default function RoomDetail() {
@@ -37,6 +41,22 @@ export default function RoomDetail() {
   const bookingQuery = api.booking.getBookingsForVacationHome.useQuery({
     vacationHomeId: Number(id),
   });
+
+  const bookingData: BookingWithVhAndImageAndAm[] | undefined =
+    bookingQuery.data?.bookings.map((booking) => {
+      if (!listing.data) {
+        throw new Error("Vacation home data not available");
+      }
+      return {
+        ...booking,
+        user: booking.user, // Assuming the booking already includes the user
+        vacationHome: {
+          ...listing.data,
+          images: listing.data.images,
+          amenities: listing.data.amenities,
+        },
+      };
+    });
   console.log(bookingQuery.data);
   const searchParams = useSearchParams();
   const sAdults = verifyAmountParam(searchParams.get("adults"), 1, 5, 1);
@@ -199,36 +219,27 @@ export default function RoomDetail() {
         </div>
 
         <Separator></Separator>
-        <div className="flex flex-col space-y-10">
-          <h2 className="mt-10 text-2xl font-medium" id="bookings">
-            {bookingQuery.data?.isOwner
-              ? " Buchungen für dieses Inserat (Du bist der Besitzer)"
-              : "Deine Buchungen"}
-          </h2>
-          {bookingQuery.data?.isOwner
-            ? bookingQuery.data?.bookings?.map((booking) => (
-                <div key={booking.id}>{booking.id}</div>
-              ))
-            : null}
-          <div className="grid gap-4 xl:grid-cols-2">
-            {bookingQuery.data?.bookings?.map((booking) => (
-              <BookingCard
-                booking={booking}
-                coverData={coverData}
-              ></BookingCard>
-              /*<Card key={booking.id}>
-            <CardHeader>
-              <CardTitle>
-                Buchung von {booking.user.firstName} {booking.user.lastName} für{" "}
-                {booking.guestCount} Personen
-              </CardTitle>
-              <CardDescription>{listing.data?.title}</CardDescription>
-            </CardHeader>
-          </Card>*/
-            ))}
+        {bookingData && (
+          <div className="flex flex-col space-y-10">
+            <h2 className="mt-10 text-2xl font-medium" id="bookings">
+              {bookingQuery.data?.isOwner
+                ? "Offene Buchungen für dieses Inserat (Du bist der Besitzer)"
+                : "Deine Buchungen"}
+            </h2>
+            <div className="grid gap-4 xl:grid-cols-2">
+              {bookingData.map(
+                (booking) =>
+                  booking.status === "PAID" && (
+                    <BookingCard
+                      booking={booking}
+                      bookingPage={false}
+                    ></BookingCard>
+                  ),
+              )}
+            </div>
+            <Separator></Separator>
           </div>
-          <Separator></Separator>
-        </div>
+        )}
       </div>
       <StickyBookMobile
         dateRange={dateRange}
