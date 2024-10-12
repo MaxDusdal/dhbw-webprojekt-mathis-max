@@ -29,6 +29,9 @@ type CoverData = {
 export default function BookingOverview() {
   const { id } = useParams<{ id: string }>();
   const listing = api.vacationhome.getById.useQuery({ id: Number(id) });
+  const blockedDatesQuery = api.booking.getBlockedDates.useQuery({
+    vacationHomeId: Number(id),
+  });
   const [paymentStatus, setPaymentStatus] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

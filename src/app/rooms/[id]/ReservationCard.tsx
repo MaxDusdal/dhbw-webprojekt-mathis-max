@@ -22,6 +22,11 @@ type Guests = {
   children: number;
   pets: number;
 };
+enum SectionState {
+  VALID,
+  INVALID,
+  INCOMPLETE,
+}
 
 type ReservationData = {
   listing_id: number;
@@ -33,6 +38,7 @@ type ReservationData = {
   maxGuests: number;
   handleChange: (type: keyof Guests) => (value: number) => void;
   getUpdatedParams: () => URLSearchParams;
+  sectionState: SectionState;
 };
 
 export default function ReservationCard({
@@ -45,8 +51,15 @@ export default function ReservationCard({
   maxGuests,
   handleChange,
   getUpdatedParams,
+  sectionState,
 }: ReservationData) {
   const searchParams = useSearchParams();
+
+  const handleClick = (e: any) => {
+    if (sectionState !== SectionState.VALID) {
+      e.preventDefault();
+    }
+  };
 
   return (
     <div className="sticky top-20 h-fit min-w-[379px] rounded-xl p-6 shadow-lg ring-1 ring-gray-300">
@@ -62,8 +75,15 @@ export default function ReservationCard({
         handleSelectCheckIn={handleSelectCheckIn}
         handleSelectCheckOut={handleSelectCheckOut}
       ></ReservationDataInput>
-      <Link href={`/rooms/${listing_id}/book?${getUpdatedParams()}`}>
-        <Button className="mt-5 h-12 w-full bg-blue-600 text-white shadow-md hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+      <Link
+        href={`/rooms/${listing_id}/book?${getUpdatedParams()}`}
+        onClick={handleClick}
+        className={sectionState !== SectionState.VALID ? "disabled-link" : ""}
+      >
+        <Button
+          className="mt-5 h-12 w-full bg-blue-600 text-white shadow-md hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+          disabled={sectionState !== SectionState.VALID}
+        >
           Reservieren
         </Button>
       </Link>

@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Separator } from "~/components/ui/separator";
 import { api } from "~/trpc/react";
 import { CalendarLarge } from "~/components/ui/calendar";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import ReservationCard from "./ReservationCard";
 import MapComponent from "./MapComponent";
@@ -83,52 +83,18 @@ export default function RoomDetail() {
     handleSelectCheckOut,
     handleChange,
     getUpdatedParams,
+    sectionState,
+    updateSectionState,
   } = useReservation(initialDateRange, sAdults, sChildren, sPets);
 
-  enum SectionState {
-    VALID,
-    INVALID,
-    INCOMPLETE,
-  }
+  const [hasUpdated, setHasUpdated] = useState(false);
 
-  const [sectionState, setSectionState] = useState<SectionState>(
-    SectionState.INCOMPLETE,
-  );
-
-  function isSelectionAvailable(
-    selection: DateRange | undefined,
-    bookedDates: DateRange[],
-  ) {
-    if (!selection?.from || !selection?.to) {
-      setSectionState(SectionState.INCOMPLETE);
-      return false; // Ungültige Auswahl
+  useEffect(() => {
+    if (!hasUpdated && blockedDatesQuery.data) {
+      updateSectionState(blockedDatesQuery.data);
+      setHasUpdated(true);
     }
-
-    const start = new Date(selection.from);
-    const end = new Date(selection.to);
-
-    for (
-      let date = new Date(start);
-      date <= end;
-      date.setDate(date.getDate() + 1)
-    ) {
-      for (const bookedRange of bookedDates) {
-        if (bookedRange.from && bookedRange.to) {
-          const bookedStart = new Date(bookedRange.from);
-          const bookedEnd = new Date(bookedRange.to);
-
-          if (date >= bookedStart && date <= bookedEnd) {
-            setSectionState(SectionState.INVALID);
-            notify.error("Diese Daten sind bereits reserviert");
-            return false; // Überlappung gefunden
-          }
-        }
-      }
-    }
-    setSectionState(SectionState.VALID);
-    notify.success("Gültige Auswahl");
-    return true;
-  }
+  }, [blockedDatesQuery.data, hasUpdated]);
 
   // TODO: Hier eine "schönen Loading-State
   if (listing.isLoading) {
@@ -148,18 +114,8 @@ export default function RoomDetail() {
        - ${listing.data.bedroomCount} Schlafzimmer 
         - ${listing.data.bathroomCount} ${listing.data.bathroomCount > 1 ? "Bäder" : "Bad"}`;
 
-  function handleSelect(
-    range: DateRange | undefined,
-    selectedDay: Date,
-    activeModifiers: ActiveModifiers,
-    e: React.MouseEvent<Element, MouseEvent>,
-  ) {
-    isSelectionAvailable(
-      range,
-      blockedDatesQuery.data ? blockedDatesQuery.data : [],
-    );
-
-    setDateRange(range, selectedDay, activeModifiers, e);
+  function handleSelect(range: DateRange | undefined) {
+    setDateRange(range, blockedDatesQuery.data ? blockedDatesQuery.data : []);
   }
 
   function handleSelectCheckInWBooked(selectedDay: Date | undefined) {
@@ -292,6 +248,7 @@ export default function RoomDetail() {
 
           <div className="relative order-first mx-auto hidden justify-end py-8 xl:order-last xl:flex xl:w-[379px] xl:pl-10">
             <ReservationCard
+              sectionState={sectionState}
               maxGuests={listing.data.guestCount}
               price_per_night={listing.data?.pricePerNight as number}
               listing_id={listing.data?.id as number}

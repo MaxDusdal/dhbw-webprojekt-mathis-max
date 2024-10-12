@@ -10,7 +10,7 @@ import {
   format,
 } from "date-fns";
 import { de } from "date-fns/locale";
-import { SelectRangeEventHandler } from "react-day-picker";
+import { ActiveModifiers, SelectRangeEventHandler } from "react-day-picker";
 import { DateRange } from "~/app/utils/types";
 import { notify } from "~/app/utils/notification";
 
@@ -82,7 +82,10 @@ export function useReservation(
   const handleChange = (type: keyof Guests) => (value: number) => {
     setGuests((prev) => ({ ...prev, [type]: value }));
   };
-  const handleSetDateRange: SelectRangeEventHandler = (range) => {
+  const handleSetDateRange = (range: any, bookedDates: DateRange[]) => {
+    setSectionState(
+      isSelectionAvailable(range as DateRange, bookedDates || []),
+    );
     setDateRange(range as DateRange | undefined);
   };
 
@@ -98,6 +101,10 @@ export function useReservation(
     return params;
   };
 
+  const updateSectionState = (booked: DateRange[]) => {
+    setSectionState(isSelectionAvailable(dateRange, booked || []));
+  };
+
   return {
     dateRange,
     setDateRange: handleSetDateRange,
@@ -107,6 +114,7 @@ export function useReservation(
     handleChange,
     getUpdatedParams,
     sectionState,
+    updateSectionState,
   };
 }
 
@@ -202,7 +210,7 @@ function isSelectionAvailable(
       }
     }
   }
-  notify.success("Gültige Auswahl");
+  //notify.success("Gültige Auswahl");
   return SectionState.VALID;
 }
 
