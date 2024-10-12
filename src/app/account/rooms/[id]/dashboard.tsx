@@ -11,8 +11,21 @@ import { RecentSales } from "./recent-sales";
 
 import { floor } from "lodash";
 import { Booking, User } from "@prisma/client";
-import { getYear } from "date-fns";
+import { format, getYear, setDate } from "date-fns";
 import { Data } from "@react-google-maps/api";
+import {
+  Calendar,
+  CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { date } from "zod";
+import { cn } from "~/lib/utils";
 
 interface OverviewProps {
   monthlyEarnings: number[];
@@ -171,26 +184,50 @@ export default function Dashboard({ data, overviewYearHook }: Props) {
           </div>
           <div className="grid gap-4 min-[975px]:grid-cols-7">
             <Card className="min-[975px]:col-span-4">
-              <CardHeader className="flex justify-between">
-                <CardTitle>Overview</CardTitle>
-                <div className="flex">
-                  {" "}
-                  <Button
-                    onClick={() => {
-                      overviewYearHook.setYear(overviewYearHook.year - 1);
-                    }}
-                  >
-                    -
-                  </Button>
-                  <CardTitle>{overviewYearHook.year}</CardTitle>
-                  <Button
-                    onClick={() => {
-                      overviewYearHook.setYear(overviewYearHook.year + 1);
-                    }}
-                    disabled={overviewYearHook.year === getYear(new Date())}
-                  >
-                    +
-                  </Button>
+              <CardHeader>
+                <div className="flex w-full justify-between">
+                  <CardTitle>Overview</CardTitle>
+
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-24 justify-start text-left font-normal",
+                          !date && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {overviewYearHook.year}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-24 p-0">
+                      <div className="flex justify-center space-x-5 p-1">
+                        <Button
+                          variant={"outline"}
+                          onClick={() => {
+                            overviewYearHook.setYear(overviewYearHook.year - 1);
+                          }}
+                          className="h-7 w-7 cursor-pointer bg-transparent p-1 opacity-50 hover:opacity-100"
+                        >
+                          <ChevronLeft></ChevronLeft>
+                        </Button>
+
+                        <Button
+                          variant={"outline"}
+                          onClick={() => {
+                            overviewYearHook.setYear(overviewYearHook.year + 1);
+                          }}
+                          className="h-7 w-7 cursor-pointer bg-transparent p-1 opacity-50 hover:opacity-100"
+                          disabled={
+                            overviewYearHook.year >= getYear(new Date())
+                          }
+                        >
+                          <ChevronRight></ChevronRight>
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </CardHeader>
               <CardContent className="pl-2">
