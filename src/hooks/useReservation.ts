@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   parse,
@@ -12,11 +12,18 @@ import {
 import { de } from "date-fns/locale";
 import { SelectRangeEventHandler } from "react-day-picker";
 import { DateRange } from "~/app/utils/types";
+import { notify } from "~/app/utils/notification";
 
 interface Guests {
   adults: number;
   children: number;
   pets: number;
+}
+
+enum SectionState {
+  VALID,
+  INVALID,
+  INCOMPLETE,
 }
 
 export function useReservation(
@@ -32,6 +39,9 @@ export function useReservation(
       return initialDateRange;
     },
   );
+  const [sectionState, setSectionState] = React.useState<SectionState>(
+    SectionState.INCOMPLETE,
+  );
 
   const [guests, setGuests] = React.useState<Guests>({
     adults: initalAdult,
@@ -39,14 +49,30 @@ export function useReservation(
     pets: initialPets,
   });
 
-  const handleSelectCheckIn = (date: Date | undefined) => {
+  const handleSelectCheckIn = (
+    date: Date | undefined,
+    booked?: DateRange[],
+  ) => {
+    if (dateRange?.to) {
+      setSectionState(
+        isSelectionAvailable({ from: date, to: dateRange.to }, booked || []),
+      );
+    }
     setDateRange((prev) => ({
       from: date,
       to: prev?.to && date && date >= prev.to ? undefined : prev?.to,
     }));
   };
 
-  const handleSelectCheckOut = (date: Date | undefined) => {
+  const handleSelectCheckOut = (
+    date: Date | undefined,
+    booked?: DateRange[],
+  ) => {
+    if (dateRange?.from) {
+      setSectionState(
+        isSelectionAvailable({ from: dateRange.from, to: date }, booked || []),
+      );
+    }
     setDateRange((prev) => ({
       from: prev?.from,
       to: date,
@@ -80,6 +106,7 @@ export function useReservation(
     handleSelectCheckOut,
     handleChange,
     getUpdatedParams,
+    sectionState,
   };
 }
 
@@ -140,6 +167,43 @@ export function verifyDateParamWithDefault(
     from: fromDate,
     to: toDate,
   };
+}
+
+function isSelectionAvailable(
+  selection: DateRange | undefined,
+  bookedDates: DateRange[],
+) {
+  if (!selection?.from || !selection?.to) {
+    return SectionState.INCOMPLETE;
+  }
+
+  const start = new Date(selection.from);
+  const end = new Date(selection.to);
+
+  if (!Array.isArray(bookedDates) || bookedDates.length === 0) {
+    notify.success("Gültige Auswahl");
+    return SectionState.VALID;
+  }
+
+  for (
+    let date = new Date(start);
+    date <= end;
+    date.setDate(date.getDate() + 1)
+  ) {
+    for (const bookedRange of bookedDates) {
+      if (bookedRange.from && bookedRange.to) {
+        const bookedStart = new Date(bookedRange.from);
+        const bookedEnd = new Date(bookedRange.to);
+
+        if (date >= bookedStart && date <= bookedEnd) {
+          notify.error("Diese Daten sind bereits reserviert");
+          return SectionState.INVALID;
+        }
+      }
+    }
+  }
+  notify.success("Gültige Auswahl");
+  return SectionState.VALID;
 }
 
 export function verifyDateParam(

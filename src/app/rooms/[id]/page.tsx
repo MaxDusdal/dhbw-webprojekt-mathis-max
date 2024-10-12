@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Separator } from "~/components/ui/separator";
 import { api } from "~/trpc/react";
 import { CalendarLarge } from "~/components/ui/calendar";
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import ReservationCard from "./ReservationCard";
 import MapComponent from "./MapComponent";
@@ -31,6 +31,7 @@ import {
 import BookingCard from "~/components/bookingCard";
 import { Skeleton } from "~/components/ui/skeleton";
 import { notify } from "~/app/utils/notification";
+import { ActiveModifiers, DateRange } from "react-day-picker";
 
 export default function RoomDetail() {
   const { id } = useParams<{ id: string }>();
@@ -84,7 +85,51 @@ export default function RoomDetail() {
     getUpdatedParams,
   } = useReservation(initialDateRange, sAdults, sChildren, sPets);
 
-  
+  enum SectionState {
+    VALID,
+    INVALID,
+    INCOMPLETE,
+  }
+
+  const [sectionState, setSectionState] = useState<SectionState>(
+    SectionState.INCOMPLETE,
+  );
+
+  function isSelectionAvailable(
+    selection: DateRange | undefined,
+    bookedDates: DateRange[],
+  ) {
+    if (!selection?.from || !selection?.to) {
+      setSectionState(SectionState.INCOMPLETE);
+      return false; // Ungültige Auswahl
+    }
+
+    const start = new Date(selection.from);
+    const end = new Date(selection.to);
+
+    for (
+      let date = new Date(start);
+      date <= end;
+      date.setDate(date.getDate() + 1)
+    ) {
+      for (const bookedRange of bookedDates) {
+        if (bookedRange.from && bookedRange.to) {
+          const bookedStart = new Date(bookedRange.from);
+          const bookedEnd = new Date(bookedRange.to);
+
+          if (date >= bookedStart && date <= bookedEnd) {
+            setSectionState(SectionState.INVALID);
+            notify.error("Diese Daten sind bereits reserviert");
+            return false; // Überlappung gefunden
+          }
+        }
+      }
+    }
+    setSectionState(SectionState.VALID);
+    notify.success("Gültige Auswahl");
+    return true;
+  }
+
   // TODO: Hier eine "schönen Loading-State
   if (listing.isLoading) {
     return (
@@ -102,6 +147,34 @@ export default function RoomDetail() {
   - ${listing.data.bedCount} ${listing.data.bedCount > 1 ? "Betten" : "Bett"}
        - ${listing.data.bedroomCount} Schlafzimmer 
         - ${listing.data.bathroomCount} ${listing.data.bathroomCount > 1 ? "Bäder" : "Bad"}`;
+
+  function handleSelect(
+    range: DateRange | undefined,
+    selectedDay: Date,
+    activeModifiers: ActiveModifiers,
+    e: React.MouseEvent<Element, MouseEvent>,
+  ) {
+    isSelectionAvailable(
+      range,
+      blockedDatesQuery.data ? blockedDatesQuery.data : [],
+    );
+
+    setDateRange(range, selectedDay, activeModifiers, e);
+  }
+
+  function handleSelectCheckInWBooked(selectedDay: Date | undefined) {
+    handleSelectCheckIn(
+      selectedDay,
+      blockedDatesQuery.data ? blockedDatesQuery.data : [],
+    );
+  }
+
+  function handleSelectCheckOutWBooked(selectedDay: Date | undefined) {
+    handleSelectCheckOut(
+      selectedDay,
+      blockedDatesQuery.data ? blockedDatesQuery.data : [],
+    );
+  }
 
   return (
     <div className="flex w-full justify-center">
@@ -167,19 +240,17 @@ export default function RoomDetail() {
                     : "Check-Out Datum wählen"
                   : "Chek-In Datum wählen"}
               </h2>
-              
+
               <CalendarLarge
                 mode="range"
                 defaultMonth={dateRange?.from}
                 selected={dateRange}
-                onSelect={setDateRange}
+                onSelect={handleSelect}
                 modifiers={{
-                  blocked: blockedDatesQuery.data
-                    ? blockedDatesQuery.data
-                    : [],
+                  blocked: blockedDatesQuery.data ? blockedDatesQuery.data : [],
                 }}
                 onDayClick={(date, modfiiers) => {
-                  console.log(date)
+                  console.log(date);
                   if (modfiiers.blocked) {
                     notify.error("Diese Daten sind bereits reserviert");
                   }
@@ -225,8 +296,8 @@ export default function RoomDetail() {
               price_per_night={listing.data?.pricePerNight as number}
               listing_id={listing.data?.id as number}
               dateRange={dateRange}
-              handleSelectCheckIn={handleSelectCheckIn}
-              handleSelectCheckOut={handleSelectCheckOut}
+              handleSelectCheckIn={handleSelectCheckInWBooked}
+              handleSelectCheckOut={handleSelectCheckOutWBooked}
               guests={guests}
               handleChange={handleChange}
               getUpdatedParams={getUpdatedParams}
