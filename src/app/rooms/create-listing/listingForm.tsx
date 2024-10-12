@@ -7,7 +7,6 @@ import { Button } from "~/components/ui/button";
 import QuantitySelector from "../../../components/listings/QuantitySelector";
 import { Card, CardContent } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
-import "@uploadthing/react/styles.css";
 import { api } from "~/trpc/react";
 import Image from "next/image";
 import {

@@ -250,16 +250,15 @@ export const vacationhomeRouter = createTRPCRouter({
       });
 
       // Apply pagination
-      const items = vacationHomes.slice(
-        input.cursor ? 1 : 0,
-        (input.cursor ? 1 : 0) + input.limit,
-      );
-      const lastVacationHome = items[items.length - 1];
+      const startIndex = input.cursor || 0;
+      const endIndex = startIndex + input.limit;
+      const items = vacationHomes.slice(startIndex, endIndex);
+      
+      const nextCursor = endIndex < vacationHomes.length ? endIndex : undefined;
 
       return {
         vacationHomes: items,
-        nextCursor:
-          vacationHomes.length > input.limit ? lastVacationHome?.id : undefined,
+        nextCursor,
       };
     }),
 
