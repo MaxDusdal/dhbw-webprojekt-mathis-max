@@ -30,6 +30,7 @@ type ReservationData = {
   handleSelectCheckIn: (date: Date | undefined) => void;
   handleSelectCheckOut: (date: Date | undefined) => void;
   guests: Guests;
+  maxGuests: number;
   handleChange: (type: keyof Guests) => (value: number) => void;
   price_per_night: number;
 };
@@ -38,6 +39,7 @@ export default function CheckoutOverview({
   handleSelectCheckIn,
   handleSelectCheckOut,
   guests,
+  maxGuests,
   handleChange,
   coverData,
   price_per_night,
@@ -51,6 +53,7 @@ export default function CheckoutOverview({
             Überprüfe alle Angaben und korrigiere diese falls nötig
           </CardDescription>
           <ReservationDataInput
+            maxGuests={maxGuests}
             dateRange={dateRange}
             guests={guests}
             handleChange={handleChange}

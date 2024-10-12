@@ -91,7 +91,8 @@ export default function RoomDetail() {
     return "Kein Listing gefunden";
   }
 
-  const bedBathSummary = `${listing.data.bedCount} ${listing.data.bedCount > 1 ? "Betten" : "Bett"}
+  const bedBathSummary = `${listing.data.guestCount} ${listing.data.guestCount > 1 ? "Gäste" : "Gast"}
+  - ${listing.data.bedCount} ${listing.data.bedCount > 1 ? "Betten" : "Bett"}
        - ${listing.data.bedroomCount} Schlafzimmer 
         - ${listing.data.bathroomCount} ${listing.data.bathroomCount > 1 ? "Bäder" : "Bad"}`;
 
@@ -198,6 +199,7 @@ export default function RoomDetail() {
 
           <div className="relative order-first mx-auto hidden justify-end py-8 xl:order-last xl:flex xl:w-[379px] xl:pl-10">
             <ReservationCard
+              maxGuests={listing.data.guestCount}
               price_per_night={listing.data?.pricePerNight as number}
               listing_id={listing.data?.id as number}
               dateRange={dateRange}

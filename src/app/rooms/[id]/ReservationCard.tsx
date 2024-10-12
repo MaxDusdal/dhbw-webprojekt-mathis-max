@@ -30,6 +30,7 @@ type ReservationData = {
   handleSelectCheckIn: (date: Date | undefined) => void;
   handleSelectCheckOut: (date: Date | undefined) => void;
   guests: Guests;
+  maxGuests: number;
   handleChange: (type: keyof Guests) => (value: number) => void;
   getUpdatedParams: () => URLSearchParams;
 };
@@ -41,6 +42,7 @@ export default function ReservationCard({
   handleSelectCheckIn,
   handleSelectCheckOut,
   guests,
+  maxGuests,
   handleChange,
   getUpdatedParams,
 }: ReservationData) {
@@ -55,6 +57,7 @@ export default function ReservationCard({
       <ReservationDataInput
         dateRange={dateRange}
         guests={guests}
+        maxGuests={maxGuests}
         handleChange={handleChange}
         handleSelectCheckIn={handleSelectCheckIn}
         handleSelectCheckOut={handleSelectCheckOut}

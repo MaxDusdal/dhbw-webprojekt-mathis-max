@@ -98,6 +98,7 @@ export default function BookingOverview() {
               <Separator></Separator>
               <div className="grid w-full gap-y-10 md:gap-x-10 min-[965px]:grid-cols-2">
                 <CheckoutOverview
+                  maxGuests={listing.data?.guestCount || 1}
                   price_per_night={listing.data?.pricePerNight as number}
                   coverData={coverData}
                   dateRange={dateRange}

@@ -16,6 +16,7 @@ type ReservationData = {
   handleSelectCheckIn?: (date: Date | undefined) => void;
   handleSelectCheckOut?: (date: Date | undefined) => void;
   guests: Guests;
+  maxGuests: number;
   handleChange?: (type: keyof Guests) => (value: number) => void;
 };
 
@@ -25,6 +26,7 @@ export default function ReservationDataInput({
   handleSelectCheckOut,
   guests,
   handleChange,
+  maxGuests,
 }: ReservationData) {
   return (
     <div className="mt-5 flex w-full flex-col overflow-hidden rounded-md ring-1 ring-gray-400">
@@ -68,6 +70,7 @@ export default function ReservationDataInput({
         <GuestSelector
           guests={guests}
           handleChange={handleChange}
+          maxGuests={maxGuests}
         ></GuestSelector>
       </div>
     </div>
@@ -129,10 +132,15 @@ function ReservationDateSelector({
 
 type GuestSelectorProps = {
   guests: Guests;
+  maxGuests: number;
   handleChange?: (type: keyof Guests) => (value: number) => void;
 };
 
-function GuestSelector({ guests, handleChange }: GuestSelectorProps) {
+function GuestSelector({
+  guests,
+  handleChange,
+  maxGuests,
+}: GuestSelectorProps) {
   const guestSummary = `${guests.adults} ${guests.adults > 1 ? "Gäste" : "Gast"}${
     guests.children > 0
       ? `, ${guests.children} ${guests.children > 1 ? "Kinder" : "Kind"}`
@@ -157,7 +165,7 @@ function GuestSelector({ guests, handleChange }: GuestSelectorProps) {
             onChange={handleChange("adults")}
             value={guests.adults}
             min={1}
-            max={5}
+            max={maxGuests - guests.children}
             label={
               <div className="flex flex-col">
                 <span className="text-base font-medium">Erwachsene</span>
@@ -168,7 +176,7 @@ function GuestSelector({ guests, handleChange }: GuestSelectorProps) {
           <QuantitySelector
             onChange={handleChange("children")}
             value={guests.children}
-            max={5}
+            max={maxGuests - guests.adults}
             label={
               <div className="flex flex-col">
                 <span className="text-base font-medium">Kinder</span>
