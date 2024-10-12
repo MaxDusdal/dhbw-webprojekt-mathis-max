@@ -5,6 +5,7 @@ import {
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import { createCaller } from "../root";
 
 export const vacationhomeRouter = createTRPCRouter({
   create: protectedProcedure
@@ -104,29 +105,46 @@ export const vacationhomeRouter = createTRPCRouter({
 
       const vacationHomes: any[] = await ctx.db.$queryRaw`
         SELECT 
-          id,
-          title,
-          "guestCount",
-          "bedroomCount",
-          "bedCount",
-          "bathroomCount",
-          "pricePerNight",
-          description,
-          "ownerId",
-          "isAvailable",
-          ST_X(location::geometry) as longitude,
-          ST_Y(location::geometry) as latitude,
-          ST_AsText(location) as location,
+          vh.id,
+          vh.title,
+          vh."guestCount",
+          vh."bedroomCount",
+          vh."bedCount",
+          vh."bathroomCount",
+          vh."pricePerNight",
+          vh.description,
+          vh."ownerId",
+          vh."isAvailable",
+          ST_X(vh.location::geometry) as longitude,
+          ST_Y(vh.location::geometry) as latitude,
+          ST_AsText(vh.location) as location,
           ST_Distance(
-            location::geography,
+            vh.location::geography,
             ST_SetSRID(ST_MakePoint(${longitude}, ${latitude})::geometry, 4326)::geography
-          ) as distance
-        FROM "VacationHome"
+          ) as distance,
+          json_agg(
+            DISTINCT jsonb_build_object(
+              'id', b.id,
+              'checkInDate', b."checkInDate",
+              'checkOutDate', b."checkOutDate",
+              'userId', b."userId"
+            )
+          ) FILTER (WHERE b.id IS NOT NULL) as bookings,
+          json_agg(
+            DISTINCT jsonb_build_object(
+              'id', img.id,
+              'url', img.url
+            )
+          ) FILTER (WHERE img.id IS NOT NULL) as images
+        FROM "VacationHome" vh
+        LEFT JOIN "Booking" b ON vh.id = b."vacationHomeId"
+        LEFT JOIN "Image" img ON vh.id = img."vacationHomeId"
         WHERE ST_DWithin(
-          location::geography,
+          vh.location::geography,
           ST_SetSRID(ST_MakePoint(${longitude}, ${latitude})::geometry, 4326)::geography,
           ${radiusInKm * 1000}
         )
+        GROUP BY vh.id
         ORDER BY distance
       `;
 
@@ -137,6 +155,8 @@ export const vacationhomeRouter = createTRPCRouter({
           latitude: parseFloat(home.latitude),
         },
         distance: parseFloat(home.distance),
+        bookings: home.bookings || [],
+        images: home.images || [],
       }));
     }),
 
@@ -168,23 +188,69 @@ export const vacationhomeRouter = createTRPCRouter({
         },
       });
     }),
-
   findMany: publicProcedure
     .input(
       z.object({
         limit: z.number(),
         cursor: z.number().optional(),
+        coordinates: z.object({
+          lat: z.number().optional(),
+          lng: z.number().optional(),
+        }).optional(),
+        checkIn: z.string().optional(),
+        checkOut: z.string().optional(),
+        adults: z.number().optional(),
+        children: z.number().optional(),
+        pets: z.number().optional(),
       }),
     )
     .query(async ({ input, ctx }) => {
-      const vacationHomes = await ctx.db.vacationHome.findMany({
-        take: input.limit + 1, // Take one extra to check if there's a next page
-        skip: input.cursor ? 1 : 0,
-        cursor: input.cursor ? { id: input.cursor } : undefined,
-        include: { images: true },
+      let vacationHomes;
+
+      if (input.coordinates && input.coordinates.lat && input.coordinates.lng) {
+        const caller: any = createCaller(ctx);
+        vacationHomes = await caller.vacationhome.searchByLocation({
+          latitude: input.coordinates.lat,
+          longitude: input.coordinates.lng,
+          radiusInKm: 50,
+        });
+      } else {
+        vacationHomes = await ctx.db.vacationHome.findMany({
+          where: {
+            isAvailable: true,
+          },
+          include: { images: true },
+        });
+      }
+
+      // Apply filters
+      vacationHomes = vacationHomes.filter((home: any) => {
+        const guestCount = (input.adults || 0) + (input.children || 0);
+        if (guestCount > 0 && home.guestCount < guestCount) {
+          return false;
+        }
+
+        if (input.checkIn !== undefined && input.checkOut !== undefined) {
+          const hasConflictingBooking = home.bookings?.some(
+            (booking: any) =>
+              // @ts-ignore
+              (booking.checkInDate <= input.checkOut &&
+                // @ts-ignore
+                booking.checkOutDate >= input.checkIn)
+          );
+          if (hasConflictingBooking) {
+            return false;
+          }
+        }
+
+        return true;
       });
 
-      const items = vacationHomes.slice(0, input.limit);
+      // Apply pagination
+      const items = vacationHomes.slice(
+        input.cursor ? 1 : 0,
+        (input.cursor ? 1 : 0) + input.limit
+      );
       const lastVacationHome = items[items.length - 1];
 
       return {

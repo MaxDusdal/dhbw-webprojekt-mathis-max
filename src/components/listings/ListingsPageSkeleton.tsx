@@ -38,9 +38,6 @@ export function ListingCoversSectionSkeleton() {
 export default function ListingPageSkeleton() {
   return (
     <>
-      <div className="flex w-full justify-center">
-        <ListingSearchSkeleton />
-      </div>
       <ListingCoversSectionSkeleton></ListingCoversSectionSkeleton>
       <div className="mt-6 flex justify-center">
         <Skeleton className="h-10 w-32 rounded-full" />
