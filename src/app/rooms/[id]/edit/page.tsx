@@ -226,7 +226,7 @@ const VacationHomeForm = () => {
               render={({ field: { onChange, value } }) => (
                 <QuantitySelector
                   label={<span>{field.label}</span>}
-                  value={value ? value : 1}
+                  value={value ? value : 0}
                   onChange={onChange}
                   min={1}
                 />

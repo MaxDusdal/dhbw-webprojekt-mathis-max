@@ -59,7 +59,7 @@ export default function ImageDisplay({ image_urls }: Props) {
       <div className="relative mt-6 grid h-[300px] w-full grid-cols-1 gap-2 overflow-hidden rounded-md md:h-[516px] md:grid-cols-2">
         {displayImages[selectedImageIndex] && (
           <ImageTile
-            image={displayImages[selectedImageIndex]}
+            image={displayImages[selectedImageIndex] as ImageData}
             onClick={() => handleImageClick(0)}
           />
         )}

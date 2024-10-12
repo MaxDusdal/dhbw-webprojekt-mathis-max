@@ -27,7 +27,7 @@ export function ListingCoverSkeleton() {
 
 export function ListingCoversSectionSkeleton() {
   return (
-    <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-x-6 gap-y-10 max-sm:px-2 max-[480px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {[...Array(8)].map((_, index) => (
         <ListingCoverSkeleton key={index} />
       ))}

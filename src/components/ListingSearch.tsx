@@ -58,7 +58,7 @@ export default function ListingSearch() {
   };
 
   return (
-    <div className="mb-8 flex items-center overflow-hidden rounded-3xl p-0 shadow-lg ring-1 ring-gray-300 max-[1080px]:w-full min-[1080px]:min-w-fit min-[1080px]:rounded-full">
+    <div className="mb-8 flex items-center overflow-hidden rounded-3xl p-0 shadow-lg ring-1 ring-gray-300 max-[1080px]:w-full max-[490px]:flex-col min-[1080px]:min-w-fit min-[1080px]:rounded-full">
       <div className="flex max-[1080px]:w-full max-[1080px]:flex-col">
         <div className="w-full min-[1080px]:w-[292px]">
           <LocationSearch
@@ -67,7 +67,14 @@ export default function ListingSearch() {
             setSearch={setSearch}
           ></LocationSearch>
         </div>
-        <Separator orientation="vertical" className="mx-1 h-1/2"></Separator>
+        <Separator
+          orientation="vertical"
+          className="mx-1 h-1/2 max-[490px]:hidden"
+        ></Separator>
+        <Separator
+          orientation="horizontal"
+          className="my-1 min-[490px]:hidden"
+        ></Separator>
         <div className="w-full min-[1080px]:w-[200px]">
           <ReservationDateSelector
             disabled={(date) => {
@@ -83,8 +90,15 @@ export default function ListingSearch() {
           ></ReservationDateSelector>
         </div>
       </div>
-      <Separator orientation="vertical" className="mx-1 h-1/2"></Separator>
-      <div className="flex max-[1080px]:w-full max-[1080px]:flex-col-reverse">
+      <Separator
+        orientation="vertical"
+        className="mx-1 h-1/2 max-[490px]:hidden"
+      ></Separator>
+      <Separator
+        orientation="horizontal"
+        className="my-1 min-[490px]:hidden"
+      ></Separator>
+      <div className="flex max-[1080px]:w-full max-[1080px]:flex-col-reverse max-[490px]:flex-col">
         <div className="w-full min-[1080px]:w-[200px]">
           <ReservationDateSelector
             disabled={(date) => {
@@ -105,7 +119,14 @@ export default function ListingSearch() {
             date={dateRange?.to}
           ></ReservationDateSelector>
         </div>
-        <Separator orientation="vertical" className="mx-1 h-1/2"></Separator>
+        <Separator
+          orientation="vertical"
+          className="mx-1 h-1/2 max-[490px]:hidden"
+        ></Separator>
+        <Separator
+          orientation="horizontal"
+          className="my-1 min-[490px]:hidden"
+        ></Separator>
         <div className="w-full min-[1080px]:w-[282px]">
           <GuestSelector
             handleChange={handleChange}
@@ -113,9 +134,16 @@ export default function ListingSearch() {
           ></GuestSelector>
         </div>
       </div>
-      <Separator orientation="vertical" className="mx-1 h-1/2"></Separator>
+      <Separator
+        orientation="vertical"
+        className="mx-1 h-1/2 max-[490px]:hidden"
+      ></Separator>
+      <Separator
+        orientation="horizontal"
+        className="my-1 min-[490px]:hidden"
+      ></Separator>
       <div
-        className="mr-2 flex h-full cursor-pointer items-center justify-center"
+        className="flex h-full cursor-pointer items-center justify-center max-[490px]:mb-2 min-[490px]:mr-2"
         onClick={handleSearch}
       >
         <div className="flex aspect-square h-[46px] w-[46px] items-center justify-center rounded-full bg-blue-600 transition hover:bg-blue-500 active:scale-95">
