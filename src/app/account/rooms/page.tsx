@@ -4,6 +4,7 @@ import { api } from "~/trpc/react";
 import MainContainer from "~/components/Utility/MainContainer";
 import ListingCard from "~/components/listings/listingCard";
 import { Skeleton } from "~/components/ui/skeleton";
+import NarrowContainer from "~/components/Utility/NarrowContainer";
 
 export default function RoomsPage() {
   const vacationHomes = api.vacationhome.getVacationHomesByUser.useQuery();
@@ -14,9 +15,9 @@ export default function RoomsPage() {
 
   return (
     <main>
-      <MainContainer>
+      <NarrowContainer>
         {vacationHomes.data?.map((vacationHome, index) => (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4">
             <ListingCard
               vacationHome={vacationHome}
               index={index}
@@ -24,7 +25,7 @@ export default function RoomsPage() {
             ></ListingCard>
           </div>
         ))}
-      </MainContainer>
+      </NarrowContainer>
     </main>
   );
 }
@@ -32,8 +33,8 @@ export default function RoomsPage() {
 function RoomsPageSkeleton() {
   return (
     <main>
-      <MainContainer>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <NarrowContainer>
+        <div className="grid grid-cols-1 gap-4">
           {[...Array(4)].map((_, index) => (
             <div key={index} className="my-4 rounded-lg border p-5 shadow-sm">
               <div className="flex flex-row gap-4">
@@ -55,7 +56,7 @@ function RoomsPageSkeleton() {
             </div>
           ))}
         </div>
-      </MainContainer>
+      </NarrowContainer>
     </main>
   );
 }
