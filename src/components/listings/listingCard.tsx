@@ -4,6 +4,7 @@ import CustomButton from "../Buttons/CustomButton";
 import { CardTitle, CardDescription } from "../ui/card";
 import Image from "next/image";
 import { VacationHomeWithImages } from "~/app/utils/types";
+import { Trash2 } from "lucide-react";
 
 type Props = {
   vacationHome: VacationHomeWithImages;
@@ -43,27 +44,32 @@ export default function ListingCard({ vacationHome, bookings, index }: Props) {
             </p>
           </div>
         </div>
-        <div className="mt-4 flex flex-row gap-2">
-          <CustomButton
-            href={`/account/rooms/${vacationHome.id}`}
-            variant="primary"
-            fullWidth={false}
-          >
-            Buchungs Dashboard
-          </CustomButton>
-          <CustomButton
-            href={`/rooms/${vacationHome.id}/edit`}
-            variant="tertiary"
-            fullWidth={false}
-          >
-            Bearbeiten
-          </CustomButton>
-          <CustomButton
-            href={`/rooms/${vacationHome.id}`}
-            variant="tertiary"
-            fullWidth={false}
-          >
-            Ansehen
+        <div className="mt-5 flex justify-between">
+          <div className="flex flex-row gap-2">
+            <CustomButton
+              href={`/account/rooms/${vacationHome.id}`}
+              variant="primary"
+              fullWidth={false}
+            >
+              Buchungs Dashboard
+            </CustomButton>
+            <CustomButton
+              href={`/rooms/${vacationHome.id}/edit`}
+              variant="tertiary"
+              fullWidth={false}
+            >
+              Bearbeiten
+            </CustomButton>
+            <CustomButton
+              href={`/rooms/${vacationHome.id}`}
+              variant="tertiary"
+              fullWidth={false}
+            >
+              Ansehen
+            </CustomButton>
+          </div>
+          <CustomButton className="h-full" variant="tertiary" fullWidth={false}>
+            {/*<Trash2 className="h-4"></Trash2>*/ "Löschen"}
           </CustomButton>
         </div>
       </div>

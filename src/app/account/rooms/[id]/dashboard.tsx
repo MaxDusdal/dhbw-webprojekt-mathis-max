@@ -40,6 +40,10 @@ type Props = {
   };
 };
 
+export function formatNumber(num: number): string {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
 export default function Dashboard({ data }: Props) {
   return (
     <>
@@ -72,10 +76,10 @@ export default function Dashboard({ data }: Props) {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {data.totalEarnings + "€"}
+                  {formatNumber(data.totalEarnings) + "€"}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {`~ ${floor(data.totalEarnings / data.totalBookings)}€ pro Buchung`}
+                  {`~ ${formatNumber(floor(data.totalEarnings / data.totalBookings))}€ pro Buchung`}
                 </p>
               </CardContent>
             </Card>
@@ -100,8 +104,10 @@ export default function Dashboard({ data }: Props) {
                 </svg>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{data.totalBookings}</div>
-                <p className="text-xs text-muted-foreground">{`+${data.newMonthlyBookings} diesen Monat`}</p>
+                <div className="text-2xl font-bold">
+                  {formatNumber(data.totalBookings)}
+                </div>
+                <p className="text-xs text-muted-foreground">{`+${formatNumber(data.newMonthlyBookings)} diesen Monat`}</p>
               </CardContent>
             </Card>
             <Card>
@@ -125,7 +131,7 @@ export default function Dashboard({ data }: Props) {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {data.currentMonthEarnings + "€"}
+                  {formatNumber(data.currentMonthEarnings) + "€"}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {data.monthEarningsComparison}
@@ -151,7 +157,9 @@ export default function Dashboard({ data }: Props) {
                 </svg>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{data.openBookings}</div>
+                <div className="text-2xl font-bold">
+                  {formatNumber(data.openBookings)}
+                </div>
               </CardContent>
             </Card>
           </div>
