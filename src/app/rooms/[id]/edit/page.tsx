@@ -1,12 +1,29 @@
 "use client";
+import { Separator } from "@radix-ui/react-separator";
+import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
+
+export default function EditBooking() {
+  return (
+    <div className="flex w-full justify-center">
+      <Card className="w-[630px]">
+        <CardHeader>
+          <CardTitle>Unterkunft erstellen</CardTitle>
+          <Separator></Separator>
+        </CardHeader>
+        <CardContent>
+          <VacationHomeForm></VacationHomeForm>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 import React, { useCallback, useEffect, useState } from "react";
 import { useForm, Controller, FieldError } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "~/components/ui/button";
-import QuantitySelector from "../../../components/listings/QuantitySelector";
-import { Card, CardContent } from "~/components/ui/card";
-import { Separator } from "~/components/ui/separator";
+import QuantitySelector from "~/components/listings/QuantitySelector";
 import "@uploadthing/react/styles.css";
 import { api } from "~/trpc/react";
 import Image from "next/image";
@@ -18,12 +35,15 @@ import "@uploadcare/react-uploader/core.css";
 import { useLoadScript } from "@react-google-maps/api";
 import InputFieldWrapper from "~/components/Inputs/InputFieldWrapper";
 import InputField from "~/components/Inputs/InputField";
-import { vacationhomeCreateSchema } from "~/app/utils/zod";
+import {
+  vacationhomeCreateSchema,
+  vacationhomeUpdateSchema,
+} from "~/app/utils/zod";
 import AdressAutoComplete from "~/components/Inputs/AdressAutoComplete";
 import { notify } from "~/app/utils/notification";
 import MultiPictureUpload from "~/components/Inputs/MultiPictureUpload";
 import type { ImagesUploadCare } from "~/app/utils/types";
-import { redirect } from "next/navigation";
+import { redirect, useParams } from "next/navigation";
 interface AdressAutoCompleteReturn {
   latitude: number;
   longitude: number;
@@ -37,13 +57,19 @@ const quantityFields = [
   { name: "bathroomCount", label: "Badezimmer/WCs" },
 ] as const;
 
-type VacationHomeFormData = z.infer<typeof vacationhomeCreateSchema>;
+type VacationHomeFormData = z.infer<typeof vacationhomeUpdateSchema>;
 
 const VacationHomeForm = () => {
+  const { id } = useParams();
+  if (!id || isNaN(Number(id))) {
+    return "Kein Listing Kefunden";
+  }
+  const listingQuery = api.vacationhome.getById.useQuery({ id: Number(id) });
+
   const [images, setImages] = React.useState<ImagesUploadCare[]>([]);
   const [adressAutoCompleteReturn, setAdressAutoCompleteReturn] =
     React.useState<AdressAutoCompleteReturn>();
-  const [createSuccess, setCreateSuccess] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
 
   const {
     control,
@@ -52,9 +78,11 @@ const VacationHomeForm = () => {
     setValue,
     register,
     watch,
+    reset,
   } = useForm<VacationHomeFormData>({
-    resolver: zodResolver(vacationhomeCreateSchema),
+    resolver: zodResolver(vacationhomeUpdateSchema),
     defaultValues: {
+      id: Number(id),
       guestCount: 1,
       bedroomCount: 1,
       bedCount: 1,
@@ -64,26 +92,55 @@ const VacationHomeForm = () => {
     },
   });
 
-  const mutation = api.vacationhome.create.useMutation({
+  useEffect(() => {
+    if (listingQuery.data) {
+      reset({
+        id: listingQuery.data.id,
+        title: listingQuery.data.title,
+        description: listingQuery.data.description,
+        pricePerNight: listingQuery.data.pricePerNight,
+        guestCount: listingQuery.data.guestCount,
+        bedroomCount: listingQuery.data.bedroomCount,
+        bedCount: listingQuery.data.bedCount,
+        bathroomCount: listingQuery.data.bathroomCount,
+        latitude: listingQuery.data.latitude || undefined,
+        longitude: listingQuery.data.longitude || undefined,
+        locationDescription: listingQuery.data.locationDescription || undefined,
+        amenities: listingQuery.data.amenities.map((a) => a.id),
+        images: listingQuery.data.images.map((img) => img.url),
+        // Füge hier weitere Felder hinzu
+      });
+      const convertedImages: ImagesUploadCare[] = listingQuery.data.images.map(
+        (img) => ({
+          uuid: `temp-${img.id}`, // Verwende eine temporäre UUID
+          url: img.url,
+          // Füge hier weitere erforderliche Eigenschaften hinzu
+        }),
+      );
+      setImages(convertedImages);
+    }
+  }, [listingQuery.data, reset]);
+
+  const mutation = api.vacationhome.update.useMutation({
     onSuccess: () => {
-      notify.success("Inserat erfolgreich erstellt");
-      setCreateSuccess(true);
+      notify.success("Inserat erfolgreich aktualisiert");
+      setUpdateSuccess(true);
     },
     onError: (error) => {
-      notify.error("Fehler beim Erstellen des Inserats");
+      notify.error("Fehler beim Aktualisieren des Inserats");
       console.error(error);
     },
   });
 
-  useEffect(() => {
-    if (mutation.data?.id) {
-      redirect("/rooms/" + mutation.data.id);
-    }
-  }, [mutation.data]);
-
   function onSubmit(data: VacationHomeFormData) {
     mutation.mutate(data);
   }
+
+  useEffect(() => {
+    if (updateSuccess) {
+      redirect("/account/rooms");
+    }
+  }, [updateSuccess]);
 
   const selectedAmenities = watch("amenities");
 
@@ -227,11 +284,9 @@ const VacationHomeForm = () => {
       <Separator></Separator>
       <div className="flex w-full justify-end">
         <Button className="mt-3 w-full" type="submit">
-          Erstellen
+          Aktualisieren
         </Button>
       </div>
     </form>
   );
 };
-
-export default VacationHomeForm;

@@ -1,4 +1,7 @@
-import { vacationhomeCreateSchema } from "~/app/utils/zod";
+import {
+  vacationhomeCreateSchema,
+  vacationhomeUpdateSchema,
+} from "~/app/utils/zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
@@ -33,6 +36,59 @@ export const vacationhomeRouter = createTRPCRouter({
       });
 
       return vacationhome;
+    }),
+
+  update: protectedProcedure
+    .input(vacationhomeUpdateSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { id, amenities, images, ...updateData } = input;
+
+      const existingVacationHome = await ctx.db.vacationHome.findFirst({
+        where: {
+          id: id,
+          ownerId: ctx.session.user.id,
+        },
+      });
+
+      if (!existingVacationHome) {
+        throw new Error(
+          "Ferienhaus nicht gefunden oder Sie haben keine Berechtigung zum Bearbeiten",
+        );
+      }
+
+      let amenitiesUpdate = {};
+      if (amenities) {
+        const amenityObjects = await ctx.db.amenity.findMany({
+          where: { id: { in: amenities } },
+        });
+        amenitiesUpdate = {
+          amenities: {
+            set: [],
+            connect: amenityObjects.map((amenity) => ({ id: amenity.id })),
+          },
+        };
+      }
+
+      let imagesUpdate = {};
+      if (images) {
+        imagesUpdate = {
+          images: {
+            deleteMany: {},
+            create: images.map((image) => ({ url: image })),
+          },
+        };
+      }
+
+      const updatedVacationHome = await ctx.db.vacationHome.update({
+        where: { id: id },
+        data: {
+          ...updateData,
+          ...amenitiesUpdate,
+          ...imagesUpdate,
+        },
+      });
+
+      return updatedVacationHome;
     }),
 
   searchByLocation: publicProcedure

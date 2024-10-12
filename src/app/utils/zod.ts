@@ -197,3 +197,22 @@ export const bookingCreateSchema = z
     message: "Check-in Datum muss in der Zukunft liegen",
     path: ["checkInDate"],
   });
+
+export const vacationhomeUpdateSchema = z.object({
+  id: z.number(),
+  title: z.string().optional(),
+  guestCount: z.number().optional(),
+  bedroomCount: z.number().optional(),
+  bedCount: z.number().optional(),
+  bathroomCount: z.number().optional(),
+  pricePerNight: z.number().optional(),
+  description: z.string().optional(),
+  amenities: z.array(z.number()).optional(),
+  isAvailable: z.boolean().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+  houseRules: z.string().optional(),
+  cancellationPolicy: z.string().optional(),
+  images: z.array(z.string()).optional(),
+  locationDescription: z.string().optional(),
+});
