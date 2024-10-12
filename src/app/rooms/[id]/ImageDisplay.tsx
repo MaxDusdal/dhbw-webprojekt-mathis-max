@@ -65,7 +65,7 @@ export default function ImageDisplay({ image_urls }: Props) {
         )}
         {/* Mobile Overlay to show how many picture there are as well as making it obvious that you can swipe */}
         <div className="absolute bottom-2 right-2 flex flex-col items-center justify-center rounded-md bg-black/60 px-3 py-1">
-          <p className="text-white text-sm">
+          <p className="text-sm text-white">
             {selectedImageIndex + 1} / {image_urls.length}
           </p>
         </div>
@@ -170,7 +170,9 @@ function ImageCarousel({
           </CarouselContent>
           <CarouselPrevious onClick={() => onSelectImage(current - 1)} />
           <CarouselNext
-            onClick={() => onSelectImage(current + 1 > images.length - 1 ? 0 : current + 1)}
+            onClick={() =>
+              onSelectImage(current + 1 > images.length - 1 ? 0 : current + 1)
+            }
           />
         </Carousel>
         <div className="mt-4 flex justify-center space-x-2 overflow-x-auto p-2">
@@ -195,3 +197,16 @@ function ImageCarousel({
     </Dialog>
   );
 }
+
+export const ImageDisplaySkeleton = () => {
+  return (
+    <div className="relative mt-6 grid h-[300px] w-full grid-cols-1 gap-2 overflow-hidden rounded-md md:h-[516px] md:grid-cols-2 xl:mb-5">
+      <Skeleton className="h-full w-full" />
+      <div className="hidden h-full w-full grid-cols-2 gap-2 md:grid">
+        {[...Array(4)].map((_, index) => (
+          <Skeleton key={`skeleton-${index}`} className="h-full w-full" />
+        ))}
+      </div>
+    </div>
+  );
+};

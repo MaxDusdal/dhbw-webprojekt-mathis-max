@@ -7,7 +7,7 @@ import React from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import ReservationCard from "./ReservationCard";
 import MapComponent from "./MapComponent";
-import ImageDisplay from "./ImageDisplay";
+import ImageDisplay, { ImageDisplaySkeleton } from "./ImageDisplay";
 import { differenceInCalendarDays } from "date-fns";
 import { useRouter } from "next/navigation";
 import {
@@ -29,6 +29,7 @@ import {
   VacationHomeWithImages,
 } from "~/app/utils/types";
 import BookingCard from "~/components/bookingCard";
+import { Skeleton } from "~/components/ui/skeleton";
 
 export default function RoomDetail() {
   const { id } = useParams<{ id: string }>();
@@ -79,23 +80,21 @@ export default function RoomDetail() {
 
   // TODO: Hier eine "schönen Loading-State
   if (listing.isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <RoomDetailSkeleton></RoomDetailSkeleton>
+      </div>
+    );
   }
   // TODO: Hier eine "schöne" Fehlermeldung
   if (!listing.data) {
     return "Kein Listing gefunden";
   }
-  type CoverData = {
-    image_url: string;
-    title: string;
-    description: string;
-  };
 
-  const coverData: CoverData = {
-    image_url: listing.data?.images[0]?.url || "https://picsum.photos/200",
-    title: listing.data?.title || "Unterkunft",
-    description: "Unterkuft: Wohnung",
-  };
+  const bedBathSummary = `${listing.data.bedCount} ${listing.data.bedCount > 1 ? "Betten" : "Bett"}
+       - ${listing.data.bedroomCount} Schlafzimmer 
+        - ${listing.data.bathroomCount} ${listing.data.bathroomCount > 1 ? "Bäder" : "Bad"}`;
+
   return (
     <div className="flex w-full justify-center">
       <div className="flex max-w-7xl flex-grow flex-col px-4">
@@ -104,22 +103,15 @@ export default function RoomDetail() {
         <div className="flex w-full flex-col xl:flex-row">
           <div className="flex flex-col space-y-10 py-8 xl:pr-8">
             <div className="mb-4">
-              <h1 className="text-2xl font-medium">Hier steht noch ein Text</h1>
-              <p className="font-light">Hier steht die anzahl Betten etc</p>
+              <h1 className="text-2xl font-medium">
+                {listing.data.locationDescription}
+              </h1>
+              <p className="font-light">{bedBathSummary}</p>
             </div>
             <Separator></Separator>
             <div className="flex flex-col space-y-8">
               <h2 className="text-2xl font-medium">Über diese Unterkunft</h2>
-              <p>
-                Ein wunderbares seltenes Haus, das von der Künstlerin Gernod
-                Minke in der Nähe der Innenstadt von Kassel gebaut wurde. Es ist
-                ein schöner gemütlicher Ort. Wir empfehlen es auch für Familien
-                zum Entspannen und Beruhigen in dieser schönen Stadt und der
-                Weltsage-Parks. Hunde sind herzlich willkommen und der Wald ist
-                in der Nähe. Im schönen Garten hast du einen Schwimmteich und
-                eine Terrasse, um zum Beispiel zu sitzen und zu frühstücken. Wir
-                freuen uns, dich zu sehen...
-              </p>
+              <p>{listing.data.description}</p>
             </div>
             <Separator></Separator>
             <div className="flex flex-col space-y-4">
@@ -249,3 +241,54 @@ export default function RoomDetail() {
     </div>
   );
 }
+
+const RoomDetailSkeleton = () => {
+  return (
+    <div className="flex w-full justify-center">
+      <div className="flex max-w-7xl flex-grow flex-col px-4">
+        <Skeleton className="mb-4 h-8 w-[300px]" />
+        <ImageDisplaySkeleton></ImageDisplaySkeleton>
+        <div className="flex w-full flex-col xl:flex-row">
+          <div className="flex flex-grow flex-col space-y-10 py-8 xl:pr-8">
+            <div className="mb-4">
+              <Skeleton className="mb-2 h-6 w-1/2" />
+              <Skeleton className="h-4 w-1/3" />
+            </div>
+            <Separator />
+            <div className="flex flex-col space-y-4">
+              <Skeleton className="mb-2 h-6 w-1/4" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+            <Separator />
+            <div className="flex flex-col space-y-4">
+              <Skeleton className="mb-2 h-6 w-1/3" />
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                {[...Array(8)].map((_, index) => (
+                  <Skeleton key={index} className="h-20 w-full rounded-md" />
+                ))}
+              </div>
+            </div>
+            <Separator />
+            <div className="flex flex-col space-y-4">
+              <Skeleton className="mb-2 h-6 w-1/2" />
+              <Skeleton className="h-64 w-full" />
+            </div>
+            <Separator />
+            <div className="flex flex-col space-y-4">
+              <Skeleton className="mb-2 h-6 w-1/3" />
+              <Skeleton className="h-96 w-full" />
+            </div>
+          </div>
+          <div className="relative hidden xl:flex xl:w-[379px] xl:pl-10">
+            <Skeleton className="sticky top-20 h-96 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+      <div className="fixed bottom-0 left-0 right-0 xl:hidden">
+        <Skeleton className="h-16 w-full" />
+      </div>
+    </div>
+  );
+};
