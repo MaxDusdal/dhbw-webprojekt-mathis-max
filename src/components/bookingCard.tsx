@@ -65,7 +65,7 @@ export default function BookingCard({ booking, bookingPage }: Props) {
         <div className="flex w-fit flex-col items-end justify-end space-x-2 max-[325px]:justify-start">
           <div className="flex h-fit max-h-[195px] w-fit max-w-[195px] flex-shrink-0 overflow-hidden rounded-lg max-[597px]:h-[110px] max-[597px]:w-[110px] xl:h-[195px] xl:w-[195px]">
             <Image
-              className="h-fit w-fit"
+              className="h-full w-full object-cover object-center aspect-square"
               src={booking.vacationHome.images[0]?.url as string}
               alt="cover"
               width={195}

@@ -254,7 +254,7 @@ function GuestSelector({ guests, handleChange }: GuestSelectorProps) {
           onChange={handleChange("adults")}
           value={guests.adults}
           min={1}
-          max={5}
+          max={50}
           label={
             <div className="flex flex-col">
               <span className="text-base font-medium">Erwachsene</span>
@@ -265,7 +265,7 @@ function GuestSelector({ guests, handleChange }: GuestSelectorProps) {
         <QuantitySelector
           onChange={handleChange("children")}
           value={guests.children}
-          max={5}
+          max={50}
           label={
             <div className="flex flex-col">
               <span className="text-base font-medium">Kinder</span>
@@ -276,7 +276,7 @@ function GuestSelector({ guests, handleChange }: GuestSelectorProps) {
         <QuantitySelector
           onChange={handleChange("pets")}
           value={guests.pets}
-          max={5}
+          max={50}
           label={
             <div className="flex flex-col">
               <span className="text-base font-medium">Haustiere</span>

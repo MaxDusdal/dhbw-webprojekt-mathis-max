@@ -192,6 +192,7 @@ export default function RoomDetail() {
                       1
                         ? " Nächte "
                         : " Nacht ") +
+                      "in " +
                       listing.data?.locationDescription
                     : "Check-Out Datum wählen"
                   : "Chek-In Datum wählen"}
@@ -264,13 +265,16 @@ export default function RoomDetail() {
         </div>
 
         <Separator></Separator>
+        <div id="bookings"></div>
         {bookingData && (
           <div className="flex flex-col space-y-10">
-            <h2 className="mt-10 text-2xl font-medium" id="bookings">
+            <h2 className="mt-10 text-2xl font-medium">
               {bookingQuery.data?.isOwner
                 ? "Offene Buchungen für dieses Inserat (Du bist der Besitzer)"
                 : "Deine Buchungen"}
             </h2>
+            {bookingData.length === 0 && <p>Keine Buchungen gefunden</p>}
+
             <div className="grid gap-4 xl:grid-cols-2">
               {bookingData.map(
                 (booking) =>

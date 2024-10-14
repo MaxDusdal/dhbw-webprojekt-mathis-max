@@ -59,7 +59,7 @@ export default function BookingOverview() {
   const createBookingMutation = api.booking.create.useMutation({
     onSuccess: (booking) => {
       setIsLoading(false);
-      setBookingId("string");
+      setBookingId(booking.vacationHomeId.toString());
     },
     onError: (error) => {
       setIsLoading(false);
@@ -69,7 +69,7 @@ export default function BookingOverview() {
 
   useEffect(() => {
     if (bookingId) {
-      redirect("/");
+      redirect(`/rooms/${bookingId}#bookings`);
     }
   }, [bookingId]);
 
@@ -173,9 +173,9 @@ export default function BookingOverview() {
                 Indem ich auf den unten stehenden Button klicke, stimme ich den
                 Hausregeln des Gastgebers bzw. der Gastgeberin, Grundregeln für
                 Gäste, Richtlinien für Umbuchungen und Rückerstattungen auf
-                Airbnb zu und bestätige, dass Luftbnb meine Zahlungsart belasten
+                Airbnb zu und bestätige, dass LuftNBN meine Zahlungsart belasten
                 kann, wenn ich für Schäden verantwortlich bin. Es gelten die
-                Zahlungsbedingungen zwischen dir und Luftbnb Payments Mannheim
+                Zahlungsbedingungen zwischen dir und LuftNBN Payments Mannheim
               </p>
               <div>
                 <Button

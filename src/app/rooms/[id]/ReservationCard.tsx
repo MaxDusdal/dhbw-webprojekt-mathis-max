@@ -67,7 +67,7 @@ export default function ReservationCard({
     <div className="sticky top-20 h-fit min-w-[379px] rounded-xl p-6 shadow-lg ring-1 ring-gray-300">
       <p className="text-base font-light">
         <span className="text-2xl font-medium">{`${price_per_night}€`}</span>
-        Nacht
+        {" "}Nacht
       </p>
       <ReservationDataInput
         booked={booked}

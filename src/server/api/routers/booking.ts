@@ -1,5 +1,5 @@
 import { bookingCreateSchema } from "~/app/utils/zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, sessionPassProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { differenceInDays } from "date-fns";
 import { z } from "node_modules/zod/lib";
@@ -15,7 +15,7 @@ export const bookingRouter = createTRPCRouter({
   // This endpoint can return two separte types of bookings:
   // 1. If the VacationHome is owned by the calling user, it returns all bookings for that vacation home
   // 2. If the VacationHome is not owned by the calling user, it returns only the bookings that the calling user has made
-  getBookingsForVacationHome: protectedProcedure
+  getBookingsForVacationHome: sessionPassProcedure
     .input(z.object({ vacationHomeId: z.number() }))
     .query(async ({ input, ctx }) => {
       const vacationHome = await ctx.db.vacationHome.findUnique({

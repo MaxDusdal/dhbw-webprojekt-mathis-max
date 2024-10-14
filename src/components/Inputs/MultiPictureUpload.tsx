@@ -65,7 +65,7 @@ export default function MultiPictureUpload({
                 width={300}
                 height={300}
                 alt="Picture"
-                className="h-auto w-full object-cover"
+                className="h-full w-full object-cover aspect-square object-center"
               />
             </div>
           </div>

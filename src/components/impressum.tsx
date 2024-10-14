@@ -5,14 +5,14 @@ export default function Impressum() {
       <h2 id="m46" className="mb-2 text-xl font-bold">
         Diensteanbieter
       </h2>
-      <p>LuftBNB GmbH</p>
+      <p>LuftNBN GmbH</p>
       <p>Coblitzallee 1-9</p>
       <p>68183 Mannheim</p>
       <br></br>
       <h2 id="m56" className="text-xl font-bold">
         Kontaktmöglichkeiten
       </h2>
-      <p>E-Mail-Adresse: luftbnb@dusdal.dev</p>
+      <p>E-Mail-Adresse: luftnbn@dusdal.dev</p>
       <p>Telefon: 01745259553</p>
       <br></br>
       <h2 id="m153" className="text-xl font-bold">

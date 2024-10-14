@@ -13,7 +13,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
     new URL(
       "/login",
       process.env.NODE_ENV === "production"
-        ? `http://127.0.0.1:3000`
+        ? "https://" + process.env.APPLICATION_URL
         : req.nextUrl.origin,
     ),
   );

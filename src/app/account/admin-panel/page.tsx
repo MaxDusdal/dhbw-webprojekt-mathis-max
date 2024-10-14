@@ -1,14 +1,9 @@
 "use client";
 import { api, TRPCReactProvider } from "~/trpc/react";
 import CreateUserDialog from "../../../components/Dialogs/CreateUserDialog";
-import Header from "../../../components/Layout/Header";
-import SectionHeading from "../../../components/Layout/SectionHeading";
 import UsersTable from "../../../components/Tables/AccountTable";
-import MainContainer from "../../../components/Utility/MainContainer";
-import NarrowContainer from "../../../components/Utility/NarrowContainer";
 import TableHeader from "../../../components/Utility/TableHeader";
 import { useState } from "react";
-import Footer from "../../../components/Layout/Footer";
 
 export default function SettingsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);

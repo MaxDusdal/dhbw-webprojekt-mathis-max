@@ -72,6 +72,16 @@ export const usersRouter = createTRPCRouter({
     return users as UserWithSessions[];
   }),
 
+  changeRole: adminProcedure
+    .input(z.object({ id: z.string(), role: z.nativeEnum(Role) }))
+    .mutation(async ({ input, ctx }) => {
+      await ctx.db.user.update({
+        where: { id: input.id },
+        data: { role: input.role },
+      });
+      return true;
+    }),
+
   getCallerUser: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.db.user.findUnique({
       where: { id: ctx.session.user.id, email: ctx.session.user.email },
@@ -184,13 +194,5 @@ export const usersRouter = createTRPCRouter({
       });
     }),
 
-  changeRole: adminProcedure
-    .input(z.object({ id: z.string(), role: z.nativeEnum(Role) }))
-    .mutation(async ({ input, ctx }) => {
-      await ctx.db.user.update({
-        where: { id: input.id },
-        data: { role: input.role },
-      });
-      return true;
-    }),
+  
 });

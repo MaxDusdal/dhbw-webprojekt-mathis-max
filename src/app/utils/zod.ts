@@ -99,12 +99,12 @@ export const vacationhomeCreateSchema = z.object({
     .max(10, "Anzahl der Bäder darf nicht höher als 100 sein"),
   pricePerNight: z
     .number()
-    .min(0, "Preis pro Nacht darf nicht niedriger als 0€ sein")
+    .min(5, "Preis pro Nacht darf nicht niedriger als 5€ sein")
     .max(5000, "Preis pro Nacht darf nicht höher als 5000€ sein"),
   description: z
     .string()
     .min(10, "Beschreibung muss aus mindestens 10 Zeichen bestehen")
-    .max(1000, "Beschreibung muss aus weniger als 1000 Zeichen bestehen"),
+    .max(10000, "Beschreibung muss aus weniger als 10000 Zeichen bestehen"),
   houseRules: z
     .string()
     .min(3, "Hausregeln müssen aus mindestens 3 Zeichen bestehen")

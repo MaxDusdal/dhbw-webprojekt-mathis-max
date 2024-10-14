@@ -31,7 +31,7 @@ export default function RoomsListings() {
     }, [searchParams]);
   
     const listings = api.vacationhome.findMany.useInfiniteQuery(
-      { limit: 20, ...search },
+      { limit: 12, ...search },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
       },
